@@ -1,7 +1,7 @@
 import { WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from '@loxa/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
 import { PhotoPlate } from '@/components/PhotoPlate';
@@ -9,6 +9,7 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { Body, Display, Meta } from '@/components/Text';
 import { Toast } from '@/components/Toast';
 import { planLabel, resetLabel } from '@/format';
+import { openPrivacy, openTerms } from '@/legal';
 import { disableDaily, enableDaily } from '@/notifications';
 import { purchases } from '@/purchases';
 import { useCredits } from '@/store/credits';
@@ -157,15 +158,8 @@ export default function Profile() {
 
         <View style={styles.rows}>
           <Row label="Restore purchases" onPress={restore} />
-          <Row
-            label="Privacy policy"
-            onPress={() => Linking.openURL('https://loxa.blankhexadecimal.com/privacy-policy')}
-          />
-          <Row
-            label="Terms of use"
-            onPress={() => Linking.openURL('https://loxa.blankhexadecimal.com/terms')}
-            last
-          />
+          <Row label="Privacy policy" onPress={openPrivacy} />
+          <Row label="Terms of use" onPress={openTerms} last />
         </View>
       </ScrollView>
 

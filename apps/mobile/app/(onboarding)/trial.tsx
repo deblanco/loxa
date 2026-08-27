@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { Pill } from '@/components/Pill';
 import { PhotoPlate } from '@/components/PhotoPlate';
+import { LegalLinks } from '@/components/LegalLinks';
 import { Body, Display, Meta } from '@/components/Text';
 import { purchases } from '@/purchases';
 import { useOnboarding } from '@/store/onboarding';
@@ -86,6 +87,7 @@ export default function Trial() {
           <Meta variant="note" tone="ink40" sentence style={styles.terms}>
             then {WEEKLY_PRICE_LABEL} · {WEEKLY_CREDITS} photos a week · cancel anytime
           </Meta>
+          <LegalLinks />
         </View>
       </View>
     </View>

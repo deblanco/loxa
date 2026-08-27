@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
+import { LegalLinks } from '@/components/LegalLinks';
 import { Body, Display, Meta } from '@/components/Text';
 import { purchases } from '@/purchases';
 import { useCredits } from '@/store/credits';
@@ -108,6 +109,8 @@ export default function Paywall() {
         <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.dismiss}>
           <Body tone="ink45">Not now</Body>
         </Pressable>
+
+        <LegalLinks />
       </Animated.View>
     </View>
   );
