@@ -158,6 +158,26 @@ at once. Two rules protect it, and both are easy to undo by accident:
 Anything else the profile grows — a gallery, a chosen avatar, a setting — gets
 the same test: does it still resolve after the container UUID changes?
 
+## Development controls
+
+The profile carries a dashed panel under the real settings, rendered only under
+`__DEV__` (`src/components/DevPanel.tsx`):
+
+- **Subscriber** toggles the `X-Dev-Premium` header. It only ever *asks* — the
+  Worker honours it solely where `DEV_PREMIUM` is set in `.dev.vars`, and never
+  in production. The header used to be sent unconditionally in development,
+  which made every build a subscriber and put the free tier and the paywall out
+  of reach.
+- **Reset this install** wipes the device id, the onboarding flag and every
+  saved look. Deleting the app is *not* equivalent: the device id lives in the
+  keychain so that it survives a reinstall, so uninstalling hands back the same
+  identity and the same spent free credit.
+
+`dev/reset.ts` holds the list of every storage key the app writes, and a test
+reads the source to prove nothing has been added without it — that list going
+stale is silent, and leaves the app remembering what the reset was meant to
+forget.
+
 ## Gotchas
 
 - `bunfig.toml`'s hoisted linker, `apps/mobile/metro.config.js`'s `watchFolders`,

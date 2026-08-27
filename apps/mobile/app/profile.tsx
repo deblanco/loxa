@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
+import { DevPanel } from '@/components/DevPanel';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Body, Display, Meta } from '@/components/Text';
@@ -161,6 +162,9 @@ export default function Profile() {
           <Row label="Privacy policy" onPress={openPrivacy} />
           <Row label="Terms of use" onPress={openTerms} last />
         </View>
+        {/* Last on the screen, below the real settings, so it reads as a tool
+            rather than as a feature. Returns null outside __DEV__. */}
+        <DevPanel onChanged={refresh} />
       </ScrollView>
 
       <Toast message={toast} />

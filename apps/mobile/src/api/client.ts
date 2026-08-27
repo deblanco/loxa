@@ -8,6 +8,7 @@ import {
   type PurchaseSyncResponse,
   type TryOnResponse,
 } from '@loxa/shared';
+import { isDevPremium } from '@/dev/premium';
 import { deviceId } from './device-id';
 
 /**
@@ -62,8 +63,11 @@ async function request<T>(
       headers: {
         'Content-Type': 'application/json',
         'X-Device-Id': await deviceId(),
-        // Compiled out of a release build, so the header simply never ships.
-        ...(__DEV__ ? { 'X-Dev-Premium': '1' } : {}),
+        // Only when the dev toggle asks for it. Sending it unconditionally in
+        // development made every build a subscriber and put the free tier and
+        // the paywall out of reach. `isDevPremium` is false outside __DEV__, so
+        // a release build never sends the header at all.
+        ...((await isDevPremium()) ? { 'X-Dev-Premium': '1' } : {}),
         ...init.headers,
       },
     });
