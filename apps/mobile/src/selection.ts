@@ -17,6 +17,8 @@ export interface Selection {
   source: PhotoSource;
   /** True once a photo has been taken this session for the `new` source. */
   hasFreshShot: boolean;
+  /** Whether a photo has been chosen at all. Nothing can be rendered without one. */
+  hasPhoto: boolean;
 }
 
 export const INITIAL_SELECTION: Selection = {
@@ -24,6 +26,7 @@ export const INITIAL_SELECTION: Selection = {
   colorId: DEFAULT_COLOR_ID,
   source: 'saved',
   hasFreshShot: false,
+  hasPhoto: false,
 };
 
 /**
@@ -54,4 +57,27 @@ export function withSource(selection: Selection, source: PhotoSource): Selection
     source,
     hasFreshShot: source === 'new' ? selection.hasFreshShot : false,
   };
+}
+
+/** What pressing the primary button should actually do. */
+export type PrimaryAction = 'paywall' | 'camera' | 'pick-photo' | 'generate';
+
+/**
+ * Where the Try On button goes.
+ *
+ * The credit check comes first, and it is not a duplicate of the Worker's — the
+ * Worker's is the authority and always runs, spending before the model call.
+ * This one exists so that somebody at zero does not watch a progress bar that
+ * was never going to finish, and does not get sent to the camera to take a
+ * photo they cannot use.
+ *
+ * `creditsLeft` is null while the balance is still loading. That case goes
+ * through: the server will refuse if it must, and guessing "no" would put a
+ * paywall in front of a paying subscriber on a slow network.
+ */
+export function primaryAction(selection: Selection, creditsLeft: number | null): PrimaryAction {
+  if (creditsLeft !== null && creditsLeft < 1) return 'paywall';
+  if (needsCamera(selection)) return 'camera';
+  if (!selection.hasPhoto) return 'pick-photo';
+  return 'generate';
 }

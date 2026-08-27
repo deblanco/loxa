@@ -1,5 +1,5 @@
 import { findColor, findStyle } from '@loxa/shared';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,7 +11,7 @@ import { SegmentedControl } from '@/components/SegmentedControl';
 import { StyleStrip } from '@/components/StyleStrip';
 import { Body, Meta } from '@/components/Text';
 import { pickFromLibrary } from '@/photo';
-import { INITIAL_SELECTION, needsCamera, primaryActionLabel, withSource } from '@/selection';
+import { INITIAL_SELECTION, primaryAction, primaryActionLabel, withSource } from '@/selection';
 import { useCredits } from '@/store/credits';
 import { color, radius, space } from '@/theme';
 
@@ -24,7 +24,7 @@ import { color, radius, space } from '@/theme';
  */
 export default function Preview() {
   const insets = useSafeAreaInsets();
-  const { credits } = useCredits();
+  const { credits, refresh } = useCredits();
   const [selection, setSelection] = useState(INITIAL_SELECTION);
   const [photo, setPhoto] = useState<{ base64: string; uri: string } | null>(null);
 
@@ -34,7 +34,7 @@ export default function Preview() {
   useEffect(() => {
     if (params.photoUri && params.photoBase64) {
       setPhoto({ uri: params.photoUri, base64: params.photoBase64 });
-      setSelection((current) => ({ ...current, source: 'new', hasFreshShot: true }));
+      setSelection((current) => ({ ...current, source: 'new', hasFreshShot: true, hasPhoto: true }));
     }
   }, [params.photoUri, params.photoBase64]);
 
@@ -43,24 +43,40 @@ export default function Preview() {
 
   const choosePhoto = useCallback(async () => {
     const picked = await pickFromLibrary();
-    if (picked) setPhoto(picked);
+    if (!picked) return;
+    setPhoto(picked);
+    setSelection((current) => ({ ...current, hasPhoto: true }));
   }, []);
 
+  // The balance changes while this screen is not the one on top: a render spends
+  // one, a purchase on the paywall adds one. Without this the chip goes stale
+  // after a purchase — the user pays, comes back, and sees the same zero.
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh]),
+  );
+
   async function onPrimary() {
-    if (needsCamera(selection)) {
-      router.push('/camera');
-      return;
+    switch (primaryAction(selection, credits?.creditsLeft ?? null)) {
+      case 'paywall':
+        // Straight to the offer. The Worker would refuse this anyway, but not
+        // before the user had watched a progress bar for a round trip.
+        router.push('/paywall');
+        return;
+      case 'camera':
+        router.push('/camera');
+        return;
+      case 'pick-photo':
+        await choosePhoto();
+        return;
+      case 'generate':
+        if (!photo) return;
+        router.push({
+          pathname: '/generating',
+          params: { base64: photo.base64, styleId: selection.styleId, colorId: selection.colorId },
+        });
     }
-
-    if (!photo) {
-      await choosePhoto();
-      return;
-    }
-
-    router.push({
-      pathname: '/generating',
-      params: { base64: photo.base64, styleId: selection.styleId, colorId: selection.colorId },
-    });
   }
 
   return (

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   INITIAL_SELECTION,
   needsCamera,
+  primaryAction,
   primaryActionLabel,
   withSource,
 } from '../src/selection';
@@ -44,5 +45,41 @@ describe('withSource', () => {
     expect(withSource(chosen, 'new')).toEqual(
       expect.objectContaining({ styleId: 'pixie', colorId: 'copper' }),
     );
+  });
+});
+
+describe('primaryAction', () => {
+  const withPhoto = { ...INITIAL_SELECTION, hasPhoto: true };
+
+  it('sends someone at zero straight to the paywall', () => {
+    // Not a duplicate of the Worker's check — that one is the authority and
+    // still runs. This one exists so nobody watches a progress bar that was
+    // never going to finish.
+    expect(primaryAction(withPhoto, 0)).toBe('paywall');
+  });
+
+  it('offers the paywall before the camera', () => {
+    // Sending someone to photograph themselves for a render they cannot afford
+    // is worse than showing the price first.
+    const needsShot = { ...withSource(INITIAL_SELECTION, 'new'), hasPhoto: false };
+    expect(primaryAction(needsShot, 0)).toBe('paywall');
+  });
+
+  it('lets a request through while the balance is still loading', () => {
+    // Guessing "no" would put a paywall in front of a paying subscriber on a
+    // slow network. The server refuses if it must.
+    expect(primaryAction(withPhoto, null)).toBe('generate');
+  });
+
+  it('opens the camera when a new photo is wanted and none taken', () => {
+    expect(primaryAction(withSource(INITIAL_SELECTION, 'new'), 5)).toBe('camera');
+  });
+
+  it('asks for a photo when there is none', () => {
+    expect(primaryAction(INITIAL_SELECTION, 5)).toBe('pick-photo');
+  });
+
+  it('generates when there is a photo and a credit', () => {
+    expect(primaryAction(withPhoto, 1)).toBe('generate');
   });
 });
