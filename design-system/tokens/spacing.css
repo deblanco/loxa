@@ -1,0 +1,27 @@
+/**
+ * A 4px grid, plus the two screen insets that are not on it.
+ *
+ * `--gutter-screen` (16px) is the edge of every card and strip. `--gutter-text`
+ * (18–20px) is the edge of text inside those cards. Text is inset further than
+ * the plates it sits on, which is why the two are separate tokens rather than
+ * one.
+ */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-14: 56px;
+
+  --gutter-screen: 16px;
+  --gutter-text: 18px;
+  --gutter-text-wide: 20px;
+  --gutter-hero: 26px;      /* the entry and result screens, which breathe more */
+
+  --inset-top: 60px;        /* below the status bar, every screen */
+  --inset-bottom: 34px;     /* above the home indicator */
+}

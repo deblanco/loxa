@@ -1,0 +1,131 @@
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Pill } from '@/components/Pill';
+import { PhotoPlate } from '@/components/PhotoPlate';
+import { Body, Display, Meta } from '@/components/Text';
+import { useOnboarding } from '@/store/onboarding';
+import { color, motion, radius, space } from '@/theme';
+
+/**
+ * The entry carousel.
+ *
+ * Three clips of people restyling their hair, crossfading, with the pitch over
+ * them. Night, because it is a photograph full-bleed and a photograph needs a
+ * dark room.
+ *
+ * The clips are placeholders until the shoot happens — labelled ones, wearing
+ * the design system's hatch, so an empty state reads as "footage goes here"
+ * rather than as a failed load.
+ */
+const SLIDES = [
+  'video 01 · walking, hair reveal',
+  'video 02 · colour change, laughing',
+  'video 03 · phone in hand, mirror',
+] as const;
+
+export default function Entry() {
+  const { onboarded } = useOnboarding();
+  const [slide, setSlide] = useState(0);
+
+  // Somebody who has already heard the pitch goes straight to the app. Checked
+  // here rather than in the layout so the redirect happens before a frame of
+  // carousel is drawn.
+  useEffect(() => {
+    if (onboarded) router.replace('/preview');
+  }, [onboarded]);
+
+  useEffect(() => {
+    const timer = setInterval(
+      () => setSlide((current) => (current + 1) % SLIDES.length),
+      motion.carouselHold,
+    );
+    return () => clearInterval(timer);
+  }, []);
+
+  if (onboarded !== false) return <View style={styles.screen} />;
+
+  return (
+    <View style={styles.screen}>
+      {SLIDES.map((label, i) => (
+        <PhotoPlate
+          key={label}
+          dark
+          label={i === slide ? label : undefined}
+          style={[styles.slide, { opacity: i === slide ? 1 : 0 }]}
+        />
+      ))}
+
+      <LinearGradient
+        colors={['rgba(16,14,13,0.55)', 'rgba(16,14,13,0)', 'rgba(16,14,13,0.72)', 'rgba(16,14,13,0.96)']}
+        locations={[0, 0.34, 0.68, 1]}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+
+      <Meta variant="wordmark" tone="paper" style={styles.wordmark}>
+        Loxa
+      </Meta>
+
+      <View style={styles.pitch}>
+        <View style={styles.headline}>
+          <Display variant="displayL" tone="paper">
+            Try on any hair
+          </Display>
+          <Display variant="displayL" tone="paper" italic style={styles.second}>
+            before the scissors.
+          </Display>
+        </View>
+
+        <Body tone="paper66" style={styles.sub}>
+          Photo in, new hair out. Colours, cuts and lengths on your own face in seconds.
+        </Body>
+
+        <Pill label="Get started" tone="light" onPress={() => router.push('/(onboarding)/trial')} />
+
+        <View style={styles.dots}>
+          {SLIDES.map((label, i) => (
+            <Pressable
+              key={label}
+              accessibilityRole="button"
+              accessibilityLabel={`Slide ${i + 1}`}
+              onPress={() => setSlide(i)}
+              style={[
+                styles.dot,
+                i === slide ? styles.dotOn : styles.dotOff,
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: color.night },
+  slide: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 0 },
+  wordmark: {
+    position: 'absolute',
+    top: 64,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    color: color.paper,
+  },
+  pitch: {
+    position: 'absolute',
+    left: space.gutterHero,
+    right: space.gutterHero,
+    bottom: 74,
+    gap: space.s5 + 2,
+  },
+  headline: { gap: 0 },
+  second: { opacity: 0.82 },
+  sub: { maxWidth: '86%' },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 7 },
+  dot: { height: 4, borderRadius: radius.pill },
+  dotOn: { width: 22, backgroundColor: color.paper },
+  dotOff: { width: 6, backgroundColor: 'rgba(250,248,245,0.35)' },
+});

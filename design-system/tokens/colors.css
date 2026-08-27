@@ -1,0 +1,48 @@
+/**
+ * Loxa palette.
+ *
+ * Warm paper, one black, and a night surface for the two screens that show a
+ * photograph full-bleed. There is no accent colour and no second black: every
+ * control in the app — pill, sheet, chip, toggle — is `--ink` on `--paper` or
+ * the inverse. Restraint is the brand.
+ */
+:root {
+  /* Ground */
+  --paper: #faf8f5;          /* the app background, every light screen */
+  --ink: #0d0c0b;            /* text, and every filled control */
+
+  /* Night — entry, result, camera. A photograph needs a dark room. */
+  --night: #100e0d;          /* the backdrop behind a full-bleed image */
+  --night-raised: #1a1715;   /* the image plate itself */
+
+  /* Surfaces, warm-to-cool as they recede from the paper */
+  --surface-raised: #f6f3ee;  /* cards on a page that is already paper */
+  --surface-sunken: #f2ede6;  /* summary panels, settings groups */
+  --surface-track: #f0ebe3;   /* segmented-control trough */
+  --placeholder: #e7e1d8;     /* where a photograph will go */
+
+  /* Ink at reduced strength. Opacity, never a lighter grey — the warmth of the
+     paper has to come through or the greys go cold against it. */
+  --ink-80: rgba(13, 12, 11, 0.8);
+  --ink-72: rgba(13, 12, 11, 0.72);
+  --ink-60: rgba(13, 12, 11, 0.6);
+  --ink-55: rgba(13, 12, 11, 0.55);
+  --ink-45: rgba(13, 12, 11, 0.45);
+  --ink-40: rgba(13, 12, 11, 0.4);
+  --ink-30: rgba(13, 12, 11, 0.3);
+  --ink-18: rgba(13, 12, 11, 0.18);
+  --ink-12: rgba(13, 12, 11, 0.12);
+  --ink-09: rgba(13, 12, 11, 0.09);
+  --ink-07: rgba(13, 12, 11, 0.07);
+
+  /* Paper on night, same idea inverted. */
+  --paper-85: rgba(250, 248, 245, 0.85);
+  --paper-66: rgba(250, 248, 245, 0.66);
+  --paper-60: rgba(250, 248, 245, 0.6);
+  --paper-50: rgba(250, 248, 245, 0.5);
+  --paper-30: rgba(250, 248, 245, 0.3);
+  --paper-16: rgba(250, 248, 245, 0.16);
+
+  /* Scrim over the app when the paywall sheet is up. */
+  --scrim: rgba(13, 12, 11, 0.45);
+}

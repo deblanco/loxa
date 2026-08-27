@@ -1,0 +1,61 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote",
+    "promptToConfigurePushNotifications": false
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "TODO-revenuecat-test-key"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "TODO-revenuecat-test-key"
+      }
+    },
+    "testflight": {
+      "extends": "production",
+      // Every build on this profile is a TestFlight upload, and Apple refuses a
+      // build number it has already seen. `appVersionSource: remote` means EAS
+      // owns the counter, so this is the only place it can be told to move.
+      // Boolean, not "buildNumber": the schema rejects the string form here.
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "TODO-revenuecat-appl-key"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "TODO-revenuecat-appl-key"
+      }
+    }
+  },
+  "submit": {
+    "testflight": {
+      "ios": {
+        "appleId": "hola@blankhexadecimal.com",
+        "ascAppId": "TODO-app-store-connect-app-id",
+        "appleTeamId": "K579SJ8947"
+      }
+    },
+    "production": {
+      "ios": {
+        "appleId": "hola@blankhexadecimal.com",
+        "ascAppId": "TODO-app-store-connect-app-id",
+        "appleTeamId": "K579SJ8947"
+      }
+    }
+  }
+}

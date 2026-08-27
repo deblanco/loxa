@@ -1,0 +1,3 @@
+[install]
+# Metro (Expo) needs a flat node_modules tree to resolve workspace packages.
+linker = "hoisted"

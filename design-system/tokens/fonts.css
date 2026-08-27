@@ -1,0 +1,21 @@
+/**
+ * Three faces, three jobs, no overlap.
+ *
+ * Instrument Serif states things — headlines, prices, the credit count. It is
+ * never used for a control or a label.
+ * Instrument Sans runs the interface.
+ * The system monospace carries meta: section headers, counts, technical asides.
+ * It is always uppercase and always letterspaced, which is what makes it read
+ * as an annotation rather than as text.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+}

@@ -1,0 +1,22 @@
+# Copy to .dev.vars and fill in. .dev.vars is git-ignored and never deployed.
+
+# The Google service account key file, verbatim, on one line. The key for
+# `loxa-cf` lives in `secrets/`, which is also git-ignored:
+#
+#   python3 -c "import json;print('GOOGLE_SA_KEY='+json.dumps(json.load(open('secrets/loxa-cf.json')),separators=(',',':')))"
+#
+# Keep this in step with GOOGLE_PROJECT_ID in wrangler.toml — a key from one
+# project against another project's id fails at the token endpoint, which
+# surfaces as the model being unavailable rather than as an auth error.
+GOOGLE_SA_KEY=
+
+# The RevenueCat V2 secret key (sk_...), not the app's publishable key. Normally
+# left empty locally: with no key the composition root falls through to the
+# stub, where nobody is a subscriber. That is the honest default — a deployment
+# that cannot verify a purchase must not assume one. Use DEV_PREMIUM to work on
+# subscriber screens instead.
+REVENUECAT_SECRET_KEY=
+
+# Development only: lets a request ask to be treated as a subscriber with the
+# X-Dev-Premium header. Never set this in production.
+DEV_PREMIUM=1

@@ -1,0 +1,33 @@
+/**
+ * The ramp, as measured off the prototype.
+ *
+ * Display sizes are serif and set tight (1.02–1.08) with negative tracking —
+ * they are meant to be read as a single object, not as lines. UI sizes are sans
+ * and set loose. Meta is mono, small, and letterspaced wide.
+ */
+:root {
+  /* Display — Instrument Serif */
+  --text-display-xl: 58px;  --leading-display-xl: 1.02;  --tracking-display-xl: -0.015em;
+  --text-display-l: 44px;   --leading-display-l: 1.03;   --tracking-display-l: -0.01em;
+  --text-display-m: 40px;   --leading-display-m: 1.05;   --tracking-display-m: -0.01em;
+  --text-display-s: 34px;   --leading-display-s: 1.08;
+  --text-display-xs: 30px;  --leading-display-xs: 1.1;
+  --text-numeral: 44px;     --leading-numeral: 1.05;   /* the credit count */
+  --text-price: 22px;                                  /* prices in the paywall */
+
+  /* Wordmark — serif, wide tracking, never anything else */
+  --text-wordmark: 23px;    --tracking-wordmark: 0.24em;
+  --text-wordmark-s: 21px;  --tracking-wordmark-s: 0.2em;
+
+  /* UI — Instrument Sans */
+  --text-button: 16.5px;
+  --text-body: 14.5px;      --leading-body: 1.55;
+  --text-body-s: 13.5px;    --leading-body-s: 1.5;
+  --text-caption: 12.5px;
+  --text-tile: 11px;        --leading-tile: 1.25;
+
+  /* Meta — mono, uppercase, letterspaced */
+  --text-meta: 10px;        --tracking-meta: 0.14em;
+  --text-meta-s: 9.5px;     --tracking-meta-s: 0.1em;
+  --text-note: 11px;        --leading-note: 1.6;   /* mono, sentence case */
+}

@@ -1,0 +1,108 @@
+name = "loxa"
+main = "src/index.ts"
+compatibility_date = "2025-08-01"
+
+# --- Credit ledger ----------------------------------------------------------
+# Local dev creates its own SQLite file; database_id only matters for deploy.
+# Fill it in after `wrangler d1 create loxa`.
+[[d1_databases]]
+binding = "DB"
+database_name = "loxa"
+# Local dev ignores this and makes its own SQLite file, so it only blocks a
+# deploy. Not shared with WhiskerMind under any circumstances: one ledger for
+# two apps means one app's credits paying for the other's renders.
+database_id = "TODO-run-wrangler-d1-create-loxa"
+
+# --- Render cache -----------------------------------------------------------
+# Keyed on a hash of the photo, the style and the colour, so a retry of the
+# identical request is free rather than a second $0.03. One namespace,
+# key-prefixed by feature ("tryon:").
+# Fill in `id` after `wrangler kv namespace create RESULTS_CACHE`.
+[[kv_namespaces]]
+binding = "RESULTS_CACHE"
+id = "TODO-run-wrangler-kv-namespace-create-RESULTS_CACHE"
+
+# --- Style thumbnails -------------------------------------------------------
+# Served rather than bundled, so the catalogue can grow by uploading files
+# instead of shipping an app release. The style strip already says "All 24".
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "loxa-assets"
+
+[vars]
+# --- Image model ------------------------------------------------------------
+# Gemini 3.1 Flash-Lite Image ("Nano Banana 2 Lite"), reached on the global
+# endpoint. Measured on WhiskerMind at 1120 output tokens per image — $0.034 —
+# which is the cheapest model that can actually be *shown* the photo. Imagen 4
+# Fast is $0.02 but text-to-image only, so it cannot render this face, and a
+# stranger with the right haircut is the one thing this app must not return.
+#
+# `global` rather than a region, and that is a price decision: Google lists this
+# model's per-token rate under the global endpoint and several regional
+# endpoints carry a surcharge. Nothing here needs pinning to a region.
+#
+# At $0.034 a render, $9.99 for 20 photos is $0.68 of model against $9.99 of
+# revenue before Apple's cut — the 70% margin floor the plan asks for, with
+# room. The single photo at $0.99 is not close to the margin question.
+#
+# The key is GOOGLE_SA_KEY, a secret: `wrangler secret put GOOGLE_SA_KEY < key.json`.
+#
+# Loxa's own project, with its own service account (`loxa-cf`) and its own
+# quota — a shared project would mean one app's rate limit becoming the other's
+# outage. GOOGLE_SA_KEY and this id move together or not at all.
+GOOGLE_PROJECT_ID = "loxa-506814"
+IMAGE_MODEL = "gemini-3.1-flash-lite-image"
+
+# --- Entitlements -----------------------------------------------------------
+# The weekly subscription is verified server-side, against RevenueCat API v2,
+# with a secret key:
+#
+#   wrangler secret put REVENUECAT_SECRET_KEY     # the `sk_` key, not the app's
+#
+# It must be a V2 key: v1's /subscribers endpoint answers 403 to one, and the
+# adapter's fail-closed branch would turn that into "nobody is a subscriber"
+# without saying so. The ids below are not secrets — they are path segments.
+#
+# With no key set the stub answers false and every device stays on the free
+# credit. That is deliberate: a deployment that cannot verify a purchase must
+# not assume one.
+# Not borrowed from WhiskerMind, deliberately: its project sells a different
+# entitlement ("pro") and different products, so pointing Loxa at it would have
+# every real customer read as free. Left as TODO until Loxa has its own project;
+# until then the stub answers and DEV_PREMIUM covers local work.
+REVENUECAT_PROJECT_ID = "TODO-revenuecat-project-id"
+REVENUECAT_WEEKLY_ENTITLEMENT_ID = "TODO-revenuecat-entitlement-id"
+
+# --- Not yet used -----------------------------------------------------------
+# The try-on route is synchronous. The queue earns its keep somewhere around
+# 5-15s of generation; this model has only been timed on single calls, and a
+# real device on a real network has not said so yet. Uncomment when it does.
+#
+# [[queues.producers]]
+# binding = "RENDER_QUEUE"
+# queue = "render-queue"
+
+# --- Custom domain ----------------------------------------------------------
+# One label under blankhexadecimal.com, not api.loxa.*: Universal SSL covers a
+# single subdomain level and a second would need Advanced Certificate Manager.
+# The zone lives on the same account, so the first deploy creates the record.
+[[routes]]
+pattern = "loxa-api.blankhexadecimal.com"
+custom_domain = true
+
+# --- Observability ----------------------------------------------------------
+# Sub-blocks override the top-level `enabled`, so logs and traces are on.
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = true
+persist = true
+head_sampling_rate = 1

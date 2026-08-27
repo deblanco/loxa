@@ -1,0 +1,19 @@
+{
+  "name": "loxa",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*", "services/api"],
+  "scripts": {
+    "dev:api": "bun run --filter @loxa/api dev",
+    "dev:api:lan": "bun run --filter @loxa/api dev:lan",
+    "dev:mobile": "cd apps/mobile && bunx expo start",
+    "dev:mobile:lan": "cd apps/mobile && bunx expo start --host lan",
+    "dev:web": "bun run --filter @loxa/web dev",
+    "ios": "cd apps/mobile && bunx expo start --ios",
+    "test": "bun run --filter '*' test",
+    "test:coverage": "bun run --filter '*' test:coverage",
+    "typecheck": "bun run --filter '*' typecheck"
+  },
+  "devDependencies": { "typescript": "~6.0.3" },
+  "//": "React is pinned to the version Expo SDK 57 / RN 0.86 requires. React Native hard-crashes if react and react-native-renderer differ at all, so apps/web follows mobile, never the other way round.",
+  "overrides": { "react": "19.2.3", "react-dom": "19.2.3" }
+}

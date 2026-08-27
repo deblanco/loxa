@@ -1,0 +1,13 @@
+/**
+ * The Loxa design system, in the order the layers depend on each other.
+ *
+ * This file is the only entry point. Nothing in the repo imports it — it is a
+ * reference for humans and for the two hand-maintained mirrors in
+ * `apps/mobile/src/theme.ts` and `apps/web/app/globals.css`.
+ */
+@import './tokens/fonts.css';
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+@import './tokens/shape.css';
+@import './tokens/motion.css';

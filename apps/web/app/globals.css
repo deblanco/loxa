@@ -1,0 +1,61 @@
+@import "tailwindcss" source("../");
+
+/**
+ * The web mirror of `design-system/tokens/*.css`.
+ *
+ * The names match the CSS custom properties one for one, so a token can be
+ * found by searching either file for the same word. A token change updates the
+ * system, this file and `apps/mobile/src/theme.ts` in the same commit.
+ *
+ * One documented divergence: spacing is namespaced `--spacing-*` so Tailwind's
+ * scale utilities pick it up.
+ */
+@theme {
+  --color-paper: #faf8f5;
+  --color-ink: #0d0c0b;
+  --color-night: #100e0d;
+  --color-night-raised: #1a1715;
+
+  --color-surface-raised: #f6f3ee;
+  --color-surface-sunken: #f2ede6;
+  --color-surface-track: #f0ebe3;
+  --color-placeholder: #e7e1d8;
+
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-sans: "Instrument Sans", system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  --radius-pill: 999px;
+  --radius-sheet: 26px;
+  --radius-card: 18px;
+  --radius-plate: 20px;
+  --radius-tile: 12px;
+
+  --spacing-s1: 4px;
+  --spacing-s2: 8px;
+  --spacing-s3: 12px;
+  --spacing-s4: 16px;
+  --spacing-s5: 20px;
+  --spacing-s6: 24px;
+  --spacing-s8: 32px;
+  --spacing-s10: 40px;
+  --spacing-s14: 56px;
+}
+
+:root {
+  /* Ink at strength — opacity, never a lighter grey, or it goes cold against
+     the warm paper. Not in @theme because these are used as literal colours
+     rather than as a Tailwind scale. */
+  --ink-72: rgba(13, 12, 11, 0.72);
+  --ink-60: rgba(13, 12, 11, 0.6);
+  --ink-45: rgba(13, 12, 11, 0.45);
+  --ink-12: rgba(13, 12, 11, 0.12);
+  --ink-09: rgba(13, 12, 11, 0.09);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "Loxa",
+    "slug": "loxa",
+    "scheme": "loxa",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.blankhexadecimal.loxa",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.blankhexadecimal.loxa",
+      "permissions": ["android.permission.CAMERA"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-video",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Loxa uses the camera to take the photo it restyles."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Loxa needs your photo library so you can pick the photo to restyle."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Loxa saves your generated looks to your camera roll.",
+          "photosPermission": "Loxa needs your photo library so you can pick the photo to restyle.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#faf8f5"
+        }
+      ],
+      "expo-sharing"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "TODO-run-eas-init"
+      }
+    },
+    "owner": "deblancos-team"
+  }
+}

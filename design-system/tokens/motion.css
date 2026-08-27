@@ -1,0 +1,40 @@
+/**
+ * Motion is either a state change (fast, eased) or ambience (slow, linear,
+ * looping). There is nothing in between, and nothing bounces.
+ */
+:root {
+  --duration-instant: 180ms;   /* a chip taking selection */
+  --duration-quick: 200ms;
+  --duration-normal: 250ms;    /* a toggle */
+  --duration-slow: 350ms;      /* a model dot growing */
+  --duration-sheet: 320ms;     /* the paywall rising */
+  --duration-fade: 1100ms;     /* one carousel video into the next */
+
+  --ease-standard: ease;
+  --ease-out-sheet: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Ambience — these run for as long as the screen is up. */
+  --duration-drift: 30s;       /* the trial screen's masonry, per column */
+  --duration-shimmer: 1800ms;  /* the generating plate */
+  --interval-carousel: 3200ms; /* how long an entry video holds */
+}
+
+/* A sheet, a toast, anything that arrives from below. */
+@keyframes loxa-up {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* The trial screen's tilted masonry, drifting forever. Paired with a duplicated
+   tile list so the 50% wrap is seamless. */
+@keyframes loxa-drift {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+/* The generating plate, breathing. */
+@keyframes loxa-shimmer {
+  0%   { opacity: 0.35; }
+  50%  { opacity: 0.9; }
+  100% { opacity: 0.35; }
+}

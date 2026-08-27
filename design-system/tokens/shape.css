@@ -1,0 +1,29 @@
+/**
+ * Radii and the one shadow.
+ *
+ * Controls are pills, containers are 12–26px, and nothing is square. The single
+ * shadow exists only under a black control on paper, to keep it from looking
+ * printed on; it is never used to stack surfaces.
+ */
+:root {
+  --radius-pill: 999px;
+  --radius-sheet: 26px;      /* the paywall's top corners */
+  --radius-card: 18px;       /* credit card, settings groups, summary */
+  --radius-plate: 20px;      /* the photo plate on preview and generating */
+  --radius-option: 16px;     /* a row inside the paywall */
+  --radius-tile: 12px;       /* a style tile, the library button */
+  --radius-chip: 10px;
+
+  --border-hairline: 1px solid var(--ink-09);
+  --border-quiet: 1px solid var(--ink-12);
+  --border-strong: 1px solid var(--ink);
+
+  /* Under a black pill on paper. Warm, not neutral — it is the paper's shadow. */
+  --shadow-control: 0 10px 24px rgba(13, 12, 11, 0.18);
+  --shadow-float: 0 2px 8px rgba(13, 12, 11, 0.1);
+
+  /* The photo placeholder hatch. Every un-shot image in the app wears this, so
+     an empty state reads as "a picture goes here" rather than as a bug. */
+  --hatch-light: repeating-linear-gradient(102deg, rgba(13,12,11,.07) 0 12px, transparent 12px 26px);
+  --hatch-dark: repeating-linear-gradient(102deg, rgba(255,255,255,.07) 0 12px, transparent 12px 26px);
+}

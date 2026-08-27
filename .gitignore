@@ -1,0 +1,28 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+# Expo
+.expo/
+apps/mobile/ios/
+apps/mobile/android/
+# Next
+.next/
+.open-next/
+
+# Cloudflare
+.wrangler/
+.dev.vars
+
+# local machine-specific agent notes
+CLAUDE.local.md
+
+# agent skills installed by `npx skills add` — tooling, not source
+.agents/
+
+.DS_Store
+
+secrets/
+
+.claude

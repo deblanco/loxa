@@ -1,0 +1,43 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // NOT "loxa" — that is services/api's Worker, and a name collision would have
+  // one deploy overwrite the other.
+  "name": "loxa-web",
+  "account_id": "bd28eb311096699c6add6fa14f4b34d1",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-08-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": true,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Needs the blankhexadecimal.com zone on the same Cloudflare account; the
+  // first deploy creates the DNS record.
+  "routes": [
+    {
+      "pattern": "loxa.blankhexadecimal.com",
+      "custom_domain": true
+    }
+  ],
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "loxa-web"
+    }
+  ]
+}
