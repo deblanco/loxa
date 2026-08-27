@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = { title: "Privacy policy — Loxa" };
 
@@ -12,11 +13,10 @@ export const metadata: Metadata = { title: "Privacy policy — Loxa" };
  */
 export default function PrivacyPolicy() {
   return (
-    <main className="mx-auto max-w-2xl px-s6 py-s14">
-      <Link href="/" className="font-mono text-[11px] text-[var(--ink-45)] underline underline-offset-4">
-        Loxa
-      </Link>
-
+    <>
+      <SiteHeader />
+      <main className="mx-auto max-w-5xl px-s6 pt-s6 pb-s10">
+      <div className="max-w-2xl">
       <h1 className="mt-s5 font-serif text-4xl leading-tight">Privacy policy</h1>
       <p className="mt-s2 font-mono text-[11px] text-[var(--ink-45)]">
         Last updated 27 August 2026
@@ -62,7 +62,10 @@ export default function PrivacyPolicy() {
           .
         </Section>
       </div>
-    </main>
+      </div>
+      </main>
+      <SiteFooter />
+    </>
   );
 }
 

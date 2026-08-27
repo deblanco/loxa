@@ -11,7 +11,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.blankhexadecimal.loxa",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Loxa uses the camera to take the photo it restyles."
       }
     },
     "android": {
@@ -22,12 +23,6 @@
       "expo-router",
       "expo-font",
       "expo-video",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Loxa uses the camera to take the photo it restyles."
-        }
-      ],
       [
         "expo-image-picker",
         {

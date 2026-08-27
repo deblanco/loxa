@@ -53,10 +53,10 @@ control sitting on paper — otherwise the black pill looks printed on. Surfaces
 do not stack with shadow; they separate with a hairline border and a warmer fill.
 
 **Motion.** Either a state change (180–350ms, eased) or ambience (seconds,
-linear, looping). Nothing in between and nothing bounces. The three ambient
+linear, looping). Nothing in between and nothing bounces. The four ambient
 loops — the entry carousel's crossfade, the trial screen's drifting masonry, the
-generating plate's shimmer — are the only things on screen that move without
-being touched.
+generating plate's shimmer, and the camera's landmark sweep — are the only
+things on screen that move without being touched.
 
 ## Layout constants
 

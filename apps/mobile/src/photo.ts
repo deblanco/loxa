@@ -19,10 +19,25 @@ export interface PreparedPhoto {
   uri: string;
 }
 
-export async function prepare(uri: string): Promise<PreparedPhoto> {
+export interface PrepareOptions {
+  /**
+   * Flip the photo back.
+   *
+   * The front camera's preview is mirrored, because a selfie preview that is
+   * not reads as a stranger. The capture inherits that mirroring, and a mirrored
+   * photo moves the user's parting to the other side of their head before the
+   * model ever sees it. This puts it back.
+   */
+  unmirror?: boolean;
+}
+
+export async function prepare(uri: string, options: PrepareOptions = {}): Promise<PreparedPhoto> {
   const result = await ImageManipulator.manipulateAsync(
     uri,
-    [{ resize: { width: MAX_EDGE } }],
+    [
+      ...(options.unmirror ? [{ flip: ImageManipulator.FlipType.Horizontal }] : []),
+      { resize: { width: MAX_EDGE } },
+    ],
     { compress: QUALITY, format: ImageManipulator.SaveFormat.JPEG, base64: true },
   );
 

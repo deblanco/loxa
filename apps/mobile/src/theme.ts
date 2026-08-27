@@ -148,5 +148,6 @@ export const motion = {
   sheet: 320,
   fade: 1100,
   shimmer: 1800,
+  scan: 2600,
   carouselHold: 3200,
 } as const;

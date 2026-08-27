@@ -1,17 +1,17 @@
 import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from "@loxa/shared";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = { title: "Terms of use — Loxa" };
 
 /** Required by App Store review, and linked from the app's profile screen. */
 export default function Terms() {
   return (
-    <main className="mx-auto max-w-2xl px-s6 py-s14">
-      <Link href="/" className="font-mono text-[11px] text-[var(--ink-45)] underline underline-offset-4">
-        Loxa
-      </Link>
-
+    <>
+      <SiteHeader />
+      <main className="mx-auto max-w-5xl px-s6 pt-s6 pb-s10">
+      <div className="max-w-2xl">
       <h1 className="mt-s5 font-serif text-4xl leading-tight">Terms of use</h1>
       <p className="mt-s2 font-mono text-[11px] text-[var(--ink-45)]">
         Last updated 27 August 2026
@@ -54,7 +54,10 @@ export default function Terms() {
           </a>
         </Section>
       </div>
-    </main>
+      </div>
+      </main>
+      <SiteFooter />
+    </>
   );
 }
 

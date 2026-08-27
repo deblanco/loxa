@@ -28,8 +28,8 @@ describe("the landing page", () => {
   });
 
   it("prints the price and what it buys, before any tap", () => {
-    expect(html).toContain("$9.99/week");
-    expect(html).toContain(`${WEEKLY_CREDITS} photos a week`);
+    expect(html).toContain("$9.99");
+    expect(html).toContain(`${WEEKLY_CREDITS} photos every week`);
   });
 
   it("links to both legal pages", () => {
@@ -41,6 +41,11 @@ describe("the landing page", () => {
 
 describe("the privacy policy", () => {
   const html = renderToStaticMarkup(<PrivacyPolicy />);
+
+  it("carries the wordmark and the footer links", () => {
+    expect(html).toContain("LOXA");
+    expect(html).toContain('href="/terms"');
+  });
 
   it("says there is no account", () => {
     expect(html).toContain("no sign-up");
@@ -57,6 +62,11 @@ describe("the privacy policy", () => {
 
 describe("the terms", () => {
   const html = renderToStaticMarkup(<Terms />);
+
+  it("carries the wordmark and the footer links", () => {
+    expect(html).toContain("LOXA");
+    expect(html).toContain('href="/privacy-policy"');
+  });
 
   it("is honest that the result is an illustration", () => {
     expect(html).toContain("not a promise");

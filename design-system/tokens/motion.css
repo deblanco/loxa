@@ -16,6 +16,7 @@
   /* Ambience — these run for as long as the screen is up. */
   --duration-drift: 30s;       /* the trial screen's masonry, per column */
   --duration-shimmer: 1800ms;  /* the generating plate */
+  --duration-scan: 2600ms;     /* the camera's landmark sweep, top to bottom */
   --interval-carousel: 3200ms; /* how long an entry video holds */
 }
 
@@ -37,4 +38,23 @@
   0%   { opacity: 0.35; }
   50%  { opacity: 0.9; }
   100% { opacity: 0.35; }
+}
+
+/* A landmark dot arriving. The one state change that is not triggered by a
+   touch — the face is what triggers it. */
+@keyframes loxa-lock {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* The camera's sweep, crossing the detected face and starting again. The
+   element is the full height of the face box with the hairline drawn at its
+   top edge, so a 0-100% translate walks the line from crown to chin. It fades
+   at both ends rather than cutting, because a looping line that reappears at
+   the top is a glitch and a line that dissolves is weather. */
+@keyframes loxa-scan {
+  0%   { transform: translateY(0);    opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
 }

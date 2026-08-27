@@ -18,6 +18,8 @@
   @keyframes loxa-drift { from { transform: translateY(0); } to { transform: translateY(-50%); } }
   @keyframes loxa-shimmer { 0% { opacity:.35 } 50% { opacity:.9 } 100% { opacity:.35 } }
   @keyframes loxa-up { from { transform: translateY(14px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+  @keyframes loxa-lock { from { opacity:0 } to { opacity:1 } }
+  @keyframes loxa-scan { 0% { transform: translateY(0); opacity:0 } 12% { opacity:1 } 88% { opacity:1 } 100% { transform: translateY(100%); opacity:0 } }
 </style>
 </helmet>
 
@@ -288,6 +290,37 @@
             <div style="position:absolute;top:54px;left:0;right:0;height:calc(100% - 220px);margin:0 12px;border-radius:18px;overflow:hidden;background:#181614;background-image:repeating-linear-gradient(102deg,rgba(255,255,255,.06) 0 12px,transparent 12px 26px)">
               <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:400 10.5px/1.8 ui-monospace,monospace;letter-spacing:.08em;color:rgba(255,255,255,.45);text-align:center"><span>{{ cameraLabel }}</span><span>front camera feed</span></div>
               <div style="position:absolute;left:52px;right:52px;top:16%;bottom:22%;border:1px solid rgba(255,255,255,.22);border-radius:140px"></div>
+              <!-- The landmark constellation. Ten points, drawn where MLKit puts them
+                   on a real face; here they sit on an idealised one, because the
+                   prototype has no camera. The lines are rotated 1px divs — the same
+                   trade the hatch makes, and the reason neither needs an SVG. -->
+              <div style="position:absolute;left:50%;top:46%;width:200px;height:260px;transform:translate(-50%,-50%);overflow:hidden">
+                <div style="position:absolute;left:62.0px;top:86.0px;width:76.0px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(0.00deg)"></div>
+                <div style="position:absolute;left:62.0px;top:86.0px;width:72.7px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(58.50deg)"></div>
+                <div style="position:absolute;left:138.0px;top:86.0px;width:72.7px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(121.50deg)"></div>
+                <div style="position:absolute;left:100.0px;top:148.0px;width:54.6px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(118.44deg)"></div>
+                <div style="position:absolute;left:100.0px;top:148.0px;width:54.6px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(61.56deg)"></div>
+                <div style="position:absolute;left:74.0px;top:196.0px;width:52.0px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(0.00deg)"></div>
+                <div style="position:absolute;left:74.0px;top:196.0px;width:31.6px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(34.70deg)"></div>
+                <div style="position:absolute;left:126.0px;top:196.0px;width:31.6px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(145.30deg)"></div>
+                <div style="position:absolute;left:62.0px;top:86.0px;width:66.5px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(105.71deg)"></div>
+                <div style="position:absolute;left:138.0px;top:86.0px;width:66.5px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(74.29deg)"></div>
+                <div style="position:absolute;left:44.0px;top:150.0px;width:59.7px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(-129.56deg)"></div>
+                <div style="position:absolute;left:156.0px;top:150.0px;width:59.7px;height:1px;background:rgba(250,248,245,.16);transform-origin:0 50%;transform:rotate(-50.44deg)"></div>
+                <div style="position:absolute;left:62.0px;top:86.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:0ms"></div>
+                <div style="position:absolute;left:138.0px;top:86.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:40ms"></div>
+                <div style="position:absolute;left:100.0px;top:148.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:80ms"></div>
+                <div style="position:absolute;left:74.0px;top:196.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:120ms"></div>
+                <div style="position:absolute;left:126.0px;top:196.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:160ms"></div>
+                <div style="position:absolute;left:100.0px;top:214.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:200ms"></div>
+                <div style="position:absolute;left:44.0px;top:150.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:240ms"></div>
+                <div style="position:absolute;left:156.0px;top:150.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:280ms"></div>
+                <div style="position:absolute;left:6.0px;top:104.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:320ms"></div>
+                <div style="position:absolute;left:194.0px;top:104.0px;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:999px;background:rgba(250,248,245,.6);animation:loxa-lock .18s ease both;animation-delay:360ms"></div>
+                <!-- The sweep. Full height, hairline at the top edge, walked from crown
+                     to chin forever. Ambience: slow, linear, looping. -->
+                <div style="position:absolute;left:0;right:0;top:0;height:100%;background:linear-gradient(180deg,rgba(250,248,245,.5) 0 1px,transparent 1px);animation:loxa-scan 2.6s linear infinite"></div>
+              </div>
               <div style="position:absolute;left:0;right:0;bottom:18px;text-align:center;font:400 11px/1 ui-monospace,monospace;color:rgba(255,255,255,.55)">centre your face · even light · hair tied back off</div>
             </div>
             <div style="position:absolute;top:62px;left:20px;right:20px;display:flex;align-items:center;justify-content:space-between">
