@@ -18,20 +18,32 @@ const INPUT = {
 const CONTAINER =
   'file:///var/mobile/Containers/Data/Application/9F3A-4C21/Documents/looks/abc.jpg';
 
+/**
+ * Read a record as the untyped JSON it becomes on disk.
+ *
+ * These tests are about a key that must *not* be there, which is a thing the
+ * type says already — so asking for it through the type is not the assertion
+ * worth making. What is worth making is the one against what actually gets
+ * written, and that is a bag of strings.
+ */
+function asWritten(record: unknown): Record<string, unknown> {
+  return record as Record<string, unknown>;
+}
+
 describe('newLookRecord', () => {
   it('never writes an absolute path to disk', () => {
     // The bug this guards: the container UUID is reassigned on reinstall and can
     // change on a restore, so a persisted URI points at a directory that no
     // longer exists while the image sits safely where it always was. Every
     // screen then shows a blank plate and nothing errors.
-    const record = newLookRecord(INPUT) as Record<string, unknown>;
+    const record = asWritten(newLookRecord(INPUT));
     expect(record.uri).toBeUndefined();
     expect(JSON.stringify(record)).not.toContain('file://');
     expect(JSON.stringify(record)).not.toContain('/var/mobile');
   });
 
   it('refuses a uri smuggled in by the caller', () => {
-    const record = newLookRecord({ ...INPUT, uri: CONTAINER } as never) as Record<string, unknown>;
+    const record = asWritten(newLookRecord({ ...INPUT, uri: CONTAINER } as never));
     expect(record.uri).toBeUndefined();
   });
 
@@ -49,7 +61,7 @@ describe('parseLookRecord', () => {
     // Not migrated, because the value was stale the moment the container moved
     // and the correct one is derivable from the id anyway.
     const legacy = JSON.stringify({ ...INPUT, uri: CONTAINER });
-    const parsed = parseLookRecord(legacy) as Record<string, unknown>;
+    const parsed = asWritten(parseLookRecord(legacy));
     expect(parsed.uri).toBeUndefined();
     expect(parsed.id).toBe('abc');
   });

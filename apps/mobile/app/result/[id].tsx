@@ -11,7 +11,7 @@ import { Pill } from '@/components/Pill';
 import { Body, Display, Meta } from '@/components/Text';
 import { Toast } from '@/components/Toast';
 import { useCredits } from '@/store/credits';
-import { readLook, type StoredLook } from '@/store/results';
+import { readLook, type Look } from '@/store/results';
 import { color, radius, space } from '@/theme';
 
 /**
@@ -30,7 +30,7 @@ export default function Result() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { credits } = useCredits();
 
-  const [look, setLook] = useState<StoredLook | null>(null);
+  const [look, setLook] = useState<Look | null>(null);
   const [comparing, setComparing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
