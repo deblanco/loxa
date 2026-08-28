@@ -26,3 +26,7 @@ CLAUDE.local.md
 secrets/
 
 .claude
+
+# Base photography for the generated catalogue — ~82 MB, regenerable.
+# See design-system/models/README.md for the roster and where the originals live.
+design-system/models/*.png

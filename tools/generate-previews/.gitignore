@@ -1,0 +1,3 @@
+# The bases, the log and the failure list — all cheap to rebuild.
+# The catalogue itself is committed: image generation is not reproducible.
+.cache/

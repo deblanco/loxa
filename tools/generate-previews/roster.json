@@ -1,0 +1,30 @@
+{
+  "//": "Which two models wear each cut. Committed rather than drawn at random so a re-run reproduces the same catalogue, and hand-written rather than generated so the pairing makes sense: the coil-and-loc styles go to models whose hair plausibly does that, and no style shows the same face twice. Filenames are relative to design-system/models/.",
+  "//ages": "The age band in a filename is an unreliable label from the source set, not a fact about the picture. The four least usable bases -- the three ambiguous-age files and the street frame, which is a full-body shot rather than a bust -- appear once each; the studio busts carry the rest.",
+  "styles": {
+    "blunt-bob":       ["white-25-34", "east-asian-18-24"],
+    "long-layers":     ["latina-25-34", "white-35-44"],
+    "curtain-bang":    ["east-asian-18-24-2", "middle-eastern-25-34"],
+    "pixie":           ["white-55-64", "south-asian-18-24"],
+    "wolf-cut":        ["east-asian-18-24", "latina-13-17"],
+    "beach-waves":     ["latina-35-44", "white-25-34"],
+    "sleek-straight":  ["east-asian-45-54", "south-asian-45-54"],
+    "braids":          ["black-18-24", "black-35-44"],
+    "curly-shag":      ["middle-eastern-35-44", "latina-25-34"],
+    "buzz":            ["southeast-asian-45-54", "black-18-24"],
+    "lob":             ["white-35-44", "east-asian-18-24-2"],
+    "french-bob":      ["white-13-17", "east-asian-45-54"],
+    "bixie":           ["southeast-asian-45-54", "white-55-64"],
+    "blunt-fringe":    ["east-asian-18-24", "south-asian-18-24"],
+    "waist-length":    ["south-asian-45-54", "latina-35-44"],
+    "blowout":         ["middle-eastern-25-34", "white-25-34"],
+    "seventies-flick": ["white-35-44", "latina-18-24-street"],
+    "mullet":          ["east-asian-18-24-2", "middle-eastern-35-44"],
+    "afro":            ["black-35-44", "black-18-24"],
+    "locs":            ["black-18-24", "black-35-44"],
+    "bantu-knots":     ["black-13-17", "black-35-44"],
+    "high-ponytail":   ["south-asian-18-24", "east-asian-45-54"],
+    "chignon":         ["white-55-64", "middle-eastern-25-34"],
+    "half-up-knot":    ["latina-25-34", "south-asian-45-54"]
+  }
+}
