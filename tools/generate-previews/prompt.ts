@@ -24,6 +24,19 @@ import type { HairColor, HairStyle } from '@loxa/shared';
  *    the pixels, the words decide where the head sits inside them.
  * 3. Even frontal light, because twenty-four tiles in a row are read as one
  *    set. One dramatically lit cut in the middle of the strip looks like a bug.
+ *
+ * The clothing is there for the same reason as the light. Bare shoulders read
+ * as a medical or cosmetic-surgery reference shot, which is the wrong register
+ * for a catalogue someone browses for fun. A plain neutral crew-neck reads as a
+ * person, and it stays deliberately dull: the product on sale here is the hair,
+ * so the garment carries no colour, pattern or branding that could compete with
+ * it — including against the louder end of the palette, the lilac, cherry and
+ * copper.
+ *
+ * It is also why the crop stops just below the collarbone. Framing wide enough
+ * to show off the garment pushes the head down the frame, and on the hero plate
+ * that is where someone decides whether they want the cut. Show enough neckline
+ * to read as dressed, then stop.
  */
 export function buildPreviewPrompt(style: HairStyle, color: HairColor): string {
   return [
@@ -46,11 +59,18 @@ export function buildPreviewPrompt(style: HairStyle, color: HairColor): string {
     'onto it. Light the person with soft, even, frontal studio light with no hard',
     'shadows, so that the hair reads clearly against the backdrop.',
     '',
+    'Dress the person in a plain, unbranded crew-neck top — a fine-gauge knit or',
+    'a simple cotton t-shirt — in one flat, muted neutral: off-white, oatmeal,',
+    'stone or soft grey. Plain quality basics, nothing styled. The garment must',
+    'carry no text, logo, print, pattern, graphic or visible hardware, and the',
+    'neckline must sit clear of the jaw so it never crowds the hair.',
+    '',
     'Compose the result as an upright 9:16 portrait. Centre the head horizontally,',
     'place the eyes a little above the middle of the frame, and leave clear space',
-    'above the crown so that no hair is cropped by the top edge. Crop the body at',
-    'the collarbone. Keep the shoulders bare and the frame free of clothing,',
-    'text, logos and props.',
+    'above the crown so that no hair is cropped by the top edge. Crop the body',
+    'just below the collarbone — enough of the neckline to read as clothed and no',
+    'more. The head and the hair must dominate the frame. Keep the frame free of',
+    'props, jewellery and text.',
     '',
     'Return the edited photograph.',
   ].join('\n');
