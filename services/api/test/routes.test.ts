@@ -104,6 +104,94 @@ describe('GET /health', () => {
   });
 });
 
+describe('GET /v1/catalogue', () => {
+  const MANIFEST = {
+    version: 1,
+    styles: [
+      {
+        id: 'blunt-bob',
+        name: 'Blunt bob',
+        tiles: [],
+        colors: [{ id: 'caramel', heroes: ['styles/blunt-bob/caramel/0.jpg'] }],
+      },
+    ],
+    colors: [{ id: 'caramel', name: 'Caramel', hex: '#a46c3c' }],
+    defaults: { styleId: 'blunt-bob', colorId: 'caramel' },
+  };
+
+  afterEach(async () => {
+    await env.ASSETS.delete('catalogue.json');
+  });
+
+  it('needs no device id — the app asks before it has one', async () => {
+    const response = await SELF.fetch('https://loxa.test/v1/catalogue');
+    expect(response.status).toBe(200);
+  });
+
+  it('serves the manifest in the bucket', async () => {
+    await env.ASSETS.put('catalogue.json', JSON.stringify(MANIFEST));
+
+    const response = await SELF.fetch('https://loxa.test/v1/catalogue');
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(MANIFEST);
+    expect(response.headers.get('Cache-Control')).toBe('public, max-age=86400');
+    expect(response.headers.get('ETag')).toBeTruthy();
+  });
+
+  it('falls back to the shipped catalogue when the bucket is empty', async () => {
+    // A fresh deploy against a bucket nobody has uploaded to must still answer.
+    const response = await SELF.fetch('https://loxa.test/v1/catalogue');
+    const body = (await response.json()) as { styles: unknown[]; version: number };
+    expect(response.status).toBe(200);
+    expect(body.version).toBe(1);
+    expect(body.styles.length).toBe(24);
+    // No etag: the fallback's bytes change with every deploy, so promising that
+    // the same string means the same content would be a lie.
+    expect(response.headers.get('ETag')).toBeNull();
+  });
+
+  it('falls back rather than failing when the manifest is malformed', async () => {
+    // The app in someone's hand cannot fix our upload, and the catalogue we
+    // shipped is a usable answer. Degraded, not broken.
+    await env.ASSETS.put('catalogue.json', JSON.stringify({ version: 9, styles: [] }));
+
+    const response = await SELF.fetch('https://loxa.test/v1/catalogue');
+    const body = (await response.json()) as { styles: unknown[] };
+    expect(response.status).toBe(200);
+    expect(body.styles.length).toBe(24);
+  });
+
+  it('falls back when the object is not JSON at all', async () => {
+    await env.ASSETS.put('catalogue.json', 'not json');
+
+    const response = await SELF.fetch('https://loxa.test/v1/catalogue');
+    expect(response.status).toBe(200);
+  });
+
+  it('answers 304 to a client that already has this manifest', async () => {
+    await env.ASSETS.put('catalogue.json', JSON.stringify(MANIFEST));
+
+    const first = await SELF.fetch('https://loxa.test/v1/catalogue');
+    const etag = first.headers.get('ETag')!;
+
+    const second = await SELF.fetch('https://loxa.test/v1/catalogue', {
+      headers: { 'If-None-Match': etag },
+    });
+    expect(second.status).toBe(304);
+    expect(second.headers.get('ETag')).toBe(etag);
+  });
+
+  it('sends the body when the etag does not match', async () => {
+    await env.ASSETS.put('catalogue.json', JSON.stringify(MANIFEST));
+
+    const response = await SELF.fetch('https://loxa.test/v1/catalogue', {
+      headers: { 'If-None-Match': '"stale"' },
+    });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(MANIFEST);
+  });
+});
+
 describe('GET /v1/credits', () => {
   it('needs a device id', async () => {
     const response = await SELF.fetch('https://loxa.test/v1/credits');
@@ -209,7 +297,7 @@ describe('POST /v1/tryon', () => {
   });
 
   it('refuses a style outside the catalogue', async () => {
-    const response = await post('/v1/tryon', body({ styleId: 'mullet' }));
+    const response = await post('/v1/tryon', body({ styleId: 'not-a-real-style' }));
     expect(response.status).toBe(400);
   });
 

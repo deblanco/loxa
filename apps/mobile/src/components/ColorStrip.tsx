@@ -1,4 +1,4 @@
-import { HAIR_COLORS, findColor } from '@loxa/shared';
+import type { CatalogueColor } from '@loxa/shared';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { color as token, radius, space } from '../theme';
 import { Body, Meta } from './Text';
@@ -9,20 +9,25 @@ import { Body, Meta } from './Text';
  * The swatch is the flat hex from the catalogue with an inset shade over it, so
  * a circle of paint reads as a head of hair rather than as a colour picker. The
  * hex is never what the model is asked for; that is the prompt fragment, and it
- * lives beside the swatch in `@loxa/shared`.
+ * stays on the Worker — the manifest carries the swatch and nothing else.
+ *
+ * The colours are the ones rendered *for the selected cut*, which is not always
+ * all of them: the generator finishes a style one colour at a time, and a
+ * swatch that leads to an empty plate is the strip lying about what exists.
  */
 interface Props {
+  colors: readonly CatalogueColor[];
   selectedId: string;
   onSelect: (id: string) => void;
 }
 
-export function ColorStrip({ selectedId, onSelect }: Props) {
+export function ColorStrip({ colors, selectedId, onSelect }: Props) {
   return (
     <View>
       <View style={styles.header}>
         <Meta>Hair colours</Meta>
         <Body variant="caption" tone="ink45">
-          {findColor(selectedId)?.name ?? ''}
+          {colors.find((hair) => hair.id === selectedId)?.name ?? ''}
         </Body>
       </View>
 
@@ -31,7 +36,7 @@ export function ColorStrip({ selectedId, onSelect }: Props) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.strip}
       >
-        {HAIR_COLORS.map((hair) => {
+        {colors.map((hair) => {
           const selected = hair.id === selectedId;
           return (
             <Pressable

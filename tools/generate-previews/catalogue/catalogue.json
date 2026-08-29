@@ -85,6 +85,7 @@
       "id": "long-layers",
       "name": "Long layers",
       "tiles": [
+        "styles/long-layers/tile-0.jpg",
         "styles/long-layers/tile-1.jpg"
       ],
       "colors": [
@@ -163,7 +164,10 @@
     {
       "id": "curtain-bang",
       "name": "Curtain bang",
-      "tiles": [],
+      "tiles": [
+        "styles/curtain-bang/tile-0.jpg",
+        "styles/curtain-bang/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -240,7 +244,10 @@
     {
       "id": "pixie",
       "name": "Pixie",
-      "tiles": [],
+      "tiles": [
+        "styles/pixie/tile-0.jpg",
+        "styles/pixie/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -317,7 +324,10 @@
     {
       "id": "wolf-cut",
       "name": "Wolf cut",
-      "tiles": [],
+      "tiles": [
+        "styles/wolf-cut/tile-0.jpg",
+        "styles/wolf-cut/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -394,7 +404,10 @@
     {
       "id": "beach-waves",
       "name": "Beach waves",
-      "tiles": [],
+      "tiles": [
+        "styles/beach-waves/tile-0.jpg",
+        "styles/beach-waves/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -471,7 +484,10 @@
     {
       "id": "sleek-straight",
       "name": "Sleek straight",
-      "tiles": [],
+      "tiles": [
+        "styles/sleek-straight/tile-0.jpg",
+        "styles/sleek-straight/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -548,7 +564,10 @@
     {
       "id": "braids",
       "name": "Braids",
-      "tiles": [],
+      "tiles": [
+        "styles/braids/tile-0.jpg",
+        "styles/braids/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -625,7 +644,10 @@
     {
       "id": "curly-shag",
       "name": "Curly shag",
-      "tiles": [],
+      "tiles": [
+        "styles/curly-shag/tile-0.jpg",
+        "styles/curly-shag/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -702,7 +724,10 @@
     {
       "id": "buzz",
       "name": "Buzz",
-      "tiles": [],
+      "tiles": [
+        "styles/buzz/tile-0.jpg",
+        "styles/buzz/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -779,7 +804,10 @@
     {
       "id": "lob",
       "name": "Long bob",
-      "tiles": [],
+      "tiles": [
+        "styles/lob/tile-0.jpg",
+        "styles/lob/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -856,7 +884,10 @@
     {
       "id": "french-bob",
       "name": "French bob",
-      "tiles": [],
+      "tiles": [
+        "styles/french-bob/tile-0.jpg",
+        "styles/french-bob/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -933,7 +964,10 @@
     {
       "id": "bixie",
       "name": "Bixie",
-      "tiles": [],
+      "tiles": [
+        "styles/bixie/tile-0.jpg",
+        "styles/bixie/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1010,7 +1044,10 @@
     {
       "id": "blunt-fringe",
       "name": "Blunt fringe",
-      "tiles": [],
+      "tiles": [
+        "styles/blunt-fringe/tile-0.jpg",
+        "styles/blunt-fringe/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1087,7 +1124,10 @@
     {
       "id": "waist-length",
       "name": "Waist length",
-      "tiles": [],
+      "tiles": [
+        "styles/waist-length/tile-0.jpg",
+        "styles/waist-length/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1164,7 +1204,10 @@
     {
       "id": "blowout",
       "name": "Blowout",
-      "tiles": [],
+      "tiles": [
+        "styles/blowout/tile-0.jpg",
+        "styles/blowout/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1241,7 +1284,10 @@
     {
       "id": "seventies-flick",
       "name": "Seventies flick",
-      "tiles": [],
+      "tiles": [
+        "styles/seventies-flick/tile-0.jpg",
+        "styles/seventies-flick/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1318,7 +1364,10 @@
     {
       "id": "mullet",
       "name": "Mullet",
-      "tiles": [],
+      "tiles": [
+        "styles/mullet/tile-0.jpg",
+        "styles/mullet/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1395,7 +1444,10 @@
     {
       "id": "afro",
       "name": "Afro",
-      "tiles": [],
+      "tiles": [
+        "styles/afro/tile-0.jpg",
+        "styles/afro/tile-1.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1407,7 +1459,464 @@
         {
           "id": "espresso",
           "heroes": [
-            "styles/afro/espresso/0.jpg"
+            "styles/afro/espresso/0.jpg",
+            "styles/afro/espresso/1.jpg"
+          ]
+        },
+        {
+          "id": "chestnut",
+          "heroes": [
+            "styles/afro/chestnut/0.jpg",
+            "styles/afro/chestnut/1.jpg"
+          ]
+        },
+        {
+          "id": "caramel",
+          "heroes": [
+            "styles/afro/caramel/0.jpg",
+            "styles/afro/caramel/1.jpg"
+          ]
+        },
+        {
+          "id": "honey-blonde",
+          "heroes": [
+            "styles/afro/honey-blonde/0.jpg",
+            "styles/afro/honey-blonde/1.jpg"
+          ]
+        },
+        {
+          "id": "platinum",
+          "heroes": [
+            "styles/afro/platinum/0.jpg",
+            "styles/afro/platinum/1.jpg"
+          ]
+        },
+        {
+          "id": "ash-grey",
+          "heroes": [
+            "styles/afro/ash-grey/0.jpg",
+            "styles/afro/ash-grey/1.jpg"
+          ]
+        },
+        {
+          "id": "copper",
+          "heroes": [
+            "styles/afro/copper/0.jpg",
+            "styles/afro/copper/1.jpg"
+          ]
+        },
+        {
+          "id": "cherry",
+          "heroes": [
+            "styles/afro/cherry/0.jpg",
+            "styles/afro/cherry/1.jpg"
+          ]
+        },
+        {
+          "id": "lilac",
+          "heroes": [
+            "styles/afro/lilac/0.jpg",
+            "styles/afro/lilac/1.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "locs",
+      "name": "Locs",
+      "tiles": [
+        "styles/locs/tile-0.jpg",
+        "styles/locs/tile-1.jpg"
+      ],
+      "colors": [
+        {
+          "id": "jet-black",
+          "heroes": [
+            "styles/locs/jet-black/0.jpg",
+            "styles/locs/jet-black/1.jpg"
+          ]
+        },
+        {
+          "id": "espresso",
+          "heroes": [
+            "styles/locs/espresso/0.jpg",
+            "styles/locs/espresso/1.jpg"
+          ]
+        },
+        {
+          "id": "chestnut",
+          "heroes": [
+            "styles/locs/chestnut/0.jpg",
+            "styles/locs/chestnut/1.jpg"
+          ]
+        },
+        {
+          "id": "caramel",
+          "heroes": [
+            "styles/locs/caramel/0.jpg",
+            "styles/locs/caramel/1.jpg"
+          ]
+        },
+        {
+          "id": "honey-blonde",
+          "heroes": [
+            "styles/locs/honey-blonde/0.jpg",
+            "styles/locs/honey-blonde/1.jpg"
+          ]
+        },
+        {
+          "id": "platinum",
+          "heroes": [
+            "styles/locs/platinum/0.jpg",
+            "styles/locs/platinum/1.jpg"
+          ]
+        },
+        {
+          "id": "ash-grey",
+          "heroes": [
+            "styles/locs/ash-grey/0.jpg",
+            "styles/locs/ash-grey/1.jpg"
+          ]
+        },
+        {
+          "id": "copper",
+          "heroes": [
+            "styles/locs/copper/0.jpg",
+            "styles/locs/copper/1.jpg"
+          ]
+        },
+        {
+          "id": "cherry",
+          "heroes": [
+            "styles/locs/cherry/0.jpg",
+            "styles/locs/cherry/1.jpg"
+          ]
+        },
+        {
+          "id": "lilac",
+          "heroes": [
+            "styles/locs/lilac/0.jpg",
+            "styles/locs/lilac/1.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bantu-knots",
+      "name": "Bantu knots",
+      "tiles": [
+        "styles/bantu-knots/tile-0.jpg",
+        "styles/bantu-knots/tile-1.jpg"
+      ],
+      "colors": [
+        {
+          "id": "jet-black",
+          "heroes": [
+            "styles/bantu-knots/jet-black/0.jpg",
+            "styles/bantu-knots/jet-black/1.jpg"
+          ]
+        },
+        {
+          "id": "espresso",
+          "heroes": [
+            "styles/bantu-knots/espresso/0.jpg",
+            "styles/bantu-knots/espresso/1.jpg"
+          ]
+        },
+        {
+          "id": "chestnut",
+          "heroes": [
+            "styles/bantu-knots/chestnut/0.jpg",
+            "styles/bantu-knots/chestnut/1.jpg"
+          ]
+        },
+        {
+          "id": "caramel",
+          "heroes": [
+            "styles/bantu-knots/caramel/0.jpg",
+            "styles/bantu-knots/caramel/1.jpg"
+          ]
+        },
+        {
+          "id": "honey-blonde",
+          "heroes": [
+            "styles/bantu-knots/honey-blonde/0.jpg",
+            "styles/bantu-knots/honey-blonde/1.jpg"
+          ]
+        },
+        {
+          "id": "platinum",
+          "heroes": [
+            "styles/bantu-knots/platinum/0.jpg",
+            "styles/bantu-knots/platinum/1.jpg"
+          ]
+        },
+        {
+          "id": "ash-grey",
+          "heroes": [
+            "styles/bantu-knots/ash-grey/0.jpg",
+            "styles/bantu-knots/ash-grey/1.jpg"
+          ]
+        },
+        {
+          "id": "copper",
+          "heroes": [
+            "styles/bantu-knots/copper/0.jpg",
+            "styles/bantu-knots/copper/1.jpg"
+          ]
+        },
+        {
+          "id": "cherry",
+          "heroes": [
+            "styles/bantu-knots/cherry/0.jpg",
+            "styles/bantu-knots/cherry/1.jpg"
+          ]
+        },
+        {
+          "id": "lilac",
+          "heroes": [
+            "styles/bantu-knots/lilac/0.jpg",
+            "styles/bantu-knots/lilac/1.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "high-ponytail",
+      "name": "High ponytail",
+      "tiles": [
+        "styles/high-ponytail/tile-0.jpg",
+        "styles/high-ponytail/tile-1.jpg"
+      ],
+      "colors": [
+        {
+          "id": "jet-black",
+          "heroes": [
+            "styles/high-ponytail/jet-black/0.jpg",
+            "styles/high-ponytail/jet-black/1.jpg"
+          ]
+        },
+        {
+          "id": "espresso",
+          "heroes": [
+            "styles/high-ponytail/espresso/0.jpg",
+            "styles/high-ponytail/espresso/1.jpg"
+          ]
+        },
+        {
+          "id": "chestnut",
+          "heroes": [
+            "styles/high-ponytail/chestnut/0.jpg",
+            "styles/high-ponytail/chestnut/1.jpg"
+          ]
+        },
+        {
+          "id": "caramel",
+          "heroes": [
+            "styles/high-ponytail/caramel/0.jpg",
+            "styles/high-ponytail/caramel/1.jpg"
+          ]
+        },
+        {
+          "id": "honey-blonde",
+          "heroes": [
+            "styles/high-ponytail/honey-blonde/0.jpg",
+            "styles/high-ponytail/honey-blonde/1.jpg"
+          ]
+        },
+        {
+          "id": "platinum",
+          "heroes": [
+            "styles/high-ponytail/platinum/0.jpg",
+            "styles/high-ponytail/platinum/1.jpg"
+          ]
+        },
+        {
+          "id": "ash-grey",
+          "heroes": [
+            "styles/high-ponytail/ash-grey/0.jpg",
+            "styles/high-ponytail/ash-grey/1.jpg"
+          ]
+        },
+        {
+          "id": "copper",
+          "heroes": [
+            "styles/high-ponytail/copper/0.jpg",
+            "styles/high-ponytail/copper/1.jpg"
+          ]
+        },
+        {
+          "id": "cherry",
+          "heroes": [
+            "styles/high-ponytail/cherry/0.jpg",
+            "styles/high-ponytail/cherry/1.jpg"
+          ]
+        },
+        {
+          "id": "lilac",
+          "heroes": [
+            "styles/high-ponytail/lilac/0.jpg",
+            "styles/high-ponytail/lilac/1.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chignon",
+      "name": "Chignon",
+      "tiles": [
+        "styles/chignon/tile-0.jpg",
+        "styles/chignon/tile-1.jpg"
+      ],
+      "colors": [
+        {
+          "id": "jet-black",
+          "heroes": [
+            "styles/chignon/jet-black/0.jpg",
+            "styles/chignon/jet-black/1.jpg"
+          ]
+        },
+        {
+          "id": "espresso",
+          "heroes": [
+            "styles/chignon/espresso/0.jpg",
+            "styles/chignon/espresso/1.jpg"
+          ]
+        },
+        {
+          "id": "chestnut",
+          "heroes": [
+            "styles/chignon/chestnut/0.jpg",
+            "styles/chignon/chestnut/1.jpg"
+          ]
+        },
+        {
+          "id": "caramel",
+          "heroes": [
+            "styles/chignon/caramel/0.jpg",
+            "styles/chignon/caramel/1.jpg"
+          ]
+        },
+        {
+          "id": "honey-blonde",
+          "heroes": [
+            "styles/chignon/honey-blonde/0.jpg",
+            "styles/chignon/honey-blonde/1.jpg"
+          ]
+        },
+        {
+          "id": "platinum",
+          "heroes": [
+            "styles/chignon/platinum/0.jpg",
+            "styles/chignon/platinum/1.jpg"
+          ]
+        },
+        {
+          "id": "ash-grey",
+          "heroes": [
+            "styles/chignon/ash-grey/0.jpg",
+            "styles/chignon/ash-grey/1.jpg"
+          ]
+        },
+        {
+          "id": "copper",
+          "heroes": [
+            "styles/chignon/copper/0.jpg",
+            "styles/chignon/copper/1.jpg"
+          ]
+        },
+        {
+          "id": "cherry",
+          "heroes": [
+            "styles/chignon/cherry/0.jpg",
+            "styles/chignon/cherry/1.jpg"
+          ]
+        },
+        {
+          "id": "lilac",
+          "heroes": [
+            "styles/chignon/lilac/0.jpg",
+            "styles/chignon/lilac/1.jpg"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "half-up-knot",
+      "name": "Half-up knot",
+      "tiles": [
+        "styles/half-up-knot/tile-0.jpg",
+        "styles/half-up-knot/tile-1.jpg"
+      ],
+      "colors": [
+        {
+          "id": "jet-black",
+          "heroes": [
+            "styles/half-up-knot/jet-black/0.jpg",
+            "styles/half-up-knot/jet-black/1.jpg"
+          ]
+        },
+        {
+          "id": "espresso",
+          "heroes": [
+            "styles/half-up-knot/espresso/0.jpg",
+            "styles/half-up-knot/espresso/1.jpg"
+          ]
+        },
+        {
+          "id": "chestnut",
+          "heroes": [
+            "styles/half-up-knot/chestnut/0.jpg",
+            "styles/half-up-knot/chestnut/1.jpg"
+          ]
+        },
+        {
+          "id": "caramel",
+          "heroes": [
+            "styles/half-up-knot/caramel/0.jpg",
+            "styles/half-up-knot/caramel/1.jpg"
+          ]
+        },
+        {
+          "id": "honey-blonde",
+          "heroes": [
+            "styles/half-up-knot/honey-blonde/0.jpg",
+            "styles/half-up-knot/honey-blonde/1.jpg"
+          ]
+        },
+        {
+          "id": "platinum",
+          "heroes": [
+            "styles/half-up-knot/platinum/0.jpg",
+            "styles/half-up-knot/platinum/1.jpg"
+          ]
+        },
+        {
+          "id": "ash-grey",
+          "heroes": [
+            "styles/half-up-knot/ash-grey/0.jpg",
+            "styles/half-up-knot/ash-grey/1.jpg"
+          ]
+        },
+        {
+          "id": "copper",
+          "heroes": [
+            "styles/half-up-knot/copper/0.jpg",
+            "styles/half-up-knot/copper/1.jpg"
+          ]
+        },
+        {
+          "id": "cherry",
+          "heroes": [
+            "styles/half-up-knot/cherry/0.jpg",
+            "styles/half-up-knot/cherry/1.jpg"
+          ]
+        },
+        {
+          "id": "lilac",
+          "heroes": [
+            "styles/half-up-knot/lilac/0.jpg",
+            "styles/half-up-knot/lilac/1.jpg"
           ]
         }
       ]

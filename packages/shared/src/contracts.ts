@@ -1,6 +1,4 @@
 import { z } from 'zod';
-import { HAIR_STYLE_IDS } from './styles';
-import { HAIR_COLOR_IDS } from './colors';
 import { PLAN_IDS } from './entitlements';
 
 /**
@@ -28,8 +26,28 @@ export const imageBase64Schema = z
   .max(MAX_IMAGE_BASE64, 'the photo is too large')
   .regex(/^[A-Za-z0-9+/]+={0,2}$/, 'the photo is not base64');
 
-export const styleIdSchema = z.enum(HAIR_STYLE_IDS as [string, ...string[]]);
-export const colorIdSchema = z.enum(HAIR_COLOR_IDS as [string, ...string[]]);
+/**
+ * A catalogue id, as a string rather than as an enum of the ids we ship with.
+ *
+ * It used to be `z.enum(HAIR_STYLE_IDS)`, and that was two problems. The app
+ * parses responses with this file, so the enum dragged `styles.ts` and
+ * `colors.ts` — every render prompt included — into the app bundle. And the
+ * catalogue the app draws is now served rather than compiled, so a wire schema
+ * that lists the ids is precisely the coupling that change removes.
+ *
+ * Nothing is unvalidated as a result: `core/try-on.ts` resolves both ids
+ * against the catalogue before it does anything else, and an id it cannot find
+ * is an `UnknownStyleError` and a 400. The check moved one layer in, to the
+ * side that owns the prompts.
+ */
+const catalogueIdSchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z0-9-]+$/, 'not a catalogue id');
+
+export const styleIdSchema = catalogueIdSchema;
+export const colorIdSchema = catalogueIdSchema;
 export const planIdSchema = z.enum(PLAN_IDS);
 
 // --- POST /v1/tryon ---------------------------------------------------------
@@ -42,7 +60,7 @@ export const tryOnRequestSchema = z.object({
 export type TryOnRequest = z.infer<typeof tryOnRequestSchema>;
 
 export const tryOnResponseSchema = z.object({
-  /** JPEG, base64, 2:3. The client writes it straight to `${id}.jpg`. */
+  /** JPEG, base64, 9:16. The client writes it straight to `${id}.jpg`. */
   imageBase64: z.string().min(1),
   /** After the spend, so the app can update the chip without a second call. */
   creditsLeft: z.number().int().min(0),
@@ -88,6 +106,114 @@ export const purchaseSyncResponseSchema = z.object({
   creditsLeft: z.number().int().min(0),
 });
 export type PurchaseSyncResponse = z.infer<typeof purchaseSyncResponseSchema>;
+
+// --- GET /v1/catalogue ------------------------------------------------------
+
+/**
+ * The published catalogue, as the app draws it.
+ *
+ * This is a projection of the catalogue in `styles.ts` and `colors.ts`, not a
+ * copy of it: `prompt` is missing from both halves and never crosses the wire.
+ * The Worker owns the prompts because the Worker makes the render, and a
+ * fragment the app could edit is a fragment that can rewrite a paid call.
+ *
+ * What it does carry is what the strip and the plate need, plus the preview
+ * keys. Only styles and colours that have *rendered art* appear, which is the
+ * reason this is served at all — the generator has finished 15 of 24 cuts, and
+ * a compiled catalogue has no way to say so.
+ */
+
+/** Preview keys, relative to the assets bucket. Never absolute URLs — see below. */
+const previewKeySchema = z.string().min(1).max(256);
+
+export const catalogueStyleSchema = z.object({
+  id: catalogueIdSchema,
+  name: z.string().min(1),
+  /**
+   * Strip tiles, one key per rendered model slot.
+   *
+   * May be empty, and usually is: 45 of the 48 tiles do not exist yet. The
+   * strip falls back to a hero rather than dropping the style, so a missing
+   * tile costs a crop, not a cut.
+   */
+  tiles: z.array(previewKeySchema),
+  /** The colours rendered for this style, in catalogue order. Never empty. */
+  colors: z
+    .array(
+      z.object({
+        id: catalogueIdSchema,
+        /** Hero keys for this style-and-colour, one per rendered model slot. */
+        heroes: z.array(previewKeySchema).min(1),
+      }),
+    )
+    .min(1),
+});
+export type CatalogueStyle = z.infer<typeof catalogueStyleSchema>;
+
+export const catalogueColorSchema = z.object({
+  id: catalogueIdSchema,
+  name: z.string().min(1),
+  /** The swatch, and only the swatch. What the model is asked for stays server-side. */
+  hex: z.string().regex(/^#[0-9a-f]{6}$/, 'not a lowercase six-digit hex'),
+});
+export type CatalogueColor = z.infer<typeof catalogueColorSchema>;
+
+export const catalogueResponseSchema = z
+  .object({
+    /**
+     * Bumped only for a breaking shape change.
+     *
+     * The app refuses a version it does not know rather than guessing, and a
+     * cached manifest from an older shape is discarded instead of migrated.
+     */
+    version: z.literal(1),
+    styles: z.array(catalogueStyleSchema).min(1),
+    /**
+     * Names and swatches, once each, referenced by id from the per-style lists.
+     * Listing them here rather than inside every style keeps the payload flat
+     * and makes a rename one edit instead of twenty-four.
+     */
+    colors: z.array(catalogueColorSchema).min(1),
+    /** What the preview screen opens on. Both must appear above. */
+    defaults: z.object({ styleId: catalogueIdSchema, colorId: catalogueIdSchema }),
+  })
+  .superRefine((manifest, ctx) => {
+    // Referential integrity, checked here so that both the Worker serving a
+    // manifest and the app caching one refuse the same broken file. A default
+    // that is not in the list boots the app onto a style that does not exist,
+    // and a colour id with no entry renders a swatch with no colour — both are
+    // silent, and both survive a 24h cache.
+    const styleIds = new Set(manifest.styles.map((style) => style.id));
+    const colorIds = new Set(manifest.colors.map((color) => color.id));
+
+    if (!styleIds.has(manifest.defaults.styleId)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['defaults', 'styleId'],
+        message: 'the default style is not in the catalogue',
+      });
+    }
+    if (!colorIds.has(manifest.defaults.colorId)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['defaults', 'colorId'],
+        message: 'the default colour is not in the catalogue',
+      });
+    }
+
+    manifest.styles.forEach((style, index) => {
+      for (const entry of style.colors) {
+        if (!colorIds.has(entry.id)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['styles', index, 'colors'],
+            message: `${style.id} lists a colour that is not in the catalogue: ${entry.id}`,
+          });
+        }
+      }
+    });
+  });
+export type CatalogueResponse = z.infer<typeof catalogueResponseSchema>;
 
 // --- Errors -----------------------------------------------------------------
 

@@ -1,5 +1,8 @@
-import { HAIR_STYLES } from '@loxa/shared';
+import type { CatalogueResponse } from '@loxa/shared';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { assetUrl } from '../api/assets';
+import { tileFor } from '../catalogue';
 import { color, radius, space } from '../theme';
 import { PhotoPlate } from './PhotoPlate';
 import { Body, Meta } from './Text';
@@ -10,19 +13,37 @@ import { Body, Meta } from './Text';
  * Selection is a ring on the tile plus a tick, not a colour change: there is
  * only one black, so "selected" has to be expressed with weight and a mark
  * rather than with a highlight.
+ *
+ * Each cut was photographed on two models, and the tile shows one of them. Which
+ * one is drawn once when the strip mounts and then held: the catalogue looks
+ * different between sessions without anything moving on its own, which is the
+ * only version of "rotating" the design system allows — it names four ambient
+ * loops and says they are the only things on screen that move untouched.
+ *
+ * The tiles are cropped from the default colour rather than the selected one. A
+ * tile that tracked the colour strip would send all of them back to the network
+ * every time the most-touched control on the screen was touched.
+ *
+ * What is in the strip comes from the manifest, not from a compiled list, so it
+ * shows the cuts that have actually been rendered and grows by an upload rather
+ * than by a release. `tileFor` falls back to a hero where no crop exists, which
+ * is most of them.
  */
 interface Props {
+  catalogue: CatalogueResponse;
   selectedId: string;
   onSelect: (id: string) => void;
 }
 
-export function StyleStrip({ selectedId, onSelect }: Props) {
+export function StyleStrip({ catalogue, selectedId, onSelect }: Props) {
+  const [seed] = useState(() => Math.floor(Math.random() * 1000));
+
   return (
     <View>
       <View style={styles.header}>
         <Meta>Hair styles</Meta>
         <Body variant="caption" tone="ink40">
-          All {HAIR_STYLES.length}
+          All {catalogue.styles.length}
         </Body>
       </View>
 
@@ -31,7 +52,7 @@ export function StyleStrip({ selectedId, onSelect }: Props) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.strip}
       >
-        {HAIR_STYLES.map((style) => {
+        {catalogue.styles.map((style) => {
           const selected = style.id === selectedId;
           return (
             <Pressable
@@ -42,6 +63,7 @@ export function StyleStrip({ selectedId, onSelect }: Props) {
               style={styles.tile}
             >
               <PhotoPlate
+                uri={assetUrl(tileFor(catalogue, style.id, seed))}
                 style={[styles.thumb, { borderColor: selected ? color.ink : color.ink12 }]}
               />
               {selected ? (

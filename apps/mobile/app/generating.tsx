@@ -1,4 +1,3 @@
-import { findColor, findStyle } from '@loxa/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
@@ -8,6 +7,7 @@ import { PhotoPlate } from '@/components/PhotoPlate';
 import { Pill } from '@/components/Pill';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Body, Display, Meta } from '@/components/Text';
+import { humaniseId } from '@/store/look-record';
 import { saveLook } from '@/store/results';
 import { color, motion, radius, space } from '@/theme';
 
@@ -29,10 +29,15 @@ const ESTIMATE_MS = 9_000;
 
 export default function Generating() {
   const insets = useSafeAreaInsets();
-  const { base64, styleId, colorId } = useLocalSearchParams<{
+  // The names come with the render rather than from the catalogue. A render
+  // already in flight must not wait on a manifest to print its own caption, and
+  // this screen then needs no catalogue at all.
+  const { base64, styleId, colorId, styleName, colorName } = useLocalSearchParams<{
     base64: string;
     styleId: string;
     colorId: string;
+    styleName?: string;
+    colorName?: string;
   }>();
 
   const [progress, setProgress] = useState(0);
@@ -65,7 +70,13 @@ export default function Generating() {
     async function render() {
       try {
         const result = await tryOn({ imageBase64: base64, styleId, colorId });
-        const look = await saveLook({ imageBase64: result.imageBase64, styleId, colorId });
+        const look = await saveLook({
+          imageBase64: result.imageBase64,
+          styleId,
+          colorId,
+          styleName,
+          colorName,
+        });
         if (cancelled) return;
 
         setProgress(1);
@@ -111,8 +122,8 @@ export default function Generating() {
         <Meta tone="ink40" style={styles.summaryHeader}>
           Selection summary
         </Meta>
-        <Row label="Style" value={findStyle(styleId)?.name ?? styleId} />
-        <Row label="Colour" value={findColor(colorId)?.name ?? colorId} />
+        <Row label="Style" value={styleName ?? humaniseId(styleId)} />
+        <Row label="Colour" value={colorName ?? humaniseId(colorId)} />
         <Row label="Cost" value="1 credit" />
       </View>
 

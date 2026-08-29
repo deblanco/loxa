@@ -1,3 +1,4 @@
+import { randomUUID } from 'expo-crypto';
 import { Directory, File, Paths } from 'expo-file-system';
 import {
   lookImageName,
@@ -46,9 +47,11 @@ export async function saveLook(input: {
   imageBase64: string;
   styleId: string;
   colorId: string;
+  styleName?: string;
+  colorName?: string;
 }): Promise<Look> {
   const dir = looksDir();
-  const id = crypto.randomUUID();
+  const id = randomUUID();
 
   const image = new File(dir, lookImageName(id));
   image.write(input.imageBase64, { encoding: 'base64' });
@@ -57,6 +60,8 @@ export async function saveLook(input: {
     id,
     styleId: input.styleId,
     colorId: input.colorId,
+    styleName: input.styleName,
+    colorName: input.colorName,
     createdAt: new Date().toISOString(),
   });
 

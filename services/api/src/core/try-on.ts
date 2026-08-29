@@ -4,7 +4,7 @@ import type { EntitlementsPort } from '../ports/entitlements';
 import type { HairRendererPort } from '../ports/hair-renderer';
 import type { RenderCachePort } from '../ports/render-cache';
 import { renderCacheKey } from './cache-key';
-import { OutOfCreditsError } from './errors';
+import { OutOfCreditsError, UnknownStyleError } from './errors';
 import { available, rollForward, spendOne } from './rules';
 
 export interface TryOnDeps {
@@ -49,9 +49,10 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
   const style = findStyle(command.styleId);
   const color = findColor(command.colorId);
 
-  // The route already parsed these against the catalogue's enum, so reaching
-  // here with an unknown id means the two have drifted apart in the same build.
-  if (!style || !color) throw new Error(`unknown style or colour: ${command.styleId}/${command.colorId}`);
+  // First, and before the cache read as well as the spend. The wire schema no
+  // longer enumerates the catalogue's ids — it cannot, now that the catalogue
+  // the app draws is served — so this is the validation, not a re-check of it.
+  if (!style || !color) throw new UnknownStyleError(command.styleId, command.colorId);
 
   const now = deps.now();
   const key = await renderCacheKey(command.imageBase64, command.styleId, command.colorId);

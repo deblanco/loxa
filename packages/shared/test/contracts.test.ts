@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  catalogueResponseSchema,
   apiErrorSchema,
   creditsResponseSchema,
   purchaseSyncRequestSchema,
@@ -18,10 +19,23 @@ describe('tryOnRequestSchema', () => {
     expect(parsed.success).toBe(true);
   });
 
-  it('rejects a style that is not in the catalogue', () => {
+  it('accepts a style id this build has never heard of', () => {
+    // The catalogue the app draws is served, so it can be a subset of what the
+    // Worker ships and an old client can hold ids that have since been
+    // withdrawn. The wire no longer enumerates them; `core/try-on.ts` resolves
+    // both against the catalogue and answers 400 when it cannot.
     const parsed = tryOnRequestSchema.safeParse({
       imageBase64: PHOTO,
-      styleId: 'mullet',
+      styleId: 'a-style-from-next-year',
+      colorId: 'caramel',
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('still rejects an id that is not shaped like one', () => {
+    const parsed = tryOnRequestSchema.safeParse({
+      imageBase64: PHOTO,
+      styleId: 'Blunt Bob',
       colorId: 'caramel',
     });
     expect(parsed.success).toBe(false);
@@ -96,5 +110,85 @@ describe('purchaseSyncRequestSchema', () => {
   it('caps the batch', () => {
     const ids = Array.from({ length: 51 }, (_, i) => `tx_${i}`);
     expect(purchaseSyncRequestSchema.safeParse({ transactionIds: ids }).success).toBe(false);
+  });
+});
+
+describe('catalogueResponseSchema', () => {
+  const MANIFEST = {
+    version: 1,
+    styles: [
+      {
+        id: 'blunt-bob',
+        name: 'Blunt bob',
+        tiles: ['styles/blunt-bob/tile-0.jpg'],
+        colors: [{ id: 'caramel', heroes: ['styles/blunt-bob/caramel/0.jpg'] }],
+      },
+    ],
+    colors: [{ id: 'caramel', name: 'Caramel', hex: '#a46c3c' }],
+    defaults: { styleId: 'blunt-bob', colorId: 'caramel' },
+  };
+
+  it('accepts a manifest', () => {
+    expect(catalogueResponseSchema.safeParse(MANIFEST).success).toBe(true);
+  });
+
+  it('accepts a style with no tile, because most of them have none', () => {
+    const parsed = catalogueResponseSchema.safeParse({
+      ...MANIFEST,
+      styles: [{ ...MANIFEST.styles[0]!, tiles: [] }],
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('rejects a version this build does not know', () => {
+    expect(catalogueResponseSchema.safeParse({ ...MANIFEST, version: 2 }).success).toBe(false);
+  });
+
+  it('rejects a swatch that is not a lowercase six-digit hex', () => {
+    const parsed = catalogueResponseSchema.safeParse({
+      ...MANIFEST,
+      colors: [{ id: 'caramel', name: 'Caramel', hex: 'brown' }],
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects a style with no colours rendered', () => {
+    const parsed = catalogueResponseSchema.safeParse({
+      ...MANIFEST,
+      styles: [{ ...MANIFEST.styles[0]!, colors: [] }],
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects a colour entry with no pictures', () => {
+    const parsed = catalogueResponseSchema.safeParse({
+      ...MANIFEST,
+      styles: [{ ...MANIFEST.styles[0]!, colors: [{ id: 'caramel', heroes: [] }] }],
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects a default that is not in the catalogue', () => {
+    // It would boot the app onto a style that does not exist, and a client
+    // would cache it for a day.
+    const parsed = catalogueResponseSchema.safeParse({
+      ...MANIFEST,
+      defaults: { styleId: 'mullet', colorId: 'caramel' },
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects a style naming a colour the catalogue does not list', () => {
+    // A swatch with no entry renders a circle with no colour, silently.
+    const parsed = catalogueResponseSchema.safeParse({
+      ...MANIFEST,
+      styles: [
+        {
+          ...MANIFEST.styles[0]!,
+          colors: [{ id: 'lilac', heroes: ['styles/blunt-bob/lilac/0.jpg'] }],
+        },
+      ],
+    });
+    expect(parsed.success).toBe(false);
   });
 });

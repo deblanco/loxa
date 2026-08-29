@@ -13,6 +13,8 @@
 set -euo pipefail
 
 BUCKET=loxa-assets
+CATALOGUE=catalogue.json
+SELF="$(cd "$(dirname "$0")" && pwd)"
 OUT="$(cd "$(dirname "$0")" && pwd)/catalogue"
 
 if [ ! -d "$OUT/styles" ]; then
@@ -39,5 +41,26 @@ for key in $(find styles -name '*.jpg'); do
     echo "  $n/$total  FAILED $key" >&2
   fi
 done
+
+# The manifest last, and never before the pictures it names.
+#
+# It is the only mutable object in this bucket: every key above is written once
+# and cached for a year, which is what lets the app trust a preview URL forever.
+# This one is overwritten on purpose -- it is how the catalogue changes without
+# an app release -- so it gets a minute of cache rather than a year, and the
+# Worker serves it with its own headers on top.
+#
+# Uploading it before the art would advertise keys that are not in the bucket
+# yet, and every app that fetched in between would draw a hatch for a picture
+# that exists.
+echo "building the manifest"
+bun run "$SELF/manifest.ts" --write
+
+echo "uploading $CATALOGUE"
+bunx wrangler r2 object put "$BUCKET/$CATALOGUE" \
+  --file="$CATALOGUE" \
+  --content-type=application/json \
+  --cache-control="public, max-age=60" \
+  --remote
 
 echo "done"

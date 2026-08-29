@@ -19,6 +19,20 @@ export interface StoredLook {
   styleId: string;
   colorId: string;
   createdAt: string;
+  /**
+   * What the cut and the colour were called when this was made.
+   *
+   * Stored rather than looked up, and that is a reversal of this file's own
+   * rule — but the rule is "persist the stable thing", and under a served
+   * catalogue the name is no longer the volatile half. A manifest can withdraw
+   * or rename a style; the picture on disk is unaffected and must keep its
+   * caption. Writing the name down is also what lets the result screen render
+   * offline, with no catalogue loaded at all.
+   *
+   * Optional, because records written before this existed still read.
+   */
+  styleName?: string;
+  colorName?: string;
 }
 
 /** A look with its location resolved against the current container. */
@@ -39,6 +53,8 @@ export function newLookRecord(input: {
   styleId: string;
   colorId: string;
   createdAt: string;
+  styleName?: string;
+  colorName?: string;
 }): StoredLook {
   // Built field by field rather than spread, so a caller handing this an object
   // that happens to carry a `uri` cannot smuggle one onto disk.
@@ -47,6 +63,8 @@ export function newLookRecord(input: {
     styleId: input.styleId,
     colorId: input.colorId,
     createdAt: input.createdAt,
+    ...(input.styleName ? { styleName: input.styleName } : {}),
+    ...(input.colorName ? { colorName: input.colorName } : {}),
   };
 }
 
@@ -79,7 +97,33 @@ export function parseLookRecord(raw: string): StoredLook | null {
     return null;
   }
 
-  return { id, styleId, colorId, createdAt };
+  // The names are a caption, not the look. Anything that is not a string is
+  // dropped and the reader falls back — the same tolerance shown to a legacy
+  // `uri`, and for the same reason: a bad field must cost its field, not the
+  // picture.
+  const { styleName, colorName } = record;
+
+  return {
+    id,
+    styleId,
+    colorId,
+    createdAt,
+    ...(typeof styleName === 'string' && styleName ? { styleName } : {}),
+    ...(typeof colorName === 'string' && colorName ? { colorName } : {}),
+  };
+}
+
+/**
+ * A readable name for a look written before the names were stored.
+ *
+ * Lossy on purpose, and only where the catalogue disagreed with itself:
+ * `'lob'` is called "Long bob" in the catalogue and comes back "Lob" here.
+ * A slightly wrong caption on an old picture beats a screen that cannot render
+ * without the network.
+ */
+export function humaniseId(id: string): string {
+  const spaced = id.replace(/-/g, ' ');
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
 /** Newest first — the order the profile's gallery will want them in. */

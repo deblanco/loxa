@@ -58,6 +58,10 @@ describe('resetAppState', () => {
     // carries on sending the identity it just erased.
     expect(reset).toContain('resetDeviceIdCache');
     expect(reset).toContain('clearDevPremiumCache');
+    // The catalogue is held in a module for the process lifetime too, so
+    // clearing only the key would leave the wiped manifest on screen — and the
+    // first-launch state the reset exists to reach unreachable.
+    expect(reset).toContain('clearCatalogueCache');
   });
 
   it('cancels scheduled notifications', () => {

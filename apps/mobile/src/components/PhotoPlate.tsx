@@ -1,4 +1,4 @@
-import { Image } from 'react-native';
+import { Image } from 'expo-image';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { color, radius } from '../theme';
 import { Meta } from './Text';
@@ -24,7 +24,22 @@ export function PhotoPlate({ uri, label, dark, style, children }: Props) {
   return (
     <View style={[styles.plate, dark ? styles.dark : styles.light, style]}>
       {uri ? (
-        <Image source={{ uri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+        <Image
+          source={{ uri }}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          // The catalogue is served from R2 with a year of cache and immutable
+          // keys, so a picture fetched once should never be fetched again. RN's
+          // own Image leans on NSURLCache, which honours that but shares one
+          // small budget with every other request and evicts invisibly; this
+          // keeps its own disk cache, which is what makes the strip work on a
+          // plane.
+          cachePolicy="memory-disk"
+          // No fade. The design system names four ambient loops and says they
+          // are the only things on screen that move untouched; fifteen tiles
+          // dissolving in is a fifth.
+          transition={0}
+        />
       ) : (
         <>
           <Hatch dark={dark} />
@@ -34,7 +49,7 @@ export function PhotoPlate({ uri, label, dark, style, children }: Props) {
                 {label}
               </Meta>
               <Meta variant="note" tone={dark ? 'paper50' : 'ink45'} sentence style={styles.centered}>
-                1024 × 1536
+                1080 × 1920
               </Meta>
             </View>
           ) : null}

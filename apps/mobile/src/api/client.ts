@@ -1,9 +1,11 @@
 import {
   apiErrorSchema,
+  catalogueResponseSchema,
   creditsResponseSchema,
   purchaseSyncResponseSchema,
   tryOnResponseSchema,
   type ApiErrorCode,
+  type CatalogueResponse,
   type CreditsResponse,
   type PurchaseSyncResponse,
   type TryOnResponse,
@@ -92,6 +94,18 @@ async function request<T>(
   }
 
   return parse(body);
+}
+
+/**
+ * The published catalogue.
+ *
+ * The one call that needs no identity — it is the same answer for everybody,
+ * and the app asks for it before onboarding has minted a device id. The shared
+ * request path sends the header anyway; the Worker ignores it, which is cheaper
+ * than a second code path here.
+ */
+export async function fetchCatalogue(): Promise<CatalogueResponse> {
+  return await request('/v1/catalogue', (body) => catalogueResponseSchema.parse(body));
 }
 
 export async function fetchCredits(): Promise<CreditsResponse> {

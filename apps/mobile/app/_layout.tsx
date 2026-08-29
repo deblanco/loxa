@@ -14,6 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { deviceId } from '@/api/client';
+import { loadCatalogue } from '@/store/catalogue';
 import { purchases } from '@/purchases';
 import { color } from '@/theme';
 
@@ -44,6 +45,11 @@ export default function RootLayout() {
     // The store's customer id is our anonymous device id, which is what lets an
     // app with no login screen still verify a purchase server-side.
     void deviceId().then((id) => purchases().configure(id));
+
+    // Started behind the splash, which is held for the fonts anyway. In the
+    // usual case — a cached manifest — storage has answered before the preview
+    // screen mounts and its loading state is never seen.
+    void loadCatalogue();
   }, []);
 
   useEffect(() => {

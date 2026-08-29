@@ -6,7 +6,13 @@ import {
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { buildCreditsDeps, buildSyncDeps, buildTryOnDeps } from '../../composition';
-import { OutOfCreditsError, PhotoRejectedError, RendererUnavailableError } from '../../core/errors';
+import {
+  OutOfCreditsError,
+  PhotoRejectedError,
+  RendererUnavailableError,
+  UnknownStyleError,
+} from '../../core/errors';
+import { readCatalogue } from '../r2/catalogue';
 import { getCredits } from '../../core/get-credits';
 import { syncPurchases } from '../../core/sync-purchases';
 import { tryOn } from '../../core/try-on';
@@ -39,6 +45,7 @@ function fail(code: ApiErrorCode, message: string) {
 
 /** Domain error to wire error. Anything unrecognised is ours, and is a 500. */
 function translate(err: unknown): Response {
+  if (err instanceof UnknownStyleError) return fail('bad_request', err.message);
   if (err instanceof OutOfCreditsError) return fail('out_of_credits', err.message);
   if (err instanceof PhotoRejectedError) return fail('photo_rejected', err.message);
   if (err instanceof RendererUnavailableError) return fail('renderer_unavailable', err.message);
@@ -61,6 +68,37 @@ export function createApp() {
   // Unversioned on purpose: it is for uptime checks, not for the app, and it
   // must keep answering across every future /v2.
   app.get('/health', (c) => c.json({ ok: true }));
+
+  /**
+   * The published catalogue.
+   *
+   * Unmetered, and the one route with no device id. It is the same answer for
+   * everybody, it costs a bucket read rather than a model call, and the app
+   * needs it before onboarding has minted an identity — a credit check here
+   * would gate the catalogue behind the thing the catalogue is used to sell.
+   *
+   * A day of cache and an etag, so the edge absorbs the load and a client that
+   * already has the current manifest pays 304 bytes for the check. The app
+   * keeps its own 24h copy on top of this; both windows are the same number by
+   * agreement, not by accident.
+   */
+  app.get('/v1/catalogue', async (c) => {
+    const { catalogue, etag } = await readCatalogue(c.env.ASSETS);
+
+    if (etag && c.req.header('If-None-Match') === etag) {
+      return new Response(null, {
+        status: 304,
+        headers: { 'Cache-Control': 'public, max-age=86400', ETag: etag },
+      });
+    }
+
+    return Response.json(catalogue, {
+      headers: {
+        'Cache-Control': 'public, max-age=86400',
+        ...(etag ? { ETag: etag } : {}),
+      },
+    });
+  });
 
   app.get('/v1/credits', async (c) => {
     const deviceId = deviceIdFrom(c);

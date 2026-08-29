@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { renderCacheKey } from '../src/core/cache-key';
-import { OutOfCreditsError, RendererUnavailableError } from '../src/core/errors';
+import {
+  OutOfCreditsError,
+  RendererUnavailableError,
+  UnknownStyleError,
+} from '../src/core/errors';
 import { tryOn } from '../src/core/try-on';
 import { FIXED_NOW, fakeCache, fakeEntitlements, fakeLedger, fakeRenderer, fixedClock } from './fakes';
 
@@ -173,9 +177,23 @@ describe('tryOn', () => {
     expect(cache.store.size).toBe(0);
   });
 
-  it('throws on a style the catalogue does not have', async () => {
+  it('throws on a style the catalogue does not have, before spending anything', async () => {
+    // Reachable now that the wire no longer enumerates the ids: an old client
+    // can hold a manifest naming a cut that has since been withdrawn. It is the
+    // client naming something that does not exist, so it is a 400 — and the
+    // ledger must not have been touched on the way to finding that out.
+    const { deps: d, ledger } = deps();
+    await expect(
+      tryOn({ ...COMMAND, styleId: 'not-a-real-style' }, d),
+    ).rejects.toThrow(UnknownStyleError);
+    expect(ledger.writes).toEqual([]);
+  });
+
+  it('throws on a colour the catalogue does not have', async () => {
     const { deps: d } = deps();
-    await expect(tryOn({ ...COMMAND, styleId: 'mullet' }, d)).rejects.toThrow(/unknown style/);
+    await expect(
+      tryOn({ ...COMMAND, colorId: 'not-a-real-colour' }, d),
+    ).rejects.toThrow(UnknownStyleError);
   });
 
   it('uses the clock it was given', async () => {

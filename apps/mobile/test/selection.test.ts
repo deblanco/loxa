@@ -1,27 +1,34 @@
 import { describe, expect, it } from 'vitest';
 import {
-  INITIAL_SELECTION,
+  initialSelection,
   needsCamera,
   primaryAction,
   primaryActionLabel,
   withSource,
 } from '../src/selection';
 
+/**
+ * The defaults now arrive with the served catalogue, so the fixture names them
+ * rather than borrowing whichever ids happen to ship — which also removes this
+ * suite's silent dependency on the catalogue's contents.
+ */
+const BASE = initialSelection({ styleId: 'blunt-bob', colorId: 'caramel' });
+
 describe('primaryActionLabel', () => {
   it('is Try On for a saved photo', () => {
-    expect(primaryActionLabel(INITIAL_SELECTION)).toBe('Try On');
+    expect(primaryActionLabel(BASE)).toBe('Try On');
   });
 
   it('becomes a camera button when a new photo is wanted and none has been taken', () => {
     // The button must say what it will do. A control that silently opens the
     // camera when it is labelled Try On is how a user spends a credit by
     // accident — or fails to, and thinks the app is broken.
-    const selection = withSource(INITIAL_SELECTION, 'new');
+    const selection = withSource(BASE, 'new');
     expect(primaryActionLabel(selection)).toBe('Take photo & try on');
   });
 
   it('goes back to Try On once a shot exists', () => {
-    const selection = { ...withSource(INITIAL_SELECTION, 'new'), hasFreshShot: true };
+    const selection = { ...withSource(BASE, 'new'), hasFreshShot: true };
     expect(primaryActionLabel(selection)).toBe('Try On');
     expect(needsCamera(selection)).toBe(false);
   });
@@ -31,17 +38,17 @@ describe('withSource', () => {
   it('drops the fresh shot when switching back to the saved photo', () => {
     // Keeping it would make a later switch to `new` skip the camera and
     // silently reuse a photo the user has moved on from.
-    const taken = { ...withSource(INITIAL_SELECTION, 'new'), hasFreshShot: true };
+    const taken = { ...withSource(BASE, 'new'), hasFreshShot: true };
     expect(withSource(taken, 'saved').hasFreshShot).toBe(false);
   });
 
   it('keeps the fresh shot when re-selecting the new photo', () => {
-    const taken = { ...withSource(INITIAL_SELECTION, 'new'), hasFreshShot: true };
+    const taken = { ...withSource(BASE, 'new'), hasFreshShot: true };
     expect(withSource(taken, 'new').hasFreshShot).toBe(true);
   });
 
   it('leaves the style and colour alone', () => {
-    const chosen = { ...INITIAL_SELECTION, styleId: 'pixie', colorId: 'copper' };
+    const chosen = { ...BASE, styleId: 'pixie', colorId: 'copper' };
     expect(withSource(chosen, 'new')).toEqual(
       expect.objectContaining({ styleId: 'pixie', colorId: 'copper' }),
     );
@@ -49,7 +56,7 @@ describe('withSource', () => {
 });
 
 describe('primaryAction', () => {
-  const withPhoto = { ...INITIAL_SELECTION, hasPhoto: true };
+  const withPhoto = { ...BASE, hasPhoto: true };
 
   it('sends someone at zero straight to the paywall', () => {
     // Not a duplicate of the Worker's check — that one is the authority and
@@ -61,7 +68,7 @@ describe('primaryAction', () => {
   it('offers the paywall before the camera', () => {
     // Sending someone to photograph themselves for a render they cannot afford
     // is worse than showing the price first.
-    const needsShot = { ...withSource(INITIAL_SELECTION, 'new'), hasPhoto: false };
+    const needsShot = { ...withSource(BASE, 'new'), hasPhoto: false };
     expect(primaryAction(needsShot, 0)).toBe('paywall');
   });
 
@@ -72,11 +79,11 @@ describe('primaryAction', () => {
   });
 
   it('opens the camera when a new photo is wanted and none taken', () => {
-    expect(primaryAction(withSource(INITIAL_SELECTION, 'new'), 5)).toBe('camera');
+    expect(primaryAction(withSource(BASE, 'new'), 5)).toBe('camera');
   });
 
   it('asks for a photo when there is none', () => {
-    expect(primaryAction(INITIAL_SELECTION, 5)).toBe('pick-photo');
+    expect(primaryAction(BASE, 5)).toBe('pick-photo');
   });
 
   it('generates when there is a photo and a credit', () => {

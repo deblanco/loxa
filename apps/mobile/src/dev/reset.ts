@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Directory, Paths } from 'expo-file-system';
 import * as SecureStore from 'expo-secure-store';
 import { resetDeviceIdCache } from '@/api/device-id';
+import { clearCatalogueCache } from '@/store/catalogue';
 import { clearDevPremiumCache } from '@/dev/premium';
 import { disableDaily } from '@/notifications';
 
@@ -22,6 +23,12 @@ import { disableDaily } from '@/notifications';
 const KEYS = [
   'loxa.onboarded',
   'loxa.dev.premium.v1',
+  /**
+   * The cached catalogue. An install that "starts fresh" but keeps a day-old
+   * manifest is not fresh, and this is the only way to reach the first-launch
+   * empty state on purpose.
+   */
+  'loxa.catalogue.v1',
   /**
    * The AsyncStorage mirror of the device id. The keychain copy below is the
    * real one; this exists so a keychain that refuses to write does not mint a
@@ -63,4 +70,5 @@ export async function resetAppState(): Promise<void> {
   // keeps sending the identity it just erased.
   resetDeviceIdCache();
   clearDevPremiumCache();
+  clearCatalogueCache();
 }

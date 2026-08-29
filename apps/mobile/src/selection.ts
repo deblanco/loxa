@@ -1,5 +1,3 @@
-import { DEFAULT_COLOR_ID, DEFAULT_STYLE_ID } from '@loxa/shared';
-
 /**
  * What the preview screen is currently showing, as plain data.
  *
@@ -21,13 +19,23 @@ export interface Selection {
   hasPhoto: boolean;
 }
 
-export const INITIAL_SELECTION: Selection = {
-  styleId: DEFAULT_STYLE_ID,
-  colorId: DEFAULT_COLOR_ID,
-  source: 'saved',
-  hasFreshShot: false,
-  hasPhoto: false,
-};
+/**
+ * A fresh selection, opened on whatever the catalogue says to open on.
+ *
+ * The defaults used to be constants compiled into the app. They now arrive with
+ * the manifest, because the catalogue is served and the style it opens on has
+ * to be one that is actually published — a default that was withdrawn is a
+ * screen naming a cut it cannot draw.
+ */
+export function initialSelection(defaults: { styleId: string; colorId: string }): Selection {
+  return {
+    styleId: defaults.styleId,
+    colorId: defaults.colorId,
+    source: 'saved',
+    hasFreshShot: false,
+    hasPhoto: false,
+  };
+}
 
 /**
  * What the primary button says, which is also what it does.

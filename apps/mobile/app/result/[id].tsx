@@ -1,4 +1,3 @@
-import { findColor, findStyle } from '@loxa/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -11,6 +10,7 @@ import { Pill } from '@/components/Pill';
 import { Body, Display, Meta } from '@/components/Text';
 import { Toast } from '@/components/Toast';
 import { useCredits } from '@/store/credits';
+import { humaniseId } from '@/store/look-record';
 import { readLook, type Look } from '@/store/results';
 import { color, radius, space } from '@/theme';
 
@@ -57,8 +57,11 @@ export default function Result() {
     await Sharing.shareAsync(look.uri, { mimeType: 'image/jpeg' });
   }
 
-  const styleName = look ? (findStyle(look.styleId)?.name ?? '') : '';
-  const colorName = look ? (findColor(look.colorId)?.name ?? '') : '';
+  // Read off the record, never off the catalogue. This screen shows a picture
+  // that already exists, and it must render with no network and no manifest —
+  // including for a cut the catalogue has since stopped publishing.
+  const styleName = look ? (look.styleName ?? humaniseId(look.styleId)) : '';
+  const colorName = look ? (look.colorName ?? humaniseId(look.colorId)) : '';
 
   return (
     <View style={styles.screen}>

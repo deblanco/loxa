@@ -37,8 +37,9 @@ Deploys are per-workspace, never from the root:
 
 ## Non-negotiables
 
-1. **AI keys never ship in the app.** `GOOGLE_SA_KEY` is a Worker secret, and
-   `.dev.vars` locally. The app talks only to our Worker.
+1. **AI keys never ship in the app.** `GOOGLE_SA_KEY` and `OPENROUTER_API_KEY`
+   are Worker secrets, and `.dev.vars` locally. The app talks only to our
+   Worker.
 2. **Credits are spent server-side, before the model call.** `spendCredit` runs
    first in `core/try-on.ts`, and refunds on any throw. A client that asks nicely
    for a free render gets a 402.
@@ -60,6 +61,90 @@ there are two hand-maintained mirrors:
 
 **A token change updates the CSS and both mirrors in the same commit.**
 
+## Catalogue art
+
+The style strip and the preview plate show generated photographs, not stock.
+They are rendered once, offline, by `tools/generate-previews` — 24 cuts x 10
+colours x 2 models — and served from the `loxa-assets` R2 bucket at
+**`https://loxa-assets.blankhexadecimal.com`** (`EXPO_PUBLIC_ASSETS_URL`).
+
+- **The catalogue is data, served from the bucket, not compiled into the app.**
+  `catalogue.json` lists the cuts and colours that have actually been rendered,
+  with their preview keys; the Worker serves it at `GET /v1/catalogue` and the
+  app caches it for 24h. Publishing a newly-rendered style is an upload, not an
+  App Store release. A style whose art does not exist is simply not in the
+  manifest, which is how the strip stops offering cuts it cannot show.
+- **`packages/shared/src/previews.ts` is the *generator's* key source, not the
+  app's.** Nothing in `apps/mobile` imports it: the app asks for the keys the
+  manifest hands it, which is what lets a style carry nine colours instead of
+  ten without the app guessing and getting a 404.
+- **Prompts never cross the wire.** The manifest carries ids, names, hex and
+  keys. `HairStyle.prompt` and `HairColor.prompt` stay in `services/api`, so
+  `HAIR_STYLES` remains the authoritative superset and the manifest is a
+  published-subset projection of it. A *new* cut therefore still needs a Worker
+  deploy for its prompt — but never an app release.
+- Objects are immutable: a key is written once and cached for a year. To change
+  a picture, change the key. **`catalogue.json` is the one exception** — it is
+  overwritten on purpose, which is the whole feature, so it is uploaded with
+  `max-age=60` and the Worker serves it with an etag and a day of cache on top.
+  Because clients hold it for 24h, withdrawing a style means *stop listing it*,
+  never *delete its objects*: deleting shows broken art to everyone still
+  holding the old manifest.
+- **A missing or malformed `catalogue.json` is a supported state.** The Worker
+  falls back to the catalogue it shipped with rather than 500ing, so a fresh
+  deploy against an empty bucket still answers and a bad upload degrades
+  instead of breaking.
+- `EXPO_PUBLIC_ASSETS_URL` unset is a supported state — the app falls back to
+  the hatched placeholder rather than to broken images. It must be set in all
+  four `apps/mobile/eas.json` profiles or every build ships a hatch-only
+  catalogue.
+- The bucket's `r2.dev` URL is deliberately **disabled**. One public endpoint,
+  and it is the custom domain.
+
+**The Vertex image quota is 2 requests/minute per base model**, so a full run
+takes about eight hours unless it is raised. Concurrency does not help, and
+neither does another model or another region — these models are `global` only.
+The generator is resumable and never re-bills work already on disk.
+`tools/generate-previews/manifest.ts` builds `catalogue.json` from the files
+that exist on disk, and `upload.sh` pushes it **after** the images — a manifest
+uploaded first advertises keys that are not in the bucket yet.
+
+## The image model, and its fallback
+
+Vertex is the primary and OpenRouter is the fallback, and both call the same
+model — `gemini-3.1-flash-lite-image`, spelled `google/gemini-3.1-flash-lite-image`
+on OpenRouter. A different model would return a stranger's face with the right
+haircut, which is the one thing this app must not do.
+
+The reason there are two is the quota: about one image a minute, project-wide,
+and the model is published on `global` only, so there is no region to escape to
+and concurrency does not help. OpenRouter serves it from its own Google AI
+Studio and Vertex accounts, neither of which is `loxa-506814`. It bills $30 per
+million image-output tokens — 1120 of them per image, $0.034 — so a render that
+falls back costs what it would have cost anyway.
+
+- **Only a transient failure falls through**: 429, 5xx, or a host that could not
+  be reached. That is what `RendererUnavailableError.transient` means, and
+  `adapters/fallback-renderer.ts` is the only thing that reads it.
+- **A rejected photo never falls through.** A safety block is a verdict on the
+  user's photograph; the same model elsewhere returns the same verdict, one
+  billed call later. Neither does a 400 or a bad key — retrying our own broken
+  request buys a second bill and hides the fault.
+- **The second call happens inside the port**, so `core/try-on.ts` refunds the
+  credit only when both providers have failed and the ledger never learns there
+  were two. A fallback in core would mean spending twice.
+- **`OPENROUTER_API_KEY` unset is a supported state** — one provider, and the
+  behaviour the Worker had before there were two. Unlike the RevenueCat stub, a
+  missing key here costs availability, not correctness.
+- `OPENROUTER_IMAGE_MODEL` is written out rather than derived from `IMAGE_MODEL`
+  by prefixing `google/`. The two catalogues are not obliged to stay in step,
+  and a drifted slug is a 404 on the one path nobody exercises until it is
+  needed.
+
+`tools/generate-previews` is deliberately **not** covered by this. It is run by
+hand, it already has its own quota-aware retry, and an eight-hour run is not the
+thing a user is waiting on.
+
 ## Backend architecture — hexagonal
 
 `services/api` is ports and adapters. Dependencies point inwards, always.
@@ -67,7 +152,7 @@ there are two hand-maintained mirrors:
 ```
 src/core/         product rules. No Hono, no D1, no KV, no fetch.
 src/ports/        the interfaces core calls out through.
-src/adapters/     the implementations. http/ d1/ kv/ vertex/ entitlements/
+src/adapters/     the implementations. http/ d1/ kv/ vertex/ openrouter/ entitlements/
 src/composition.ts  the only file that knows about both sides.
 src/index.ts      three lines.
 ```
@@ -77,6 +162,9 @@ Placement rules:
   in the wrong place.
 - HTTP status codes belong only in `adapters/http`. Core throws domain errors.
 - A new metered route gets a credit check and a cache key, or it does not merge.
+- `GET /v1/catalogue` is the one route with neither, deliberately: it costs a
+  bucket read rather than a model call, it is the same answer for everybody, and
+  the app needs it before onboarding has minted a device id.
 
 ## Testing
 

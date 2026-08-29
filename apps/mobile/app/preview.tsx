@@ -1,8 +1,9 @@
-import { findColor, findStyle } from '@loxa/shared';
+import type { CatalogueResponse } from '@loxa/shared';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { assetUrl } from '@/api/assets';
 import { ColorStrip } from '@/components/ColorStrip';
 import { CreditChip } from '@/components/CreditChip';
 import { PhotoPlate } from '@/components/PhotoPlate';
@@ -10,8 +11,12 @@ import { Pill } from '@/components/Pill';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { StyleStrip } from '@/components/StyleStrip';
 import { Body, Meta } from '@/components/Text';
+import { Wordmark } from '@/components/Wordmark';
+import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary } from '@/photo';
-import { INITIAL_SELECTION, primaryAction, primaryActionLabel, withSource } from '@/selection';
+import { clampSelection, colorsFor, findColor, findStyle, heroKeys } from '@/catalogue';
+import { initialSelection, primaryAction, primaryActionLabel, withSource } from '@/selection';
+import { useCatalogue } from '@/store/catalogue';
 import { useCredits } from '@/store/credits';
 import { color, radius, space } from '@/theme';
 
@@ -23,10 +28,74 @@ import { color, radius, space } from '@/theme';
  * and the inputs of that button legible before it is pressed.
  */
 export default function Preview() {
+  const { status, catalogue, reload } = useCatalogue();
+
+  // The catalogue decides what the strips hold and what the screen opens on, so
+  // there is no honest version of this screen without one. Splitting the gate
+  // from the body is what keeps `Selection` non-nullable: every control below
+  // can assume a style and a colour that exist, rather than carrying a `| null`
+  // through the badge, both strips and the button for a moment in which none of
+  // them are on screen.
+  if (status === 'ready') return <PreviewReady catalogue={catalogue} />;
+  return <PreviewPlaceholder offline={status === 'unavailable'} onRetry={reload} />;
+}
+
+/**
+ * The screen before the catalogue arrives, and if it never does.
+ *
+ * Built out of the same plate, pill and captions as the real thing rather than
+ * out of a spinner: the app owns no `ActivityIndicator`, and its only waiting
+ * object is the progress bar, which is for a render of known length. The
+ * hatched plate already means "a picture goes here", which is exactly true.
+ *
+ * The controls stay in place, disabled, so nothing reflows when the catalogue
+ * lands. The strips are omitted — an empty strip header over nothing reads as
+ * a broken screen, where no strip reads as one still loading.
+ */
+function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: () => void }) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View style={[styles.screen, { paddingTop: insets.top + space.s4 }]}>
+      <View style={styles.header}>
+        <Wordmark variant="wordmarkSmall" />
+      </View>
+
+      <View style={styles.plateWrap}>
+        <PhotoPlate
+          label={offline ? 'the catalogue is not available' : undefined}
+          style={styles.plate}
+        />
+      </View>
+
+      <View style={styles.controls}>
+        {offline ? (
+          <>
+            <Pill label="Try again" onPress={onRetry} />
+            <Meta variant="note" tone="ink45" sentence style={styles.centred}>
+              loxa needs a connection the first time
+            </Meta>
+          </>
+        ) : (
+          <Pill label="Try On" hint="1 credit" disabled onPress={() => {}} />
+        )}
+      </View>
+    </View>
+  );
+}
+
+function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
-  const [selection, setSelection] = useState(INITIAL_SELECTION);
+  const [selection, setSelection] = useState(() => initialSelection(catalogue.defaults));
   const [photo, setPhoto] = useState<{ base64: string; uri: string } | null>(null);
+  // Why the last photo they chose was turned away, if it was. Cleared by the
+  // next one that isn't — including the one the camera hands back.
+  const [rejected, setRejected] = useState<FaceVerdict | null>(null);
+  // The plate is a pager, and a pager needs to know how wide one page is. Zero
+  // until the first layout, which is why the plain plate renders until then.
+  const [plateWidth, setPlateWidth] = useState(0);
+  const [page, setPage] = useState(0);
 
   // The camera hands the shot back through the router rather than through a
   // store: it is one value, used once, on the way back to exactly this screen.
@@ -34,17 +103,48 @@ export default function Preview() {
   useEffect(() => {
     if (params.photoUri && params.photoBase64) {
       setPhoto({ uri: params.photoUri, base64: params.photoBase64 });
+      setRejected(null);
       setSelection((current) => ({ ...current, source: 'new', hasFreshShot: true, hasPhoto: true }));
     }
   }, [params.photoUri, params.photoBase64]);
 
-  const style = findStyle(selection.styleId);
-  const colorName = findColor(selection.colorId)?.name ?? '';
+  // A refresh in the background can withdraw the cut being looked at, and
+  // choosing a style never rendered in the current colour is the same problem
+  // from the other side. Both would leave a named look over an empty plate.
+  useEffect(() => {
+    setSelection((current) => clampSelection(current, catalogue));
+  }, [catalogue]);
+
+  const style = findStyle(catalogue, selection.styleId);
+  const colorName = findColor(catalogue, selection.colorId)?.name ?? '';
+
+  /**
+   * The user's own face first, then the models wearing the same cut and colour.
+   *
+   * Theirs leads because it is the point of the app — the models are there to
+   * show what the cut looks like before they have committed a photo to it, and
+   * to stop the plate being an empty rectangle on a first run. With no photo and
+   * no asset host configured this is empty, and the plate falls back to the
+   * labelled placeholder it has always drawn.
+   */
+  const pages = [
+    ...(photo ? [{ key: 'photo', uri: photo.uri }] : []),
+    ...heroKeys(catalogue, selection.styleId, selection.colorId)
+      .map((key) => ({ key: `model-${key}`, uri: assetUrl(key) }))
+      .filter((model): model is { key: string; uri: string } => model.uri !== undefined),
+  ];
 
   const choosePhoto = useCallback(async () => {
     const picked = await pickFromLibrary();
     if (!picked) return;
-    setPhoto(picked);
+    if (!picked.ok) {
+      // The photo they already had, if any, stays. Losing a good photo because
+      // the next one had nobody in it would be the worse of the two failures.
+      setRejected(picked.reason);
+      return;
+    }
+    setRejected(null);
+    setPhoto(picked.photo);
     setSelection((current) => ({ ...current, hasPhoto: true }));
   }, []);
 
@@ -74,7 +174,17 @@ export default function Preview() {
         if (!photo) return;
         router.push({
           pathname: '/generating',
-          params: { base64: photo.base64, styleId: selection.styleId, colorId: selection.colorId },
+          params: {
+            base64: photo.base64,
+            styleId: selection.styleId,
+            colorId: selection.colorId,
+            // The names travel with the render rather than being looked up
+            // again downstream. A look outlives the manifest that described it,
+            // and a saved picture must not lose its caption because a cut was
+            // withdrawn months later.
+            styleName: style?.name ?? selection.styleId,
+            colorName,
+          },
         });
     }
   }
@@ -82,9 +192,7 @@ export default function Preview() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top + space.s4 }]}>
       <View style={styles.header}>
-        <Meta variant="wordmarkSmall" tone="ink">
-          Loxa
-        </Meta>
+        <Wordmark variant="wordmarkSmall" />
         <View style={styles.headerRight}>
           <CreditChip credits={credits?.creditsLeft ?? 0} onPress={() => router.push('/profile')} />
           <Pressable
@@ -96,19 +204,65 @@ export default function Preview() {
         </View>
       </View>
 
-      <Pressable style={styles.plateWrap} onPress={choosePhoto}>
-        <PhotoPlate
-          uri={photo?.uri}
-          label={photo ? undefined : 'tap to choose a photo'}
-          style={styles.plate}
-        >
-          <View style={styles.badge}>
-            <Body variant="tile" weight="medium">
-              {style?.name} · {colorName}
-            </Body>
+      <View style={styles.plateWrap} onLayout={(e) => setPlateWidth(e.nativeEvent.layout.width)}>
+        {pages.length > 0 && plateWidth > 0 ? (
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={(e) =>
+              setPage(Math.round(e.nativeEvent.contentOffset.x / plateWidth))
+            }
+            style={styles.pager}
+          >
+            {pages.map((item) => (
+              <Pressable key={item.key} onPress={choosePhoto} style={{ width: plateWidth }}>
+                <PhotoPlate uri={item.uri} style={styles.plate} />
+              </Pressable>
+            ))}
+          </ScrollView>
+        ) : (
+          <Pressable onPress={choosePhoto} style={styles.plate}>
+            <PhotoPlate
+              uri={photo?.uri}
+              label={photo ? undefined : rejected ? verdictLine(rejected) : 'tap to choose a photo'}
+              style={styles.plate}
+            />
+          </Pressable>
+        )}
+
+        <View style={styles.badge} pointerEvents="none">
+          <Body variant="tile" weight="medium">
+            {style?.name} · {colorName}
+          </Body>
+        </View>
+
+        {pages.length > 1 ? (
+          <>
+            <View style={styles.dots} pointerEvents="none">
+              {pages.map((item, index) => (
+                <View
+                  key={item.key}
+                  style={[styles.dot, index === page ? styles.dotOn : styles.dotOff]}
+                />
+              ))}
+            </View>
+            <View style={styles.hint} pointerEvents="none">
+              <Meta variant="note" tone="ink40">
+                swipe for models
+              </Meta>
+            </View>
+          </>
+        ) : null}
+
+        {rejected && photo ? (
+          <View style={styles.rejected} pointerEvents="none">
+            <Meta variant="note" tone="ink" sentence>
+              {verdictLine(rejected)}
+            </Meta>
           </View>
-        </PhotoPlate>
-      </Pressable>
+        ) : null}
+      </View>
 
       <View style={styles.controls}>
         <SegmentedControl
@@ -129,10 +283,12 @@ export default function Preview() {
         showsVerticalScrollIndicator={false}
       >
         <StyleStrip
+          catalogue={catalogue}
           selectedId={selection.styleId}
           onSelect={(styleId) => setSelection((current) => ({ ...current, styleId }))}
         />
         <ColorStrip
+          colors={colorsFor(catalogue, selection.styleId)}
           selectedId={selection.colorId}
           onSelect={(colorId) => setSelection((current) => ({ ...current, colorId }))}
         />
@@ -160,7 +316,35 @@ const styles = StyleSheet.create({
     borderColor: color.ink12,
   },
   plateWrap: { flex: 1, marginHorizontal: space.gutterScreen },
+  // Over the photo they kept, because the plate's own label only shows when
+  // there is no photo under it. Wearing the badge's plate for the same reason
+  // the badge does: this text has a photograph behind it.
+  rejected: {
+    position: 'absolute',
+    bottom: space.s3,
+    alignSelf: 'center',
+    height: 26,
+    paddingHorizontal: 11,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(250,248,245,0.9)',
+    justifyContent: 'center',
+  },
   plate: { flex: 1 },
+  pager: { flex: 1, borderRadius: radius.plate },
+  // Sits above the hint, which sits above the home indicator's clearance.
+  dots: {
+    position: 'absolute',
+    bottom: space.s3,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: space.s1 + 2,
+  },
+  dot: { height: 4, borderRadius: radius.pill },
+  dotOn: { width: 12, backgroundColor: color.ink40 },
+  dotOff: { width: 4, backgroundColor: color.ink18 },
+  hint: { position: 'absolute', bottom: 26, left: 0, right: 0, alignItems: 'center' },
   badge: {
     position: 'absolute',
     top: space.s3,
@@ -176,6 +360,7 @@ const styles = StyleSheet.create({
     paddingTop: space.s3 + 2,
     gap: 11,
   },
+  centred: { textAlign: 'center' },
   strips: { flexGrow: 0, marginTop: space.gutterText },
   stripsContent: { gap: space.s5 },
 });
