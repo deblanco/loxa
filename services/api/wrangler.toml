@@ -11,7 +11,7 @@ database_name = "loxa"
 # Local dev ignores this and makes its own SQLite file, so it only blocks a
 # deploy. Not shared with WhiskerMind under any circumstances: one ledger for
 # two apps means one app's credits paying for the other's renders.
-database_id = "TODO-run-wrangler-d1-create-loxa"
+database_id = "ffdfda67-385e-456e-a377-307e8e85b2da"
 
 # --- Render cache -----------------------------------------------------------
 # Keyed on a hash of the photo, the style and the colour, so a retry of the
@@ -20,7 +20,7 @@ database_id = "TODO-run-wrangler-d1-create-loxa"
 # Fill in `id` after `wrangler kv namespace create RESULTS_CACHE`.
 [[kv_namespaces]]
 binding = "RESULTS_CACHE"
-id = "TODO-run-wrangler-kv-namespace-create-RESULTS_CACHE"
+id = "2765fb39e7924fcf9c3fe8f93be03edc"   # loxa-results-cache. WhiskerMind has its own; they must never share one.
 
 # --- Style thumbnails -------------------------------------------------------
 # Served rather than bundled, so the catalogue can grow by uploading files
