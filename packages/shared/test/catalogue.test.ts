@@ -38,7 +38,7 @@ describe('the catalogue', () => {
   });
 
   it('returns undefined for something that is not in it', () => {
-    expect(findStyle('mullet')).toBeUndefined();
+    expect(findStyle('not-a-real-style')).toBeUndefined();
     expect(findColor('chartreuse')).toBeUndefined();
   });
 });
