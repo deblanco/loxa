@@ -21,6 +21,9 @@ two hand-maintained mirrors:
 **A token change updates `tokens/*.css` and both mirrors in the same commit.**
 A colour that exists in only one of the three is a bug in the other two.
 
+`logo/` holds the mark and the same rule applies to it — its copies, including
+the app icon and the favicon, are listed in `logo/README.md`.
+
 ## Fundamentals
 
 **Colour.** Paper `#faf8f5` and ink `#0d0c0b`. That is the palette. There is no
@@ -48,6 +51,12 @@ square. Every un-shot image wears the diagonal hatch from `--hatch-light` /
 `--hatch-dark`, so an empty state reads as *a picture goes here* rather than as
 a failure.
 
+The style strip and the preview plate now show generated photographs, and they
+are shot on `--placeholder` — the same fill the hatch sits on. A tile that has
+loaded and a tile that has not therefore share a ground, so the strip settles
+instead of flashing, and a build with no asset host falls back to the hatch
+rather than to broken images.
+
 **Depth.** One shadow, `--shadow-control`, and it only ever goes under a black
 control sitting on paper — otherwise the black pill looks printed on. Surfaces
 do not stack with shadow; they separate with a hairline border and a warmer fill.
@@ -58,6 +67,10 @@ loops — the entry carousel's crossfade, the trial screen's drifting masonry, t
 generating plate's shimmer, and the camera's landmark sweep — are the only
 things on screen that move without being touched.
 
+Still four. Each cut is photographed on two models, and the strip picks which of
+the two it shows when it mounts — so the catalogue looks different between
+sessions without a fifth loop running under twenty-four tiles at once.
+
 ## Layout constants
 
 Screen gutter is 16px and text inside a card is inset to 18–20px: text always
@@ -65,8 +78,15 @@ sits further in than the plate it is on. Every screen starts 60px from the top
 (clear of the status bar) and ends 34px from the bottom (clear of the home
 indicator).
 
-The generated image is **2:3**, `1024 × 1536`. That ratio is in the Vertex
-adapter, in the preview plate, and in the result screen, and they have to agree.
+The generated image is **9:16**, `1080 × 1920`. That ratio is in the Vertex
+adapter, in the preview plate, and in the result screen, and they have to agree. The
+catalogue previews are generated at the same size, for the same reason.
+
+The preview plate is a pager: the user's own photograph first, then the models
+wearing the selected cut and colour. It carries the dots and the `swipe for
+models` hint. It does not carry the prototype's prev/next arrows — those exist
+so the prototype can be clicked through in a browser, and a thumb on a phone
+already has the gesture.
 
 ## Voice
 
@@ -78,10 +98,26 @@ costs something is before they buy it.
 Never promise a haircut will suit them. The app shows what a style looks like on
 their face; the judgement stays theirs.
 
+**When a photo is turned away**, the line replaces the viewfinder hint it sits
+in — same place, same shape, one lowercase clause and then what to do about it.
+It says what is wrong with the photo, never what is wrong with the person.
+
+| Reason | Line |
+|---|---|
+| No face found | `no face in that one · try again` |
+| More than one face | `more than one face · one at a time` |
+| Too small or too soft | `too small or too soft · try a closer photo` |
+
+The check runs on the device, on the photo, before the render is paid for — the
+alternative is a spent credit, a refund, and a progress bar that ends in
+nothing. On the main screen the same line goes on the plate: as its label when
+there is no photo, and on the badge's plate over one there is.
+
 ## Known gaps
 
-- Real footage for the entry carousel and real thumbnails for the style strip.
-  Everything ships as a labelled placeholder until then.
-- A style taxonomy (length / texture / bang) so the strip can filter. The header
-  already says "All 24"; there is nothing behind it yet.
+- Real footage for the entry carousel. The three clips on the entry screen are
+  still labelled placeholders.
+- A style taxonomy (length / texture / bang) so the strip can filter. The
+  catalogue is 24 cuts now, which is what the header always claimed, but there
+  is still nothing to filter it by.
 - A gallery of past generations on the profile. Local-only in v1.

@@ -23,6 +23,11 @@ const sans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
+  // The share card lives at `app/opengraph-image.png`, and Next turns that file
+  // into an absolute URL — which it can only do against a base. Without this it
+  // falls back to localhost, and every shared link points at the sharer's own
+  // machine. This Worker answers on one hostname; it is that one.
+  metadataBase: new URL("https://loxa.blankhexadecimal.com"),
   title: "Loxa — try on any hair before the scissors",
   description:
     "Pick a cut and a colour and see it on your own face in seconds. An iOS app.",

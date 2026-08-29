@@ -1,6 +1,6 @@
 import { HAIR_COLORS, HAIR_STYLES, WEEKLY_CREDITS } from "@loxa/shared";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import Home from "../app/page";
 import PrivacyPolicy from "../app/privacy-policy/page";
 import Terms from "../app/terms/page";
@@ -30,6 +30,26 @@ describe("the landing page", () => {
   it("prints the price and what it buys, before any tap", () => {
     expect(html).toContain("$9.99");
     expect(html).toContain(`${WEEKLY_CREDITS} photos every week`);
+  });
+
+  it("asks for no catalogue art when the assets host is unset", () => {
+    // The supported empty state: the hatched placeholder, and no request that
+    // could 404 on a bucket that has not been filled in yet.
+    expect(html).not.toContain("tile-0.jpg");
+    expect(html).not.toContain("tile-1.jpg");
+  });
+
+  it("points every style tile at the bucket once the host is set", async () => {
+    vi.stubEnv("NEXT_PUBLIC_ASSETS_URL", "https://assets.example/");
+    vi.resetModules();
+    const { default: Page } = await import("../app/page");
+    const withArt = renderToStaticMarkup(<Page />);
+    vi.unstubAllEnvs();
+    vi.resetModules();
+
+    for (const style of HAIR_STYLES) {
+      expect(withArt).toContain(`https://assets.example/styles/${style.id}/tile-`);
+    }
   });
 
   it("links to both legal pages", () => {

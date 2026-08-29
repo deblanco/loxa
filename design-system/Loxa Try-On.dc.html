@@ -124,7 +124,7 @@
             </div>
 
             <div onPointerDown="{{ dragStart }}" onPointerUp="{{ dragEnd }}" style="flex:1;margin:0 16px;position:relative;border-radius:20px;overflow:hidden;background:#e7e1d8;background-image:repeating-linear-gradient(102deg,rgba(13,12,11,.07) 0 12px,transparent 12px 26px);cursor:grab">
-              <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font:400 10.5px/1.8 ui-monospace,monospace;letter-spacing:.08em;color:rgba(13,12,11,.42)">{{ modelLabel }}<br>1024 × 1536</div>
+              <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font:400 10.5px/1.8 ui-monospace,monospace;letter-spacing:.08em;color:rgba(13,12,11,.42)">{{ modelLabel }}<br>1080 × 1920</div>
               <div style="position:absolute;top:12px;left:12px;height:26px;padding:0 11px;border-radius:999px;background:rgba(250,248,245,.9);display:flex;align-items:center;font:500 11px/1 'Instrument Sans',system-ui;color:#0d0c0b">{{ styleName }} · {{ colorName }}</div>
               <div onClick="{{ prevModel }}" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:999px;background:rgba(250,248,245,.92);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 8px rgba(13,12,11,.1)" style-hover="background:#0d0c0b;color:#faf8f5">‹</div>
               <div onClick="{{ nextModel }}" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:999px;background:rgba(250,248,245,.92);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 8px rgba(13,12,11,.1)" style-hover="background:#0d0c0b;color:#faf8f5">›</div>
@@ -208,7 +208,7 @@
         <sc-if value="{{ sResult }}" hint-placeholder-val="{{ true }}">
           <div style="position:absolute;inset:0;background:#100e0d">
             <div style="position:absolute;inset:0;background:#1a1715;background-image:repeating-linear-gradient(102deg,rgba(255,255,255,.07) 0 12px,transparent 12px 26px)"></div>
-            <div style="position:absolute;left:0;right:0;top:46%;text-align:center;font:400 10.5px/1.8 ui-monospace,monospace;letter-spacing:.08em;color:rgba(255,255,255,.5)">{{ resultLabel }}<br>1024 × 1536</div>
+            <div style="position:absolute;left:0;right:0;top:46%;text-align:center;font:400 10.5px/1.8 ui-monospace,monospace;letter-spacing:.08em;color:rgba(255,255,255,.5)">{{ resultLabel }}<br>1080 × 1920</div>
             <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,14,13,.6) 0,rgba(16,14,13,0) 26%,rgba(16,14,13,.85) 74%,rgba(16,14,13,.97) 100%)"></div>
             <div style="position:absolute;top:60px;left:18px;right:18px;display:flex;align-items:center;justify-content:space-between">
               <div onClick="{{ goPreview }}" style="width:36px;height:36px;border-radius:999px;background:rgba(250,248,245,.16);color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer" style-hover="background:#faf8f5;color:#0d0c0b">‹</div>
@@ -409,7 +409,7 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;entry&quot;,&quot;trial&quot;,&quot;preview&quot;,&quot;gen&quot;,&quot;result&quot;,&quot;profile&quot;,&quot;camera&quot;],&quot;default&quot;:&quot;entry&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;startCredits&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:13,&quot;min&quot;:0,&quot;max&quot;:20,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;creditCap&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:60,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;weeklyPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$9.99/week&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;}}">
-const STYLES = ['Blunt bob','Long layers','Curtain bang','Pixie','Wolf cut','Beach waves','Sleek straight','Braids','Curly shag','Buzz'];
+const STYLES = ['Blunt bob','Long layers','Curtain bang','Pixie','Wolf cut','Beach waves','Sleek straight','Braids','Curly shag','Buzz','Long bob','French bob','Bixie','Blunt fringe','Waist length','Blowout','Seventies flick','Mullet','Afro','Locs','Bantu knots','High ponytail','Chignon','Half-up knot'];
 const COLORS = [
   ['Jet black','#14110f'],['Espresso','#3a2418'],['Chestnut','#6b4226'],['Caramel','#a46c3c'],
   ['Honey blonde','#c99a5c'],['Platinum','#e2d8c4'],['Ash grey','#9a958f'],['Copper','#b4592b'],
