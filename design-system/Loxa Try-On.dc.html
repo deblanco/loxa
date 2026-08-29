@@ -128,12 +128,11 @@
               <div style="position:absolute;top:12px;left:12px;height:26px;padding:0 11px;border-radius:999px;background:rgba(250,248,245,.9);display:flex;align-items:center;font:500 11px/1 'Instrument Sans',system-ui;color:#0d0c0b">{{ styleName }} · {{ colorName }}</div>
               <div onClick="{{ prevModel }}" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:999px;background:rgba(250,248,245,.92);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 8px rgba(13,12,11,.1)" style-hover="background:#0d0c0b;color:#faf8f5">‹</div>
               <div onClick="{{ nextModel }}" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:999px;background:rgba(250,248,245,.92);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 8px rgba(13,12,11,.1)" style-hover="background:#0d0c0b;color:#faf8f5">›</div>
-              <div style="position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:6px">
+              <div style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);height:18px;padding:0 9px;border-radius:999px;background:rgba(250,248,245,.5);display:flex;align-items:center;gap:6px">
                 <sc-for list="{{ models }}" as="m" hint-placeholder-count="4">
-                  <div onClick="{{ m.go }}" style="width:{{ m.w }};height:4px;border-radius:9px;background:{{ m.dot }};cursor:pointer;transition:all .35s ease"></div>
+                  <div onClick="{{ m.go }}" style="width:{{ m.w }};height:6px;border-radius:9px;background:{{ m.dot }};cursor:pointer;transition:all .35s ease"></div>
                 </sc-for>
               </div>
-              <div style="position:absolute;bottom:26px;left:0;right:0;text-align:center;font:400 9.5px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:rgba(13,12,11,.38)">swipe for models</div>
             </div>
 
             <div style="flex:none;padding:14px 16px 0;display:flex;flex-direction:column;gap:11px">
@@ -142,8 +141,8 @@
                   <div onClick="{{ src.go }}" style="flex:1;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;cursor:pointer;transition:all .2s ease;background:{{ src.bg }};color:{{ src.fg }}">{{ src.label }}</div>
                 </sc-for>
               </div>
-              <div onClick="{{ tryOn }}" style="height:56px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;gap:10px;font-size:16.5px;font-weight:500;cursor:pointer;box-shadow:0 10px 22px rgba(13,12,11,.16)" style-hover="opacity:.9">
-                {{ tryLabel }} <span style="font:400 11px/1 ui-monospace,monospace;opacity:.55">1 credit</span>
+              <div onClick="{{ tryOn }}" style="position:relative;height:56px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;gap:10px;font-size:16.5px;font-weight:500;cursor:pointer;box-shadow:0 10px 22px rgba(13,12,11,.16)" style-hover="opacity:.9">
+                {{ tryLabel }} <span style="position:absolute;right:20px;display:flex;align-items:center;gap:4px;font-size:12.5px;opacity:.5"><span style="font-size:23.4px;line-height:1">&#10022;</span>1</span>
               </div>
             </div>
 
@@ -518,8 +517,8 @@ class Component extends DCLogic {
         go: () => this.setState({ color: i })
       })),
       models: MODELS.map((m, i) => ({
-        dot: s.model === i ? '#0d0c0b' : 'rgba(13,12,11,.22)',
-        w: s.model === i ? '18px' : '5px',
+        dot: s.model === i ? '#0d0c0b' : 'rgba(13,12,11,.3)',
+        w: s.model === i ? '16px' : '6px',
         go: () => this.setState({ model: i })
       })),
       summary: [

@@ -41,8 +41,8 @@ describe('tryOn', () => {
 
     expect(result.imageBase64).toBe('RENDERED');
     expect(result.cached).toBe(false);
-    // 20 weekly + 1 free, minus the one just spent.
-    expect(result.creditsLeft).toBe(20);
+    // The weekly 20, minus the one just spent.
+    expect(result.creditsLeft).toBe(19);
     expect(renderer.calls).toHaveLength(1);
   });
 
@@ -85,11 +85,11 @@ describe('tryOn', () => {
     expect(ledger.state.weekUsed).toBe(0);
   });
 
-  it('refunds a bought credit as a bought credit, not a free one', async () => {
+  it('refunds a bought credit as a bought credit, not as an allowance', async () => {
     // The pool a credit came from is decided by the state before the take and
     // cannot be read back off the state after it, which is why the refund
     // writes the old row rather than reconstructing one.
-    const ledger = fakeLedger({ week: '2026-W35', freeUsed: 1, extraCredits: 1 });
+    const ledger = fakeLedger({ week: '2026-W35', extraCredits: 1 });
     const d = {
       ledger: ledger.port,
       cache: fakeCache().port,
@@ -99,13 +99,11 @@ describe('tryOn', () => {
     };
 
     await expect(tryOn(COMMAND, d)).rejects.toThrow();
-    expect(ledger.state).toEqual(
-      expect.objectContaining({ freeUsed: 1, extraCredits: 1 }),
-    );
+    expect(ledger.state).toEqual(expect.objectContaining({ weekUsed: 0, extraCredits: 1 }));
   });
 
   it('refuses when there is nothing to spend', async () => {
-    const ledger = fakeLedger({ week: '2026-W35', freeUsed: 1 });
+    const ledger = fakeLedger({ week: '2026-W35' });
     const renderer = fakeRenderer();
     const d = {
       ledger: ledger.port,
@@ -133,7 +131,7 @@ describe('tryOn', () => {
     };
 
     const result = await tryOn(COMMAND, d);
-    expect(result).toEqual({ imageBase64: 'CACHED', creditsLeft: 21, cached: true });
+    expect(result).toEqual({ imageBase64: 'CACHED', creditsLeft: 20, cached: true });
     expect(renderer.calls).toHaveLength(0);
     expect(ledger.writes).toHaveLength(0);
   });
@@ -143,7 +141,7 @@ describe('tryOn', () => {
     // to pay again because their balance has since run out.
     const key = await renderCacheKey(COMMAND.imageBase64, COMMAND.styleId, COMMAND.colorId);
     const d = {
-      ledger: fakeLedger({ week: '2026-W35', freeUsed: 1 }).port,
+      ledger: fakeLedger({ week: '2026-W35' }).port,
       cache: fakeCache({ [key]: 'CACHED' }).port,
       renderer: fakeRenderer().port,
       entitlements: fakeEntitlements('free'),

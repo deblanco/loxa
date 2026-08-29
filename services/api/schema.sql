@@ -6,17 +6,18 @@
 -- written next to the number, a Monday rollover is a comparison on read, not a
 -- scheduled job — and this database has no cron to run one.
 --
--- `free_used` is the "Continue free" credit: one photo for the lifetime of the
--- device, counted apart from the week so the Monday reset does not refill it. A
--- free tier that refills is a free tier somebody farms, and the model call is
--- the most expensive thing this product does.
+-- `free_used` was the "Continue free" credit, one photo for the lifetime of the
+-- device. That credit is withdrawn: `FREE_CREDITS` is 0 and nothing writes this
+-- column any more. It is kept because devices that spent the credit while it
+-- existed still carry a 1, and dropping it would be rewriting their history to
+-- no purpose.
 --
--- `extra_credits` is the $0.99 consumable. It also sits outside the weekly
--- counter, for the opposite reason: it was paid for separately and must survive
--- the reset that wipes the allowance.
+-- `extra_credits` is the $0.99 consumable. It sits outside the weekly counter
+-- because it was paid for separately and must survive the reset that wipes the
+-- allowance.
 --
--- Spending goes weekly allowance, then the free credit, then the bought ones —
--- so the credit somebody paid cash for is always the last to go.
+-- Spending goes weekly allowance, then the bought ones — so the credit somebody
+-- paid cash for is always the last to go.
 CREATE TABLE IF NOT EXISTS device_credits (
   device_id     TEXT    PRIMARY KEY,
   week          TEXT,

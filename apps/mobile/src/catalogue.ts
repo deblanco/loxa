@@ -104,3 +104,21 @@ export function clampSelection(
   if (style.id === selection.styleId && colorId === selection.colorId) return selection;
   return { ...selection, styleId: style.id, colorId };
 }
+
+/**
+ * The cut before or after this one in the strip, if there is one.
+ *
+ * The plate's pager runs off its edges into the neighbouring styles, so a user
+ * who never looks down at the strip can still walk the whole catalogue. It does
+ * not wrap: the ends of the strip are the ends of the pager too, and a swipe
+ * that silently jumped from the last cut to the first would lose them.
+ */
+export function adjacentStyle(
+  catalogue: CatalogueResponse,
+  styleId: string,
+  step: 1 | -1,
+): CatalogueStyle | undefined {
+  const index = catalogue.styles.findIndex((style) => style.id === styleId);
+  if (index < 0) return undefined;
+  return catalogue.styles[index + step];
+}

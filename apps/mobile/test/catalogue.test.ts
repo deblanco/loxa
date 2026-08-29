@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { CatalogueResponse } from '@loxa/shared';
-import { clampSelection, colorsFor, findStyle, heroKeys, tileFor } from '../src/catalogue';
+import {
+  adjacentStyle,
+  clampSelection,
+  colorsFor,
+  findStyle,
+  heroKeys,
+  tileFor,
+} from '../src/catalogue';
 import { initialSelection } from '../src/selection';
 
 /**
@@ -131,5 +138,21 @@ describe('clampSelection', () => {
 describe('findStyle', () => {
   it('is undefined for an id the manifest does not carry', () => {
     expect(findStyle(CATALOGUE, 'afro')).toBeUndefined();
+  });
+});
+
+describe('adjacentStyle', () => {
+  it('walks the strip in both directions', () => {
+    expect(adjacentStyle(CATALOGUE, 'blunt-bob', 1)?.id).toBe('wolf-cut');
+    expect(adjacentStyle(CATALOGUE, 'wolf-cut', -1)?.id).toBe('blunt-bob');
+  });
+
+  it('stops at the ends rather than wrapping', () => {
+    expect(adjacentStyle(CATALOGUE, 'blunt-bob', -1)).toBeUndefined();
+    expect(adjacentStyle(CATALOGUE, 'wolf-cut', 1)).toBeUndefined();
+  });
+
+  it('has no neighbour for a cut the manifest no longer lists', () => {
+    expect(adjacentStyle(CATALOGUE, 'no-such-style', 1)).toBeUndefined();
   });
 });

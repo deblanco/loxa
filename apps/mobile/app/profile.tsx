@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
+import { Chevron } from '@/components/Chevron';
 import { DevPanel } from '@/components/DevPanel';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -54,7 +55,12 @@ export default function Profile() {
   }
 
   const left = credits?.creditsLeft ?? 0;
-  const cap = credits?.cap ?? WEEKLY_CREDITS;
+  // The denominator is what they hold, not the weekly allowance. `cap` counts
+  // only the subscription's pool, but the balance sums three — the lifetime
+  // free credit and bought $0.99 credits live outside any week. Reading the cap
+  // literally prints "1/0" to a free user holding the credit on the house, and
+  // "22/20" to a subscriber who bought two, with a meter to match.
+  const cap = Math.max(credits?.cap ?? WEEKLY_CREDITS, left);
 
   return (
     <View style={styles.screen}>
@@ -66,7 +72,7 @@ export default function Profile() {
             onPress={() => router.back()}
             style={styles.round}
           >
-            <Body>‹</Body>
+            <Chevron />
           </Pressable>
           <Meta>Profile</Meta>
           <View style={styles.round} />

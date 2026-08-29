@@ -1,6 +1,6 @@
 import type { CatalogueResponse } from '@loxa/shared';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { assetUrl } from '@/api/assets';
@@ -14,7 +14,7 @@ import { Body, Meta } from '@/components/Text';
 import { Wordmark } from '@/components/Wordmark';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary } from '@/photo';
-import { clampSelection, colorsFor, findColor, findStyle, heroKeys } from '@/catalogue';
+import { adjacentStyle, clampSelection, colorsFor, findColor, findStyle, heroKeys } from '@/catalogue';
 import { initialSelection, primaryAction, primaryActionLabel, withSource } from '@/selection';
 import { useCatalogue } from '@/store/catalogue';
 import { useCredits } from '@/store/credits';
@@ -77,7 +77,7 @@ function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: (
             </Meta>
           </>
         ) : (
-          <Pill label="Try On" hint="1 credit" disabled onPress={() => {}} />
+          <Pill label="Try On" cost={1} disabled onPress={() => {}} />
         )}
       </View>
     </View>
@@ -96,6 +96,10 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   // until the first layout, which is why the plain plate renders until then.
   const [plateWidth, setPlateWidth] = useState(0);
   const [page, setPage] = useState(0);
+  const pager = useRef<ScrollView>(null);
+  // Which end of the new style's pages to land on, once a swipe off the edge
+  // has changed the style and the new pages have been laid out.
+  const [landing, setLanding] = useState<'first' | 'last' | null>(null);
 
   // The camera hands the shot back through the router rather than through a
   // store: it is one value, used once, on the way back to exactly this screen.
@@ -147,6 +151,33 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
         } => model.uri !== undefined,
       ),
   ];
+
+  /**
+   * Walk to the neighbouring cut, having been swiped off the end of this one.
+   *
+   * It lands on a model rather than on page zero, which is the user's own
+   * untouched photograph and looks identical under every cut — arriving there
+   * would read as the swipe having done nothing at all. Forwards lands on the
+   * first model and backwards on the last, so the models carry on in the
+   * direction the finger was going.
+   */
+  function stepStyle(step: 1 | -1) {
+    const next = adjacentStyle(catalogue, selection.styleId, step);
+    if (!next) return;
+    setSelection((current) => clampSelection({ ...current, styleId: next.id }, catalogue));
+    setLanding(step === 1 ? 'first' : 'last');
+  }
+
+  // The pages are new objects on every render, so this leans on `landing` alone
+  // to fire once: it is cleared here, and only a swipe off an edge sets it.
+  useEffect(() => {
+    if (!landing || plateWidth === 0) return;
+    const firstModel = pages.findIndex((item) => item.key !== 'photo');
+    const target = Math.max(landing === 'first' ? firstModel : pages.length - 1, 0);
+    pager.current?.scrollTo({ x: target * plateWidth, animated: false });
+    setPage(target);
+    setLanding(null);
+  }, [landing, pages, plateWidth]);
 
   const choosePhoto = useCallback(async () => {
     const picked = await pickFromLibrary();
@@ -221,12 +252,22 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
       <View style={styles.plateWrap} onLayout={(e) => setPlateWidth(e.nativeEvent.layout.width)}>
         {pages.length > 0 && plateWidth > 0 ? (
           <ScrollView
+            ref={pager}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={(e) =>
               setPage(Math.round(e.nativeEvent.contentOffset.x / plateWidth))
             }
+            // Dragging past either end changes the cut. The bounce is the
+            // affordance: it is the one place the plate can be pulled to
+            // where there is nothing to see, so it is worth something.
+            onScrollEndDrag={(e) => {
+              const x = e.nativeEvent.contentOffset.x;
+              const pull = plateWidth * 0.15;
+              if (x < -pull) stepStyle(-1);
+              else if (x > (pages.length - 1) * plateWidth + pull) stepStyle(1);
+            }}
             style={styles.pager}
           >
             {pages.map((item) => (
@@ -252,21 +293,14 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
         </View>
 
         {pages.length > 1 ? (
-          <>
-            <View style={styles.dots} pointerEvents="none">
-              {pages.map((item, index) => (
-                <View
-                  key={item.key}
-                  style={[styles.dot, index === page ? styles.dotOn : styles.dotOff]}
-                />
-              ))}
-            </View>
-            <View style={styles.hint} pointerEvents="none">
-              <Meta variant="note" tone="ink40">
-                swipe for models
-              </Meta>
-            </View>
-          </>
+          <View style={styles.dots} pointerEvents="none">
+            {pages.map((item, index) => (
+              <View
+                key={item.key}
+                style={[styles.dot, index === page ? styles.dotOn : styles.dotOff]}
+              />
+            ))}
+          </View>
         ) : null}
 
         {rejected && photo ? (
@@ -288,7 +322,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
           ]}
         />
 
-        <Pill label={primaryActionLabel(selection)} hint="1 credit" onPress={onPrimary} />
+        <Pill label={primaryActionLabel(selection)} cost={1} onPress={onPrimary} />
       </View>
 
       <ScrollView
@@ -345,20 +379,22 @@ const styles = StyleSheet.create({
   },
   plate: { flex: 1 },
   pager: { flex: 1, borderRadius: radius.plate },
-  // Sits above the hint, which sits above the home indicator's clearance.
+  // A capsule, like the badge: the dots have to read over whatever the photo is.
   dots: {
     position: 'absolute',
     bottom: space.s3,
-    left: 0,
-    right: 0,
+    alignSelf: 'center',
     flexDirection: 'row',
-    justifyContent: 'center',
+    alignItems: 'center',
+    height: 18,
+    paddingHorizontal: 9,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(250,248,245,0.5)',
     gap: space.s1 + 2,
   },
-  dot: { height: 4, borderRadius: radius.pill },
-  dotOn: { width: 12, backgroundColor: color.ink40 },
-  dotOff: { width: 4, backgroundColor: color.ink18 },
-  hint: { position: 'absolute', bottom: 26, left: 0, right: 0, alignItems: 'center' },
+  dot: { height: 6, borderRadius: radius.pill },
+  dotOn: { width: 16, backgroundColor: color.ink },
+  dotOff: { width: 6, backgroundColor: color.ink30 },
   badge: {
     position: 'absolute',
     top: space.s3,
@@ -376,5 +412,5 @@ const styles = StyleSheet.create({
   },
   centred: { textAlign: 'center' },
   strips: { flexGrow: 0, marginTop: space.gutterText },
-  stripsContent: { gap: space.s5 },
+  stripsContent: { gap: space.s3 },
 });

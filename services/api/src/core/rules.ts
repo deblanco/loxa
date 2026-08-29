@@ -13,7 +13,7 @@ export interface CreditState {
   /** The ISO week `weekUsed` was last written in. Null for a device seen for the first time. */
   week: string | null;
   weekUsed: number;
-  /** The lifetime free credit, spent or not. */
+  /** The lifetime free credit, spent or not. Withdrawn: `FREE_CREDITS` is 0. */
   freeUsed: number;
   /** Credits from $0.99 purchases. Survive the weekly reset. */
   extraCredits: number;
@@ -59,11 +59,13 @@ export function available(state: CreditState, plan: PlanId, now: Date): number {
  *
  * Weekly allowance, then the free lifetime credit, then the ones somebody paid
  * $0.99 for — a bought credit is always the last thing to go, because it is the
- * only one the user would be annoyed to lose.
+ * only one the user would be annoyed to lose. The middle pool is empty while
+ * `FREE_CREDITS` is 0, which is the whole of "nothing is free": a free user
+ * reaches the bought pool immediately, and reaches the paywall if it is empty.
  *
  * Returns null when there is nothing to take. The caller turns that into a
- * paywall; it is not an exception because running out is an ordinary thing that
- * happens to every free user exactly once.
+ * paywall; it is not an exception because a free user with no credits is the
+ * ordinary state of a free user, on their first render as much as their tenth.
  */
 export function spendOne(state: CreditState, plan: PlanId, now: Date): CreditState | null {
   const rolled = rollForward(state, now);

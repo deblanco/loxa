@@ -5,6 +5,7 @@ import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Chevron } from '@/components/Chevron';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { Pill } from '@/components/Pill';
 import { Body, Display, Meta } from '@/components/Text';
@@ -86,7 +87,7 @@ export default function Result() {
           onPress={() => router.replace('/preview')}
           style={styles.round}
         >
-          <Body tone="paper">‹</Body>
+          <Chevron tone="paper" />
         </Pressable>
 
         <Meta tone="paper60">{credits?.creditsLeft ?? 0} credits left</Meta>

@@ -49,12 +49,12 @@ describe('rollForward', () => {
 });
 
 describe('available', () => {
-  it('gives a new free device exactly one', () => {
-    expect(available(EMPTY_STATE, 'free', THURSDAY)).toBe(1);
+  it('gives a new free device nothing at all', () => {
+    expect(available(EMPTY_STATE, 'free', THURSDAY)).toBe(0);
   });
 
-  it('gives a new subscriber twenty plus the free one', () => {
-    expect(available(EMPTY_STATE, 'weekly', THURSDAY)).toBe(21);
+  it('gives a new subscriber the allowance and nothing on top', () => {
+    expect(available(EMPTY_STATE, 'weekly', THURSDAY)).toBe(20);
   });
 
   it('adds bought credits to whatever is left', () => {
@@ -77,18 +77,18 @@ describe('spendOne', () => {
     expect(spent).toEqual(expect.objectContaining({ weekUsed: 1, freeUsed: 0, extraCredits: 1 }));
   });
 
-  it('falls to the free credit when there is no allowance', () => {
+  it('never grants a free credit: a free user spends what they bought', () => {
     const spent = spendOne(state({ extraCredits: 1 }), 'free', THURSDAY);
-    expect(spent).toEqual(expect.objectContaining({ freeUsed: 1, extraCredits: 1 }));
+    expect(spent).toEqual(expect.objectContaining({ freeUsed: 0, extraCredits: 0 }));
   });
 
   it('touches a bought credit only when nothing else is left', () => {
-    const spent = spendOne(state({ freeUsed: 1, extraCredits: 2 }), 'free', THURSDAY);
+    const spent = spendOne(state({ extraCredits: 2 }), 'free', THURSDAY);
     expect(spent?.extraCredits).toBe(1);
   });
 
   it('returns null with nothing to take', () => {
-    expect(spendOne(state({ freeUsed: 1 }), 'free', THURSDAY)).toBeNull();
+    expect(spendOne(state(), 'free', THURSDAY)).toBeNull();
     expect(spendOne(state({ weekUsed: 20, freeUsed: 1 }), 'weekly', THURSDAY)).toBeNull();
   });
 

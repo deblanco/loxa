@@ -12,16 +12,16 @@ describe('getCredits', () => {
     });
 
     expect(view).toEqual({
-      creditsLeft: 21,
+      creditsLeft: 20,
       cap: 20,
       plan: 'weekly',
       resetsAt: '2026-08-31T00:00:00.000Z',
     });
   });
 
-  it('describes a free user who has spent their one credit', async () => {
+  it('describes a free user, who has nothing', async () => {
     const view = await getCredits('device-1', {
-      ledger: fakeLedger({ week: '2026-W35', freeUsed: 1 }).port,
+      ledger: fakeLedger({ week: '2026-W35' }).port,
       entitlements: fakeEntitlements('free'),
       now: fixedClock,
     });
@@ -54,7 +54,7 @@ describe('syncPurchases', () => {
 
     expect(result.granted).toBe(1);
     expect(ledger.state.extraCredits).toBe(1);
-    expect(result.creditsLeft).toBe(2); // the free credit plus the bought one
+    expect(result.creditsLeft).toBe(1); // the bought one, and nothing else
   });
 
   it('grants nothing for an id the store does not know', async () => {
