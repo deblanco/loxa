@@ -11,6 +11,7 @@ apps/web         Next.js marketing site, deployed to Cloudflare Workers via Open
 design-system    Tokens, guidelines and the click-through prototype. Source of truth.
 packages/shared  @loxa/shared — contracts, the style/colour catalogue, credit rules
 services/api     Cloudflare Worker — the whole backend, Hono + D1 + KV + Vertex
+tools            The catalogue art generator — run by hand, see its README
 ```
 
 ## Getting started
