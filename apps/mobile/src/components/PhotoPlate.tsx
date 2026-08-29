@@ -19,8 +19,11 @@ import { Meta } from './Text';
  * a bug, and this screen is full of them before the user has picked a photo.
  */
 interface Props {
-  /** A `data:` URI or a file URI. Absent draws the placeholder. */
-  uri?: string | null;
+  /**
+   * A `data:` URI, a file URI, or a bundled asset from `require`. Absent draws
+   * the placeholder.
+   */
+  uri?: string | number | null;
   /**
    * The head band in the picture, as fractions of its height, from the
    * manifest. Given one, the plate centres on that band and scales down until
@@ -34,6 +37,14 @@ interface Props {
    * original.
    */
   focus?: { top: number; bottom: number };
+  /**
+   * Drawn instead when `uri` will not load. Only the onboarding wall passes
+   * one: its pictures are served from the bucket but also shipped in the
+   * binary, so a plate there has something better to show than the hatch.
+   * Everywhere else the hatch is the honest answer — there is no second copy
+   * of the user's own photograph.
+   */
+  fallback?: number;
   label?: string;
   dark?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -52,8 +63,10 @@ const PREVIEW_RATIO = 1920 / 1080;
  */
 const HEAD_FILL = 0.66;
 
-export function PhotoPlate({ uri, focus, label, dark, style, children }: Props) {
+export function PhotoPlate({ uri, focus, fallback, label, dark, style, children }: Props) {
   const [box, setBox] = useState<{ width: number; height: number } | null>(null);
+  const [failed, setFailed] = useState(false);
+  const source = failed && fallback !== undefined ? fallback : uri;
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
     setBox((current) =>
@@ -85,9 +98,9 @@ export function PhotoPlate({ uri, focus, label, dark, style, children }: Props) 
 
   return (
     <View style={[styles.plate, dark ? styles.dark : styles.light, style]} onLayout={onLayout}>
-      {uri ? (
+      {source ? (
         <Image
-          source={{ uri }}
+          source={typeof source === 'number' ? source : { uri: source }}
           style={
             aligned
               ? {
@@ -107,6 +120,7 @@ export function PhotoPlate({ uri, focus, label, dark, style, children }: Props) 
           // keeps its own disk cache, which is what makes the strip work on a
           // plane.
           cachePolicy="memory-disk"
+          onError={fallback === undefined ? undefined : () => setFailed(true)}
           // No fade. The design system names four ambient loops and says they
           // are the only things on screen that move untouched; fifteen tiles
           // dissolving in is a fifth.

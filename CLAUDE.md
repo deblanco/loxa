@@ -84,9 +84,10 @@ colours x 2 models — and served from the `loxa-assets` R2 bucket at
   published-subset projection of it. A *new* cut therefore still needs a Worker
   deploy for its prompt — but never an app release.
 - Objects are immutable: a key is written once and cached for a year. To change
-  a picture, change the key. **`catalogue.json` is the one exception** — it is
-  overwritten on purpose, which is the whole feature, so it is uploaded with
-  `max-age=60` and the Worker serves it with an etag and a day of cache on top.
+  a picture, change the key. **`catalogue.json` and `onboarding/` are the two
+  exceptions** — both are overwritten on purpose, which in both cases is the
+  whole feature. `catalogue.json` is uploaded with `max-age=60` and the Worker
+  serves it with an etag and a day of cache on top.
   Because clients hold it for 24h, withdrawing a style means *stop listing it*,
   never *delete its objects*: deleting shows broken art to everyone still
   holding the old manifest.
@@ -98,6 +99,29 @@ colours x 2 models — and served from the `loxa-assets` R2 bucket at
   the hatched placeholder rather than to broken images. It must be set in all
   four `apps/mobile/eas.json` profiles or every build ships a hatch-only
   catalogue.
+
+## Onboarding footage
+
+The entry carousel's three clips and the paywall's twelve wall stills live under
+`onboarding/` in the same bucket, pushed by `tools/onboarding-footage/upload.sh`
+from the very files the app bundles — one copy on disk, so the served object and
+the binary's asset cannot drift.
+
+- **Served first, bundled underneath.** The bucket's copy wins wherever it
+  loads, so re-shooting the carousel is an upload rather than a release. The
+  bundled copy is the floor: a first launch with no network is the one launch
+  the app cannot spend on a spinner, and these are the only two screens the app
+  has before it has asked for anything.
+- **These keys are rewritten, not replaced.** A hashed key would mean the app
+  needing a release to learn the new name, which would leave the bucket doing
+  nothing that the binary was not already doing. So `onboarding/` gets a day of
+  cache rather than a year, and the same names forever.
+- **Nothing under `onboarding/` is ever deleted.** A missing object is a failed
+  request, and the fallback behind it is the footage the upload was meant to
+  replace.
+- A clip and its poster move together. `footageUrls` hands back both or neither:
+  a served clip under a bundled poster would put one woman's hair over
+  another's for the second before the video starts.
 - The bucket's `r2.dev` URL is deliberately **disabled**. One public endpoint,
   and it is the custom domain.
 

@@ -24,3 +24,23 @@ export function assetUrl(key: string | undefined): string | undefined {
   if (!BASE || !key) return undefined;
   return `${BASE.replace(/\/+$/, '')}/${key}`;
 }
+
+/**
+ * The onboarding footage in the bucket: a clip and its poster, or nothing.
+ *
+ * The two screens before the app ship their own copies of this footage, so
+ * unlike the catalogue there is no hatch to fall back to and no reason to wait.
+ * The bucket's copy is preferred anyway, because it is the one that can be
+ * replaced: swapping the entry carousel for a better shoot is then an upload,
+ * the way publishing a style is, rather than a release that only reaches the
+ * people who take it.
+ *
+ * Both halves or neither — a served clip under a bundled poster, or the
+ * reverse, would put one woman's hair over another's for the second it takes
+ * the video to start.
+ */
+export function footageUrls(name: string): { clip: string; poster: string } | undefined {
+  const clip = assetUrl(`onboarding/${name}.mp4`);
+  const poster = assetUrl(`onboarding/${name}.jpg`);
+  return clip && poster ? { clip, poster } : undefined;
+}

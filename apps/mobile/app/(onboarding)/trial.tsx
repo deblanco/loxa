@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { assetUrl } from '@/api/assets';
 import { Pill } from '@/components/Pill';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { LegalLinks } from '@/components/LegalLinks';
@@ -25,11 +26,102 @@ const PERKS = [
   'New looks dropped daily',
 ] as const;
 
+/**
+ * The wall, as three columns of four.
+ *
+ * Twelve stills rather than twelve clips: the wall is scenery behind an offer,
+ * it is tilted thirteen degrees and half of it is under a gradient, and a dozen
+ * players on a paywall would spend the battery of somebody who is reading a
+ * price. The clips belong on the entry screen, where they are the argument.
+ *
+ * A tile is a still from a real render — a different face, cut and colour in
+ * each — because the perk above it says twenty photos a week and a hatched
+ * rectangle is not evidence of that.
+ *
+ * Served from the bucket where there is one, bundled where there is not, on the
+ * same terms as the entry clips: the wall is the screen most likely to be
+ * re-shot, and the bundled copy is what stands behind the price on a first
+ * launch with no network.
+ */
 const COLUMNS = [
-  { seconds: 26, heights: [150, 190, 120, 170] },
-  { seconds: 34, heights: [190, 120, 170, 150] },
-  { seconds: 30, heights: [120, 170, 150, 190] },
+  {
+    seconds: 26,
+    tiles: [
+      {
+        height: 150,
+        name: 'wall-01',
+        bundled: require('../../assets/onboarding/wall-01.jpg'),
+      },
+      {
+        height: 190,
+        name: 'wall-02',
+        bundled: require('../../assets/onboarding/wall-02.jpg'),
+      },
+      {
+        height: 120,
+        name: 'wall-03',
+        bundled: require('../../assets/onboarding/wall-03.jpg'),
+      },
+      {
+        height: 170,
+        name: 'wall-04',
+        bundled: require('../../assets/onboarding/wall-04.jpg'),
+      },
+    ],
+  },
+  {
+    seconds: 34,
+    tiles: [
+      {
+        height: 190,
+        name: 'wall-05',
+        bundled: require('../../assets/onboarding/wall-05.jpg'),
+      },
+      {
+        height: 120,
+        name: 'wall-06',
+        bundled: require('../../assets/onboarding/wall-06.jpg'),
+      },
+      {
+        height: 170,
+        name: 'wall-07',
+        bundled: require('../../assets/onboarding/wall-07.jpg'),
+      },
+      {
+        height: 150,
+        name: 'wall-08',
+        bundled: require('../../assets/onboarding/wall-08.jpg'),
+      },
+    ],
+  },
+  {
+    seconds: 30,
+    tiles: [
+      {
+        height: 120,
+        name: 'wall-09',
+        bundled: require('../../assets/onboarding/wall-09.jpg'),
+      },
+      {
+        height: 170,
+        name: 'wall-10',
+        bundled: require('../../assets/onboarding/wall-10.jpg'),
+      },
+      {
+        height: 150,
+        name: 'wall-11',
+        bundled: require('../../assets/onboarding/wall-11.jpg'),
+      },
+      {
+        height: 190,
+        name: 'wall-12',
+        bundled: require('../../assets/onboarding/wall-12.jpg'),
+      },
+    ],
+  },
 ] as const;
+
+type Tile = (typeof COLUMNS)[number]['tiles'][number];
 
 export default function Trial() {
   const { complete } = useOnboarding();
@@ -51,7 +143,7 @@ export default function Trial() {
     <View style={styles.screen}>
       <View style={styles.wall}>
         {COLUMNS.map((column) => (
-          <DriftColumn key={column.seconds} seconds={column.seconds} heights={column.heights} />
+          <DriftColumn key={column.seconds} seconds={column.seconds} tiles={column.tiles} />
         ))}
       </View>
 
@@ -100,9 +192,9 @@ export default function Trial() {
  * The tiles are duplicated and the loop travels exactly half the content, so
  * the wrap is invisible — the same trick the CSS `loxa-drift` keyframe uses.
  */
-function DriftColumn({ seconds, heights }: { seconds: number; heights: readonly number[] }) {
+function DriftColumn({ seconds, tiles }: { seconds: number; tiles: readonly Tile[] }) {
   const drift = useRef(new Animated.Value(0)).current;
-  const total = heights.reduce((sum, h) => sum + h + space.s3, 0);
+  const total = tiles.reduce((sum, tile) => sum + tile.height + space.s3, 0);
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -127,8 +219,13 @@ function DriftColumn({ seconds, heights }: { seconds: number; heights: readonly 
           ],
         }}
       >
-        {[...heights, ...heights].map((height, i) => (
-          <PhotoPlate key={i} style={{ height }} />
+        {[...tiles, ...tiles].map((tile, i) => (
+          <PhotoPlate
+            key={i}
+            uri={assetUrl(`onboarding/${tile.name}.jpg`) ?? tile.bundled}
+            fallback={tile.bundled}
+            style={{ height: tile.height }}
+          />
         ))}
       </Animated.View>
     </View>

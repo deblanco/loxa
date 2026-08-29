@@ -1,11 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { Pill } from '@/components/Pill';
-import { PhotoPlate } from '@/components/PhotoPlate';
+import { VideoPlate } from '@/components/VideoPlate';
 import { Body, Display } from '@/components/Text';
 import { Wordmark } from '@/components/Wordmark';
+import { footageUrls } from '@/api/assets';
 import { useOnboarding } from '@/store/onboarding';
 import { color, motion, radius, space } from '@/theme';
 
@@ -16,14 +17,39 @@ import { color, motion, radius, space } from '@/theme';
  * them. Night, because it is a photograph full-bleed and a photograph needs a
  * dark room.
  *
- * The clips are placeholders until the shoot happens — labelled ones, wearing
- * the design system's hatch, so an empty state reads as "footage goes here"
- * rather than as a failed load.
+ * The clips are served from the bucket and bundled in the binary, in that
+ * order. Served, because footage is the one thing on this screen most likely to
+ * be replaced and a shoot should not need an App Store review to reach anybody.
+ * Bundled underneath, because this is the first screen of a fresh install —
+ * before onboarding has minted a device id, before anything has been cached —
+ * and the one screen in the app that must be right with the radio off.
+ *
+ * They are trimmed to the reveal, which is what `--interval-carousel` is long
+ * enough for and what the pitch is about: each one is a colour and a cut
+ * landing on a face that was already there.
  */
 const SLIDES = [
-  'video 01 · walking, hair reveal',
-  'video 02 · colour change, laughing',
-  'video 03 · phone in hand, mirror',
+  {
+    name: 'entry-01-walking',
+    bundled: {
+      clip: require('../assets/onboarding/entry-01-walking.mp4'),
+      poster: require('../assets/onboarding/entry-01-walking.jpg'),
+    },
+  },
+  {
+    name: 'entry-02-laughing',
+    bundled: {
+      clip: require('../assets/onboarding/entry-02-laughing.mp4'),
+      poster: require('../assets/onboarding/entry-02-laughing.jpg'),
+    },
+  },
+  {
+    name: 'entry-03-mirror',
+    bundled: {
+      clip: require('../assets/onboarding/entry-03-mirror.mp4'),
+      poster: require('../assets/onboarding/entry-03-mirror.jpg'),
+    },
+  },
 ] as const;
 
 export default function Entry() {
@@ -49,13 +75,14 @@ export default function Entry() {
 
   return (
     <View style={styles.screen}>
-      {SLIDES.map((label, i) => (
-        <PhotoPlate
-          key={label}
-          dark
-          label={i === slide ? label : undefined}
-          style={[styles.slide, { opacity: i === slide ? 1 : 0 }]}
-        />
+      {SLIDES.map((clip, i) => (
+        <Fade key={clip.name} on={i === slide}>
+          <VideoPlate
+            remote={footageUrls(clip.name)}
+            bundled={clip.bundled}
+            style={StyleSheet.absoluteFill}
+          />
+        </Fade>
       ))}
 
       <LinearGradient
@@ -84,9 +111,9 @@ export default function Entry() {
         <Pill label="Get started" tone="light" onPress={() => router.push('/(onboarding)/trial')} />
 
         <View style={styles.dots}>
-          {SLIDES.map((label, i) => (
+          {SLIDES.map((clip, i) => (
             <Pressable
-              key={label}
+              key={clip.name}
               accessibilityRole="button"
               accessibilityLabel={`Slide ${i + 1}`}
               onPress={() => setSlide(i)}
@@ -102,9 +129,37 @@ export default function Entry() {
   );
 }
 
+/**
+ * One slide, dissolving in or out over `--duration-fade`.
+ *
+ * A dissolve rather than a cut because the clips do not share a room: cutting
+ * from a pavement at golden hour to a greenhouse is a jump, and the design
+ * system spends 1.1s on the join for exactly that reason. Both clips keep
+ * playing underneath — a paused frame halfway through a dissolve is a
+ * photograph, and the pitch is that the hair moves.
+ */
+function Fade({ on, children }: { on: boolean; children: React.ReactNode }) {
+  const opacity = useRef(new Animated.Value(on ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: on ? 1 : 0,
+      duration: motion.fade,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  }, [on, opacity]);
+
+  return (
+    <Animated.View style={[styles.slide, { opacity }]} pointerEvents="none">
+      {children}
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.night },
-  slide: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 0 },
+  slide: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   wordmark: {
     position: 'absolute',
     top: 64,
