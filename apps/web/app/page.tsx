@@ -1,18 +1,15 @@
 import {
   HAIR_COLORS,
   HAIR_STYLES,
-  PREVIEW_SLOTS,
   SINGLE_PHOTO_PRICE_LABEL,
   TRIAL_DAYS,
   WEEKLY_CREDITS,
   WEEKLY_PRICE_LABEL,
-  tileKey,
 } from "@loxa/shared";
 import { Hatch } from "@/components/Hatch";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { assetUrl } from "@/lib/assets";
 
 /**
  * The landing page.
@@ -25,9 +22,10 @@ import { assetUrl } from "@/lib/assets";
  * does not ship or a price it does not charge, which is the sort of drift that
  * only ever gets noticed by a reviewer.
  *
- * Every image is a labelled placeholder wearing the design system's hatch. That
- * is deliberate rather than unfinished: real footage of people restyling their
- * hair drops into these slots and the page snaps into place.
+ * The hero and the before/after are real: a screenshot of the app and the render
+ * it produced, one credit apart. They are the only pictures here — the styles are
+ * counted rather than shown, because a grid of them is the app's job and a page
+ * of placeholders was worse than no grid at all.
  */
 const STEPS = [
   { n: "01", title: "Take a photo", body: "Front camera, even light, hair down. Or pick one you already have." },
@@ -76,13 +74,20 @@ export default function Home() {
         <section className="mx-auto max-w-5xl px-s6 pb-s14">
           <div className="grid gap-s4 sm:grid-cols-2">
             <figure>
-              <Hatch label="before · your photo" className="aspect-[2/3] rounded-card" />
+              <Hatch
+                photo="/before.jpg"
+                className="aspect-[2/3] rounded-card"
+              />
               <figcaption className="pt-s3 font-mono text-[10px] tracking-[0.14em] text-[var(--ink-45)] uppercase">
                 Before
               </figcaption>
             </figure>
             <figure>
-              <Hatch label="after · curtain bang, honey blonde" className="aspect-[2/3] rounded-card" dark />
+              <Hatch
+                photo="/after-curtain-bang-honey-blonde.jpg"
+                className="aspect-[2/3] rounded-card"
+                dark
+              />
               <figcaption className="pt-s3 font-mono text-[10px] tracking-[0.14em] text-[var(--ink-45)] uppercase">
                 After · one credit
               </figcaption>
@@ -106,41 +111,7 @@ export default function Home() {
         {/* The catalogue, read from the same source the app renders from */}
         <section className="mx-auto max-w-5xl px-s6 pb-s14">
           <div className="rounded-card border border-[var(--ink-09)] bg-surface-raised p-s6">
-            <div className="flex items-baseline justify-between">
-              <h2 className="font-mono text-[10px] tracking-[0.14em] text-[var(--ink-45)] uppercase">
-                Hair styles
-              </h2>
-              <p className="font-mono text-[10px] text-[var(--ink-45)]">All {HAIR_STYLES.length}</p>
-            </div>
-            <ul className="mt-s4 grid grid-cols-3 gap-s4 sm:grid-cols-4 md:grid-cols-6">
-              {HAIR_STYLES.map((style, i) => {
-                // The strip on the phone draws one of the two models at random
-                // and then holds it. Here the choice is the position in the
-                // grid, which is the same variety without a value that differs
-                // between the server's render and the browser's.
-                const src = assetUrl(tileKey(style.id, PREVIEW_SLOTS[i % PREVIEW_SLOTS.length]!));
-                return (
-                  <li key={style.id}>
-                    {/* The picture is the tile's background rather than an
-                        `<img>`, and the hatch is the tile itself. A key the
-                        generator has not reached yet then simply does not
-                        paint, leaving the placeholder — where an image element
-                        would leave a broken one. The catalogue fills up one
-                        eight-hour run at a time, so most of these keys are
-                        missing for most of the run. */}
-                    <Hatch
-                      photo={src}
-                      className="aspect-[5/6] rounded-tile border border-[var(--ink-12)]"
-                    />
-                    <p className="pt-s2 text-center text-[12.5px] text-[var(--ink-60)]">
-                      {style.name}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <h2 className="mt-s8 font-mono text-[10px] tracking-[0.14em] text-[var(--ink-45)] uppercase">
+            <h2 className="font-mono text-[10px] tracking-[0.14em] text-[var(--ink-45)] uppercase">
               Hair colours
             </h2>
             <ul className="mt-s4 flex flex-wrap gap-s4">

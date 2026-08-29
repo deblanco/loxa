@@ -10,14 +10,14 @@ import Terms from "../app/terms/page";
  *
  * Server Components rendered with `renderToStaticMarkup`, which is enough to
  * assert the two things that actually matter here: the legal pages exist and
- * link back (App Store review checks both URLs), and the landing page cannot
- * advertise a style the app does not ship.
+ * link back (App Store review checks both URLs), and the landing page counts
+ * and prices what the app actually ships.
  */
 describe("the landing page", () => {
   const html = renderToStaticMarkup(<Home />);
 
-  it("lists every style the app ships, and no others", () => {
-    for (const style of HAIR_STYLES) expect(html).toContain(style.name);
+  it("counts the styles rather than showing them", () => {
+    expect(html).toContain(`${HAIR_STYLES.length} cuts`);
   });
 
   it("lists every colour, with its swatch", () => {
@@ -32,14 +32,11 @@ describe("the landing page", () => {
     expect(html).toContain(`${WEEKLY_CREDITS} photos every week`);
   });
 
-  it("asks for no catalogue art when the assets host is unset", () => {
-    // The supported empty state: the hatched placeholder, and no request that
-    // could 404 on a bucket that has not been filled in yet.
-    expect(html).not.toContain("tile-0.jpg");
-    expect(html).not.toContain("tile-1.jpg");
-  });
+  it("asks the bucket for nothing, host set or not", async () => {
+    // The page's pictures ship with it. Nothing here waits on a generator run,
+    // so a bucket that is empty — or a host that is unset — changes no pixel.
+    expect(html).not.toContain("/styles/");
 
-  it("points every style tile at the bucket once the host is set", async () => {
     vi.stubEnv("NEXT_PUBLIC_ASSETS_URL", "https://assets.example/");
     vi.resetModules();
     const { default: Page } = await import("../app/page");
@@ -47,9 +44,7 @@ describe("the landing page", () => {
     vi.unstubAllEnvs();
     vi.resetModules();
 
-    for (const style of HAIR_STYLES) {
-      expect(withArt).toContain(`https://assets.example/styles/${style.id}/tile-`);
-    }
+    expect(withArt).not.toContain("assets.example");
   });
 
   it("links to both legal pages", () => {
