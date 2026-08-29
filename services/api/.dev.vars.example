@@ -20,3 +20,9 @@ REVENUECAT_SECRET_KEY=
 # Development only: lets a request ask to be treated as a subscriber with the
 # X-Dev-Premium header. Never set this in production.
 DEV_PREMIUM=1
+
+# An OpenRouter API key, and the whole of the image fallback switch. With it
+# set, a render that Vertex rate-limits (about one image a minute on this
+# project) or drops is retried once against the same model through OpenRouter.
+# Empty means one provider and the behaviour this Worker has always had.
+OPENROUTER_API_KEY=

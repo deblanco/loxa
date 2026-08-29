@@ -16,9 +16,45 @@ export interface Env {
    * Set with `wrangler secret put GOOGLE_SA_KEY < key.json` (or .dev.vars
    * locally). The account behind it holds `roles/aiplatform.user` and nothing
    * else — it can call the model and cannot read a bucket, list an identity, or
-   * see the billing account. One provider, one key, no fallback pair.
+   * see the billing account.
+   *
+   * Moves with GOOGLE_PROJECT_ID or not at all: a key from one project against
+   * another project's id fails at the token endpoint, and that reaches the user
+   * as the model being unavailable rather than as an auth error.
    */
   GOOGLE_SA_KEY: string;
+
+  /**
+   * Secret: an OpenRouter API key, and the whole of the fallback switch.
+   *
+   * Vertex answers every render it can. When it answers 429 — this project is
+   * measured at roughly one image a minute, and the model is `global` only, so
+   * there is no region to escape to — or 5xx, or cannot be reached, the same
+   * model is asked again through OpenRouter, on quota that is not ours.
+   *
+   * Undefined means one provider and today's behaviour, which is a supported
+   * state. Unlike the RevenueCat stub, missing this key costs availability, not
+   * correctness: no render is wrong because it was not set, some just fail that
+   * would otherwise have succeeded.
+   *
+   * `wrangler secret put OPENROUTER_API_KEY`, or .dev.vars locally. Like
+   * GOOGLE_SA_KEY it is a Worker secret and never reaches the app.
+   */
+  OPENROUTER_API_KEY?: string;
+
+  /**
+   * The same model, spelled the way OpenRouter spells it.
+   *
+   * `google/gemini-3.1-flash-lite-image` to IMAGE_MODEL's
+   * `gemini-3.1-flash-lite-image`. Written out rather than derived from
+   * IMAGE_MODEL by prefixing: the two catalogues are not obliged to stay in
+   * step, and a slug that has silently drifted is a 404 on the fallback path,
+   * which is the path nobody exercises until it is needed.
+   *
+   * Without it the fallback stays off even if the key is set — an unnamed model
+   * cannot be called.
+   */
+  OPENROUTER_IMAGE_MODEL?: string;
 
   /**
    * Secret: the RevenueCat `sk_` key, for looking a customer up server-side.

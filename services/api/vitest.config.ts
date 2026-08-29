@@ -17,8 +17,7 @@ export default defineConfig({
     cloudflareTest({
       wrangler: { configPath: './wrangler.toml' },
       miniflare: {
-        // .dev.vars is not loaded in tests, and no test reaches a real model
-        // anyway — every outbound call is intercepted.
+        // No test reaches a real model — every outbound call is intercepted.
         bindings: {
           GOOGLE_PROJECT_ID: 'loxa-test',
           IMAGE_MODEL: 'gemini-3.1-flash-lite-image',
@@ -28,7 +27,18 @@ export default defineConfig({
           GOOGLE_SA_KEY: TEST_SA_KEY,
           // No RevenueCat key: the composition root falls through to the stub,
           // where nobody is a subscriber. Tests that need a plan say so.
+          //
           DEV_PREMIUM: '1',
+          // The fallback, pinned off. .dev.vars *is* loaded here, so a
+          // developer with a real OpenRouter key would otherwise get a second
+          // provider wired into every route test — and the 503 case at
+          // routes.test.ts would fall through to a host its interceptor does
+          // not whitelist. Empty rather than absent so the answer does not
+          // depend on what is on somebody's disk.
+          //
+          // The fallback is proved in its own two suites, where a second
+          // provider can be observed rather than inferred.
+          OPENROUTER_API_KEY: '',
         },
       },
     }),

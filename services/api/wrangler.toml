@@ -53,6 +53,30 @@ bucket_name = "loxa-assets"
 GOOGLE_PROJECT_ID = "loxa-506814"
 IMAGE_MODEL = "gemini-3.1-flash-lite-image"
 
+# --- Fallback provider ------------------------------------------------------
+# The same model, reached through OpenRouter when Vertex will not answer.
+#
+# The quota above is the reason: about one image a minute, project-wide, and
+# this model is published on `global` only, so there is no region to escape to
+# and concurrency does not help. OpenRouter serves it from its own Google AI
+# Studio and Vertex accounts, neither of which is loxa-506814 — a second
+# provider is the only thing that raises the ceiling.
+#
+# Billed at $30 per million image-output tokens, and this model is measured at
+# 1120 of them per image: $0.034, the same as calling Vertex directly. A render
+# that falls back costs what it would have cost anyway.
+#
+# The slug is the same model as IMAGE_MODEL, spelled OpenRouter's way, and the
+# two move together. Written out rather than derived by prefixing "google/":
+# the catalogues are not obliged to stay in step, and a drifted slug is a 404
+# on the one path nobody exercises until it is needed.
+#
+# Off until the key is set, and that is a supported state — one provider, and
+# exactly the behaviour this Worker had before there were two:
+#
+#   wrangler secret put OPENROUTER_API_KEY
+OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
+
 # --- Entitlements -----------------------------------------------------------
 # The weekly subscription is verified server-side, against RevenueCat API v2,
 # with a secret key:

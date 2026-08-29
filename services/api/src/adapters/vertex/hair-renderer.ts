@@ -23,14 +23,14 @@ import { accessToken, type ServiceAccountCredentials } from './auth';
 const LOCATION = 'global';
 
 /**
- * 2:3 — the `1024 × 1536` the prototype's preview plate and result screen are
- * both built around.
+ * 9:16 — the portrait frame the preview plate, the result screen and the photo
+ * crop are all built around. Every render is this ratio and no other.
  *
  * Asked for here rather than in the prompt because prompt-described framing is
  * unreliable and every attempt is billed. The token count, and so the cost, is
  * identical across aspect ratios; only the pixel dimensions move.
  */
-const ASPECT_RATIO = '2:3';
+const ASPECT_RATIO = '9:16';
 
 export interface VertexRendererConfig {
   credentials: ServiceAccountCredentials;
@@ -92,17 +92,27 @@ export function vertexHairRenderer(config: VertexRendererConfig): HairRendererPo
           }),
         });
       } catch (err) {
+        // Transient: the host was not reached at all, so nothing about this
+        // request has been judged yet. Another provider may well answer it.
         throw new RendererUnavailableError(
           err instanceof Error ? err.message : 'the image model could not be reached',
+          true,
         );
       }
 
       if (!response.ok) {
         // 429 here is Vertex's own per-minute quota, not the user's credit
-        // balance. It still surfaces as unavailable: core refunds on any throw,
-        // so the credit survives either way.
+        // balance — this project is measured at about one image a minute, and
+        // the model is published on `global` only, so there is no region to
+        // escape to. That, and a 5xx, is what the OpenRouter fallback is for.
+        //
+        // Everything else in the 4xx range is our own request or our own key,
+        // and is deliberately not retried elsewhere: the same malformed call
+        // would be billed twice and the fault would go unnoticed. It still
+        // surfaces as unavailable either way, and core refunds on any throw.
         throw new RendererUnavailableError(
           `image model returned ${response.status}: ${(await response.text()).slice(0, 200)}`,
+          response.status === 429 || response.status >= 500,
         );
       }
 

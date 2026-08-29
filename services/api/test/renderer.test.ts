@@ -40,6 +40,16 @@ function intercept(vertex: () => Response | Promise<Response>, token?: () => Res
   return requests;
 }
 
+/** Whatever the adapter threw, so its `transient` flag can be read. */
+async function thrownBy(port: ReturnType<typeof renderer>) {
+  try {
+    await port.render(request);
+  } catch (err) {
+    return err;
+  }
+  throw new Error('expected a throw');
+}
+
 const image = (over: Record<string, unknown> = {}) =>
   Response.json({
     candidates: [
@@ -62,7 +72,7 @@ describe('the happy path', () => {
     await expect(renderer().render(request)).resolves.toEqual({ imageBase64: 'RENDERED' });
   });
 
-  it('asks for 2:3 and for both modalities', async () => {
+  it('asks for 9:16 and for both modalities', async () => {
     // The aspect ratio is asked for in the config rather than in the prompt
     // because prompt-described framing is unreliable and every attempt is
     // billed. Both modalities because the model rejects an image-only request.
@@ -70,7 +80,7 @@ describe('the happy path', () => {
     await renderer().render(request);
 
     const body = JSON.parse(requests.at(-1)!.body!);
-    expect(body.generationConfig.imageConfig.aspectRatio).toBe('2:3');
+    expect(body.generationConfig.imageConfig.aspectRatio).toBe('9:16');
     expect(body.generationConfig.responseModalities).toEqual(['TEXT', 'IMAGE']);
   });
 
@@ -112,16 +122,37 @@ describe('the failures that are ours', () => {
     await expect(renderer().render(request)).rejects.toThrow(RendererUnavailableError);
   });
 
-  it('reports an unreachable model', async () => {
+  it('reports an unreachable model, and says another provider could try', async () => {
+    // Nothing about the request has been judged, so the fallback is worth its
+    // second bill. See adapters/fallback-renderer.ts.
     intercept(() => {
       throw new Error('ECONNRESET');
     });
-    await expect(renderer().render(request)).rejects.toThrow(/ECONNRESET/);
+    const err = await thrownBy(renderer());
+    expect(err).toBeInstanceOf(RendererUnavailableError);
+    expect((err as RendererUnavailableError).transient).toBe(true);
   });
 
-  it('reports a non-2xx from the model', async () => {
+  it('marks the per-minute quota transient', async () => {
+    // This project is measured at about one image a minute and the model is
+    // published on `global` only, so there is no region to escape to — the
+    // fallback provider is the only thing that raises the ceiling.
     intercept(() => new Response('quota exceeded', { status: 429 }));
-    await expect(renderer().render(request)).rejects.toThrow(/429/);
+    const err = await thrownBy(renderer());
+    expect((err as Error).message).toMatch(/429/);
+    expect((err as RendererUnavailableError).transient).toBe(true);
+  });
+
+  it('marks an upstream outage transient', async () => {
+    intercept(() => new Response('backend error', { status: 503 }));
+    expect((await thrownBy(renderer()) as RendererUnavailableError).transient).toBe(true);
+  });
+
+  it('does not mark our own bad request transient', async () => {
+    // A 400 or a revoked key is the same request wherever it is sent. Asking a
+    // second provider bills it twice and hides the fault.
+    intercept(() => new Response('project not found', { status: 403 }));
+    expect((await thrownBy(renderer()) as RendererUnavailableError).transient).toBe(false);
   });
 
   it('reports an unreadable body', async () => {
@@ -147,7 +178,11 @@ describe('the failures that are ours', () => {
         candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: 'X' } }] } }],
       }),
     );
-    await expect(renderer().render(request)).rejects.toThrow(/expected image\/jpeg/);
+    const err = await thrownBy(renderer());
+    expect((err as Error).message).toMatch(/expected image\/jpeg/);
+    // Not transient: the same model on another provider answers the same way,
+    // and the failure is worth seeing rather than papering over.
+    expect((err as RendererUnavailableError).transient).toBe(false);
   });
 });
 

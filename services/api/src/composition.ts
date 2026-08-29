@@ -1,8 +1,10 @@
 import { d1CreditLedger } from './adapters/d1/credit-ledger';
 import { devEntitlements } from './adapters/entitlements/dev';
+import { fallbackRenderer } from './adapters/fallback-renderer';
 import { revenueCatEntitlements } from './adapters/entitlements/revenuecat';
 import { stubEntitlements } from './adapters/entitlements/stub';
 import { kvRenderCache } from './adapters/kv/render-cache';
+import { openRouterHairRenderer } from './adapters/openrouter/hair-renderer';
 import { parseServiceAccountKey } from './adapters/vertex/auth';
 import { vertexHairRenderer } from './adapters/vertex/hair-renderer';
 import type { GetCreditsDeps } from './core/get-credits';
@@ -10,6 +12,7 @@ import type { SyncPurchasesDeps } from './core/sync-purchases';
 import type { TryOnDeps } from './core/try-on';
 import type { Env } from './env';
 import type { EntitlementsPort } from './ports/entitlements';
+import type { HairRendererPort } from './ports/hair-renderer';
 
 /**
  * The composition root: the only file that knows about both sides of the hexagon.
@@ -42,19 +45,46 @@ export function entitlementsFor(env: Env, devPremium: boolean): EntitlementsPort
   return stubEntitlements();
 }
 
+/**
+ * Which renderer answers, and this one *is* a fallback chain.
+ *
+ * Vertex is always the primary: it is the direct relationship, and it is the
+ * cheaper of the two by whatever OpenRouter's margin turns out to be. OpenRouter
+ * is asked only when Vertex is rate-limited, down, or unreachable — see
+ * `adapters/fallback-renderer.ts` for why nothing else falls through.
+ *
+ * With no OpenRouter key this returns the bare Vertex adapter and the behaviour
+ * is exactly what it was before there was a second provider. That is a
+ * supported state, not a degraded one: unlike the entitlements stub, a missing
+ * key here costs availability rather than correctness.
+ */
+export function rendererFor(env: Env): HairRendererPort {
+  const vertex = vertexHairRenderer({
+    // Throws on a malformed key, here, at composition — which is the loudest
+    // available moment. The alternative is finding out inside `crypto.subtle`
+    // on somebody's first render, after their credit has been spent.
+    credentials: parseServiceAccountKey(env.GOOGLE_SA_KEY),
+    projectId: env.GOOGLE_PROJECT_ID,
+    model: env.IMAGE_MODEL,
+  });
+
+  if (!env.OPENROUTER_API_KEY || !env.OPENROUTER_IMAGE_MODEL) return vertex;
+
+  return fallbackRenderer(
+    vertex,
+    openRouterHairRenderer({
+      apiKey: env.OPENROUTER_API_KEY,
+      model: env.OPENROUTER_IMAGE_MODEL,
+    }),
+  );
+}
+
 export function buildTryOnDeps(env: Env, devPremium: boolean): TryOnDeps {
   return {
     ledger: d1CreditLedger(env.DB),
     entitlements: entitlementsFor(env, devPremium),
     cache: kvRenderCache(env.RESULTS_CACHE),
-    renderer: vertexHairRenderer({
-      // Throws on a malformed key, here, at composition — which is the loudest
-      // available moment. The alternative is finding out inside `crypto.subtle`
-      // on somebody's first render, after their credit has been spent.
-      credentials: parseServiceAccountKey(env.GOOGLE_SA_KEY),
-      projectId: env.GOOGLE_PROJECT_ID,
-      model: env.IMAGE_MODEL,
-    }),
+    renderer: rendererFor(env),
     now: () => new Date(),
   };
 }
