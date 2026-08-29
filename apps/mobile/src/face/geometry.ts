@@ -1,19 +1,23 @@
 /**
- * Turning MLKit's landmarks into something that can be drawn on the viewfinder.
+ * The landmark constellation, as coordinates the viewfinder can draw.
  *
- * MLKit reports points in *frame* coordinates. The preview is a rounded box that
- * crops the frame to fill itself and mirrors it on the front camera, so a frame
- * point is nowhere near the view point it appears at. VisionCamera will convert
- * a single point for us, but that is a native round-trip each time and there are
- * ten of them per face per frame.
+ * There is no detector behind these points any more. There used to be: MLKit,
+ * reporting a real face in frame coordinates, which this file mapped onto the
+ * preview. It cost the app an entire native binary — one with no arm64 slice for
+ * the simulator, so the whole project could only be built for a simulator that
+ * iOS 26 refuses to run — and what it bought was decoration. The constellation
+ * gated no shutter and reached no Worker then, and it does not now.
  *
- * So the screen converts two points — the corners of the face's bounding box —
- * and everything else is derived from those here, in arithmetic. Which is the
- * other reason this file exists: it imports nothing, so the Node-only test suite
- * can hold it to the 90% gate while the camera screen stays on the device where
- * it belongs.
+ * So the points are ours: a face-shaped layout in a unit box, mapped onto the
+ * guide oval the user is already being asked to put their face inside. The
+ * transform below is the same one the detector's output went through, which is
+ * why it survived the removal intact.
  *
- * Nothing in this file reaches the model. The constellation is decoration.
+ * The file imports nothing, so the Node-only test suite can hold it to the 90%
+ * gate while the camera screen stays on the device where it belongs.
+ *
+ * Face *validation* now happens where it always should have — on the photo,
+ * once, before a credit is spent. See `src/photo.ts`.
  */
 
 export interface Point {
@@ -21,7 +25,7 @@ export interface Point {
   y: number;
 }
 
-/** MLKit's bounding box, in frame coordinates. */
+/** A box in whatever space the points being mapped are in. */
 export interface Bounds {
   x: number;
   y: number;
@@ -30,7 +34,7 @@ export interface Bounds {
 }
 
 /**
- * The ten points MLKit gives us with `runLandmarks`, in the order they light up.
+ * The ten points of the constellation, in the order they light up.
  *
  * Centre outwards, so it reads as the app finding a face rather than as a wipe
  * across one. `LEFT` is the subject's left, which is the right of the screen.
@@ -66,10 +70,10 @@ export const EDGES: readonly (readonly [LandmarkKey, LandmarkKey])[] = [
   ['RIGHT_CHEEK', 'RIGHT_EAR'],
 ];
 
-/** A landmark set as it comes off the detector. Every key is optional. */
+/** A landmark set. Every key is optional: a point that is missing is not drawn. */
 export type Landmarks = Partial<Record<LandmarkKey, Point>>;
 
-/** Frame coordinates to view coordinates: scale, then translate. */
+/** One space to another: scale, then translate. */
 export interface Affine {
   sx: number;
   sy: number;
@@ -133,8 +137,8 @@ export function edgeGeometry(a: Point, b: Point): EdgeGeometry {
 /**
  * Everything the overlay needs, from what the detector reported.
  *
- * Landmarks MLKit did not find are dropped, and an edge is dropped with either
- * of its ends — a line to a point that is not drawn looks like a bug.
+ * Landmarks that are absent are dropped, and an edge is dropped with either of
+ * its ends — a line to a point that is not drawn looks like a bug.
  */
 export function project(landmarks: Landmarks, bounds: Bounds, affine: Affine): FaceGeometry {
   const placed = new Map<LandmarkKey, Point>();
@@ -173,9 +177,9 @@ export function project(landmarks: Landmarks, bounds: Bounds, affine: Affine): F
 /**
  * Ease this frame's landmarks toward the last frame's.
  *
- * MLKit's output moves a pixel or two between frames on a perfectly still face,
- * and ten dots twitching in place reads as a rendering fault rather than as
- * tracking. `alpha` is how much of the new frame to take: 1 is the raw signal,
+ * A tracked face moves a pixel or two between frames even when it is perfectly
+ * still, and ten dots twitching in place reads as a rendering fault rather than
+ * as tracking. `alpha` is how much of the new frame to take: 1 is the raw signal,
  * 0 never moves. A key absent from `previous` is taken whole, so a face that
  * has just arrived does not slide in from wherever the last one was.
  */
@@ -193,4 +197,45 @@ export function smooth(previous: Landmarks | null, next: Landmarks, alpha: numbe
       : to;
   }
   return eased;
+}
+
+/** The box the idle layout is written in: one unit wide, one unit tall. */
+const UNIT_BOX: Bounds = { x: 0, y: 0, width: 1, height: 1 };
+
+/**
+ * A face, where the guide oval says one should be.
+ *
+ * Ten points in the unit box, laid out on the proportions of a face looking
+ * straight ahead — eyes a little above the middle, mouth two thirds down, ears
+ * out at the edges. `LEFT` is still the subject's left, which is the right of
+ * the screen; the layout is symmetric, so nothing depends on that reading.
+ */
+export const IDLE_LANDMARKS: Record<LandmarkKey, Point> = {
+  LEFT_EYE: { x: 0.66, y: 0.36 },
+  RIGHT_EYE: { x: 0.34, y: 0.36 },
+  NOSE_BASE: { x: 0.5, y: 0.54 },
+  MOUTH_LEFT: { x: 0.61, y: 0.7 },
+  MOUTH_RIGHT: { x: 0.39, y: 0.7 },
+  MOUTH_BOTTOM: { x: 0.5, y: 0.76 },
+  LEFT_CHEEK: { x: 0.75, y: 0.55 },
+  RIGHT_CHEEK: { x: 0.25, y: 0.55 },
+  LEFT_EAR: { x: 0.88, y: 0.45 },
+  RIGHT_EAR: { x: 0.12, y: 0.45 },
+};
+
+/**
+ * The constellation, over a rectangle in view coordinates.
+ *
+ * `rect` is the guide oval's frame, so the dots land where the user is being
+ * asked to put their face. It is a function of the viewfinder's layout and
+ * nothing else, which is the point: it is computed when the layout arrives and
+ * never again, and the screen re-renders no more often than it does today.
+ */
+export function idleGeometry(rect: Bounds): FaceGeometry {
+  const affine = affineFromCorners(
+    { x: rect.x, y: rect.y },
+    { x: rect.x + rect.width, y: rect.y + rect.height },
+    UNIT_BOX,
+  );
+  return project(IDLE_LANDMARKS, UNIT_BOX, affine);
 }

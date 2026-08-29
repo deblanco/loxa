@@ -6,19 +6,18 @@ import { color, motion, radius } from '../theme';
 /**
  * The landmark constellation, over the viewfinder.
  *
- * Ten points where MLKit found them, lines between the pairs that make a face,
- * and a hairline that walks from crown to chin forever. It is decoration: it
- * gates nothing, and none of it is sent anywhere. What it says is that the app
- * is looking at *this* face, which is the same promise the render makes.
+ * Ten points on the guide oval, lines between the pairs that make a face, and a
+ * hairline that walks from crown to chin forever. It is decoration: it gates
+ * nothing, and none of it is sent anywhere. What it says is that the app is
+ * looking at a face, which is the same promise the render makes.
  *
  * Two kinds of motion, and the system allows no third: the dots arriving is a
  * state change (eased, staggered, `motion.instant` each) and the sweep is
- * ambience (linear, looping, `motion.scan`). Both on the native driver, because
- * the JS thread is already carrying a detector.
+ * ambience (linear, looping, `motion.scan`). Both on the native driver, which is
+ * now the only thread any of this runs on: the geometry is a function of the
+ * viewfinder's layout, so it is computed once and the JS thread is left alone.
  *
- * Positions are not animated. `smooth()` in `face/geometry` has already taken
- * the twitch out of them upstream, and animating a value that is replaced ten
- * times a second only adds lag.
+ * Positions are not animated, because they no longer move.
  */
 interface Props {
   /** The face as it should be drawn, or null when there isn't one. */
@@ -29,14 +28,14 @@ interface Props {
 const STAGGER = 40;
 
 export function FaceConstellation({ geometry }: Props) {
-  // The last face we saw, kept so the group can fade out over something rather
-  // than vanishing the instant the detector loses it.
+  // The last geometry we had, kept so the group can fade out over something
+  // rather than vanishing the instant it goes away.
   const last = useRef<FaceGeometry | null>(geometry);
   if (geometry) last.current = geometry;
 
-  // Built once, on the first render rather than on every one: this screen
-  // re-renders as fast as the detector reports, and ten values thrown away ten
-  // times a second is litter on the thread the detector is already using.
+  // Built once, on the first render rather than on every one. Ten values
+  // rebuilt on every render of a screen that also carries a camera is litter,
+  // and the animations hold references to them across renders anyway.
   const store = useRef<Record<LandmarkKey, Animated.Value> | null>(null);
   if (!store.current) {
     store.current = Object.fromEntries(

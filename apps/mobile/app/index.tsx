@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Pill } from '@/components/Pill';
 import { PhotoPlate } from '@/components/PhotoPlate';
-import { Body, Display, Meta } from '@/components/Text';
+import { Body, Display } from '@/components/Text';
+import { Wordmark } from '@/components/Wordmark';
 import { useOnboarding } from '@/store/onboarding';
 import { color, motion, radius, space } from '@/theme';
 
@@ -64,9 +65,7 @@ export default function Entry() {
         pointerEvents="none"
       />
 
-      <Meta variant="wordmark" tone="paper" style={styles.wordmark}>
-        Loxa
-      </Meta>
+      <Wordmark tone="paper" style={styles.wordmark} />
 
       <View style={styles.pitch}>
         <View style={styles.headline}>
@@ -111,8 +110,7 @@ const styles = StyleSheet.create({
     top: 64,
     left: 0,
     right: 0,
-    textAlign: 'center',
-    color: color.paper,
+    justifyContent: 'center',
   },
   pitch: {
     position: 'absolute',

@@ -3,14 +3,16 @@ import {
   affineFromCorners,
   apply,
   edgeGeometry,
+  idleGeometry,
   project,
   smooth,
   EDGES,
+  IDLE_LANDMARKS,
   LANDMARK_ORDER,
   type Landmarks,
 } from '../src/face/geometry';
 
-/** A face 100×120 at (200, 300) in a frame, as MLKit would report it. */
+/** A face 100×120 at (200, 300), as a detector would once have reported it. */
 const BOUNDS = { x: 200, y: 300, width: 100, height: 120 };
 
 describe('affineFromCorners', () => {
@@ -141,5 +143,62 @@ describe('smooth', () => {
 
   it('forgets a landmark the detector stopped reporting', () => {
     expect(smooth({ ...previous, MOUTH_BOTTOM: { x: 1, y: 1 } }, next, 1)).toEqual(next);
+  });
+});
+
+describe('idleGeometry', () => {
+  /** The guide oval's frame, as the viewfinder measures it. */
+  const RECT = { x: 52, y: 100, width: 260, height: 400 };
+
+  it('draws every point, inside the rectangle it was given', () => {
+    const geometry = idleGeometry(RECT);
+
+    expect(geometry.points).toHaveLength(LANDMARK_ORDER.length);
+    for (const point of geometry.points) {
+      expect(point.x).toBeGreaterThanOrEqual(RECT.x);
+      expect(point.x).toBeLessThanOrEqual(RECT.x + RECT.width);
+      expect(point.y).toBeGreaterThanOrEqual(RECT.y);
+      expect(point.y).toBeLessThanOrEqual(RECT.y + RECT.height);
+    }
+  });
+
+  it('keeps the order the dots light up in', () => {
+    expect(idleGeometry(RECT).points.map((point) => point.key)).toEqual([...LANDMARK_ORDER]);
+  });
+
+  it('draws every edge, because no landmark is ever missing', () => {
+    expect(idleGeometry(RECT).edges).toHaveLength(EDGES.length);
+  });
+
+  it('boxes the rectangle itself, so the sweep runs over the oval', () => {
+    expect(idleGeometry(RECT).box).toEqual({
+      left: RECT.x,
+      top: RECT.y,
+      width: RECT.width,
+      height: RECT.height,
+    });
+  });
+
+  it('scales with the rectangle rather than sitting at a fixed size', () => {
+    const small = idleGeometry(RECT);
+    const large = idleGeometry({ ...RECT, width: RECT.width * 2, height: RECT.height * 2 });
+
+    expect(large.box.width).toBe(small.box.width * 2);
+    expect(large.points[0].x - RECT.x).toBeCloseTo((small.points[0].x - RECT.x) * 2);
+  });
+
+  it('lays the face out symmetrically about the midline', () => {
+    // The pairs are mirrored, so the layout survives a preview that isn't.
+    const pairs = [
+      ['LEFT_EYE', 'RIGHT_EYE'],
+      ['MOUTH_LEFT', 'MOUTH_RIGHT'],
+      ['LEFT_CHEEK', 'RIGHT_CHEEK'],
+      ['LEFT_EAR', 'RIGHT_EAR'],
+    ] as const;
+
+    for (const [left, right] of pairs) {
+      expect(IDLE_LANDMARKS[left].x + IDLE_LANDMARKS[right].x).toBeCloseTo(1);
+      expect(IDLE_LANDMARKS[left].y).toBeCloseTo(IDLE_LANDMARKS[right].y);
+    }
   });
 });

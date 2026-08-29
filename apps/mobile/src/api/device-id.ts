@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { randomUUID } from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 
 /**
@@ -56,7 +57,11 @@ export async function deviceId(): Promise<string> {
     return legacy;
   }
 
-  const fresh = `device-${crypto.randomUUID()}`;
+  // `expo-crypto`, not the `crypto` global: Hermes has no such global, and the
+  // ReferenceError landed here — on the one line that mints the identity the
+  // user's credits hang off, on first launch, where there is nothing to fall
+  // back to.
+  const fresh = `device-${randomUUID()}`;
   await SecureStore.setItemAsync(KEY, fresh, OPTIONS).catch(() => {});
   // Mirrored, so a keychain that refuses to write does not mint a new identity
   // on every launch — which would look like credits resetting at random.

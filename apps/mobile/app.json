@@ -17,7 +17,9 @@
     },
     "android": {
       "package": "com.blankhexadecimal.loxa",
-      "permissions": ["android.permission.CAMERA"]
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -46,7 +48,8 @@
           "backgroundColor": "#faf8f5"
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true
