@@ -50,7 +50,7 @@ const PREVIEW_RATIO = 1920 / 1080;
  * a high ponytail is scaled down until the crown clears the top edge, rather
  * than being cropped by it.
  */
-const HEAD_FILL = 0.78;
+const HEAD_FILL = 0.66;
 
 export function PhotoPlate({ uri, focus, label, dark, style, children }: Props) {
   const [box, setBox] = useState<{ width: number; height: number } | null>(null);
