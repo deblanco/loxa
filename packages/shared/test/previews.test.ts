@@ -9,12 +9,12 @@ import {
 
 describe('preview keys', () => {
   it('builds a tile key from a style and a slot', () => {
-    expect(tileKey('blunt-bob', 0)).toBe('styles/blunt-bob/tile-0.jpg');
-    expect(tileKey('blunt-bob', 1)).toBe('styles/blunt-bob/tile-1.jpg');
+    expect(tileKey('blunt-bob', 0)).toBe('styles/blunt-bob/tile-0-r2.jpg');
+    expect(tileKey('blunt-bob', 1)).toBe('styles/blunt-bob/tile-1-r2.jpg');
   });
 
   it('builds a hero key from a style, a colour and a slot', () => {
-    expect(heroKey('wolf-cut', 'platinum', 1)).toBe('styles/wolf-cut/platinum/1.jpg');
+    expect(heroKey('wolf-cut', 'platinum', 1)).toBe('styles/wolf-cut/platinum/1-r2.jpg');
   });
 
   it('offers two models per style', () => {

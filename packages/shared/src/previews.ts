@@ -32,16 +32,38 @@ export type PreviewSlot = (typeof PREVIEW_SLOTS)[number];
  * the colour strip, which is the most-touched control on the screen. They are
  * cropped from the default colour's renders, so the strip is internally
  * consistent even though it is not tracking the selection.
+ *
+ * **Bump `TILE_REVISION` whenever the crop changes.** Tiles are served with a
+ * year-long immutable cache, so replacing the picture at a key never reaches
+ * anyone who already has it — the edge and the browser both keep the old one,
+ * and nothing in the deploy path purges. Changing the key is the supported way
+ * to change the picture, which is why the revision is in the filename.
+ *
+ * r1 cropped the top of the frame, which framed every cut differently because
+ * the model puts the crown anywhere from 9% to 29% down the render. r2 finds
+ * the crown against the flat backdrop and aligns every tile on it.
  */
+export const TILE_REVISION = 2;
+
 export function tileKey(styleId: string, slot: PreviewSlot): string {
-  return `styles/${styleId}/tile-${slot}.jpg`;
+  return `styles/${styleId}/tile-${slot}-r${TILE_REVISION}.jpg`;
 }
 
 /**
  * The full-frame preview behind the plate, 1080 × 1920. This one *is* per
  * colour — the badge on the plate names a colour, and a picture that does not
  * show it is the plate telling a lie.
+ *
+ * **Bump `HERO_REVISION` whenever the framing changes**, for the same reason
+ * tiles carry one: the pictures are served immutable for a year, so a changed
+ * picture needs a changed key or nobody sees it.
+ *
+ * r1 was the model's own framing, which put the crown anywhere from 5% to 33%
+ * down the frame — the pager visibly jumped as it swiped between two models of
+ * the same cut. r2 aligns every render's crown at one depth.
  */
+export const HERO_REVISION = 2;
+
 export function heroKey(styleId: string, colorId: string, slot: PreviewSlot): string {
-  return `styles/${styleId}/${colorId}/${slot}.jpg`;
+  return `styles/${styleId}/${colorId}/${slot}-r${HERO_REVISION}.jpg`;
 }

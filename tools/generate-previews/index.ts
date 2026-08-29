@@ -77,6 +77,28 @@ const OUT_HEIGHT = 1920;
 const TILE_WIDTH = 210;
 const TILE_HEIGHT = 252;
 
+/** How far down the tile the crown sits. */
+const TILE_CROWN_Y = 0.10;
+
+/**
+ * How far down the hero frame the crown sits.
+ *
+ * Set to the deepest crown the model produced across the catalogue rather than
+ * to a prettier number, and that is the whole design. Aligning heads can only
+ * ever push them *down*: the space above a head is backdrop and can be
+ * fabricated invisibly, while the space below one is a body and cannot. Choose
+ * a shallower target and every render with a lower head would need a torso
+ * invented under it — measured on a pale model that artifact hides, on a darker
+ * one it is a hard line across the chest.
+ *
+ * So the deepest head sets the mark and every other render comes down to meet
+ * it. Nothing is scaled, so the heads stay the size the model drew them.
+ */
+const HERO_CROWN_Y = 0.34;
+
+/** How far a pixel must sit from the backdrop to count as the person. */
+const SUBJECT_TOLERANCE = 26;
+
 /**
  * `--placeholder` from the design system, which is what the prompt asks the
  * backdrop to be. Anything further than the tolerance means the model ignored
@@ -138,12 +160,18 @@ interface Flags {
   colour?: string;
   limit?: number;
   concurrency: number;
+  /** Recut the tiles from renders already on disk. Spends nothing. */
+  tilesOnly: boolean;
+  /** Re-align existing renders on the crown. Spends nothing. */
+  reframe: boolean;
 }
 
 function parseFlags(argv: string[]): Flags {
-  const flags: Flags = { dryRun: false, concurrency: DEFAULT_CONCURRENCY };
+  const flags: Flags = { dryRun: false, concurrency: DEFAULT_CONCURRENCY, tilesOnly: false, reframe: false };
   for (const arg of argv) {
     if (arg === '--dry-run') flags.dryRun = true;
+    else if (arg === '--tiles-only') flags.tilesOnly = true;
+    else if (arg === '--reframe') flags.reframe = true;
     else if (arg.startsWith('--style=')) flags.style = arg.slice(8);
     else if (arg.startsWith('--colour=')) flags.colour = arg.slice(9);
     else if (arg.startsWith('--color=')) flags.colour = arg.slice(8);
@@ -214,6 +242,117 @@ async function backdropDrift(jpeg: Buffer): Promise<number> {
     );
   }
   return worst;
+}
+
+/**
+ * Where the crown sits in a render, measured rather than assumed.
+ *
+ * The backdrop is a flat `#E7E1D8` by instruction, which makes the subject a
+ * solved problem: anything far enough from that colour is the person, and the
+ * first row carrying more than a speck of them is the top of the hair.
+ *
+ * This exists because the model does not frame consistently. Told to leave
+ * space above the crown, it put the crown anywhere from 9% to 29% down the
+ * frame across the catalogue. Cropping the same rectangle out of every render
+ * therefore produced a strip where some faces filled the tile and others
+ * floated small and low.
+ */
+async function findCrown(source: string | Buffer): Promise<number | null> {
+  const SCAN_WIDTH = 200;
+  const { data, info } = await sharp(source)
+    .resize(SCAN_WIDTH)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const { width, height, channels } = info;
+  for (let y = 0; y < height; y++) {
+    let count = 0;
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * channels;
+      const off = Math.max(
+        Math.abs(data[i] - BACKDROP.r),
+        Math.abs(data[i + 1] - BACKDROP.g),
+        Math.abs(data[i + 2] - BACKDROP.b),
+      );
+      if (off > SUBJECT_TOLERANCE) count++;
+    }
+    // A speck is a compression artifact; a row of them is a head.
+    if (count > width * 0.02) return y / height;
+  }
+  return null;
+}
+
+/**
+ * One hero, aligned on the crown.
+ *
+ * The gap is filled by stretching the picture's own top row rather than with a
+ * flat `#E7E1D8`. The rendered backdrop is never exactly the colour the prompt
+ * asked for — close, but carrying its own faint gradient and grain — so a
+ * constant fill leaves a visible seam straight across the frame. The top row is
+ * that render's own backdrop, so extending it is invisible.
+ */
+async function reframeHero(input: Buffer): Promise<Buffer> {
+  const crown = await findCrown(input);
+  if (crown === null) return input;
+
+  const shift = Math.round((HERO_CROWN_Y - crown) * OUT_HEIGHT);
+  // Already deep enough, or deeper: leave it. Raising a head would mean
+  // inventing the body beneath it.
+  if (shift <= 0) return input;
+
+  const strip = await sharp(input)
+    .extract({ left: 0, top: 0, width: OUT_WIDTH, height: 1 })
+    .resize(OUT_WIDTH, shift, { kernel: 'nearest' })
+    .toBuffer();
+  const body = await sharp(input)
+    .extract({ left: 0, top: 0, width: OUT_WIDTH, height: OUT_HEIGHT - shift })
+    .toBuffer();
+
+  return sharp({
+    create: { width: OUT_WIDTH, height: OUT_HEIGHT, channels: 3, background: BACKDROP },
+  })
+    .composite([
+      { input: strip, left: 0, top: 0 },
+      { input: body, left: 0, top: shift },
+    ])
+    .jpeg({ quality: 82, mozjpeg: true })
+    .toBuffer();
+}
+
+/**
+ * One tile, aligned on the crown and nothing else.
+ *
+ * Deliberately no rescaling. The renders already share a scale — the subject
+ * spans 99.4% of the frame width in every one of them — so the only thing out
+ * of true is how far down the head sits. Normalising size as well as position
+ * was tried and was worse: measuring the subject inside the head band measures
+ * the *hair*, so it shrank the long styles and blew up the buzz cut, which is
+ * the opposite of one shoot.
+ *
+ * So the window is always the full width, and only its vertical offset moves.
+ * Falls back to the old top crop when the crown cannot be found — a slightly
+ * loose tile beats no tile.
+ */
+async function tileFrom(source: string): Promise<Buffer> {
+  const meta = await sharp(source).metadata();
+  const W = meta.width ?? OUT_WIDTH;
+  const H = meta.height ?? OUT_HEIGHT;
+  const cropH = Math.round((W * TILE_HEIGHT) / TILE_WIDTH);
+  const crown = await findCrown(source);
+
+  if (crown !== null && cropH <= H) {
+    const y = Math.max(0, Math.min(Math.round(crown * H - cropH * TILE_CROWN_Y), H - cropH));
+    return sharp(source)
+      .extract({ left: 0, top: y, width: W, height: cropH })
+      .resize(TILE_WIDTH, TILE_HEIGHT)
+      .jpeg({ quality: 80, mozjpeg: true })
+      .toBuffer();
+  }
+
+  return sharp(source)
+    .resize(TILE_WIDTH, TILE_HEIGHT, { fit: 'cover', position: 'top' })
+    .jpeg({ quality: 80, mozjpeg: true })
+    .toBuffer();
 }
 
 interface QuotaError extends Error {
@@ -346,6 +485,34 @@ async function main() {
     }
   }
 
+  if (flags.reframe) {
+    let moved = 0;
+    for (const job of jobs) {
+      const path = join(OUT_DIR, job.key);
+      if (!existsSync(path)) continue;
+      const before = await findCrown(path);
+      const out = await reframeHero(readFileSync(path));
+      writeFileSync(path, out);
+      if (before !== null && before < HERO_CROWN_Y) moved++;
+    }
+    console.log(`${jobs.length} renders re-aligned (${moved} moved) · nothing billed`);
+    return;
+  }
+
+  if (flags.tilesOnly) {
+    let recut = 0;
+    for (const style of styles) {
+      for (const slot of PREVIEW_SLOTS) {
+        const source = join(OUT_DIR, heroKey(style.id, DEFAULT_COLOR_ID, slot));
+        if (!existsSync(source)) continue;
+        write(tileKey(style.id, slot), await tileFrom(source));
+        recut++;
+      }
+    }
+    console.log(`${recut} tiles recut from renders already on disk · nothing billed`);
+    return;
+  }
+
   const planned = jobs.length;
   jobs = jobs.filter((job) => !existsSync(join(OUT_DIR, job.key)));
   const skipped = planned - jobs.length;
@@ -391,10 +558,12 @@ async function main() {
             break;
           }
 
-          const framed = await sharp(outcome.jpeg!)
-            .resize(OUT_WIDTH, OUT_HEIGHT, { fit: 'cover', position: 'top' })
-            .jpeg({ quality: 82, mozjpeg: true })
-            .toBuffer();
+          const framed = await reframeHero(
+            await sharp(outcome.jpeg!)
+              .resize(OUT_WIDTH, OUT_HEIGHT, { fit: 'cover', position: 'top' })
+              .jpeg({ quality: 82, mozjpeg: true })
+              .toBuffer(),
+          );
 
           const drift = await backdropDrift(framed);
           attempt++;
@@ -456,11 +625,7 @@ async function main() {
     for (const slot of PREVIEW_SLOTS) {
       const source = join(OUT_DIR, heroKey(style.id, DEFAULT_COLOR_ID, slot));
       if (!existsSync(source)) continue;
-      const tile = await sharp(source)
-        .resize(TILE_WIDTH, TILE_HEIGHT, { fit: 'cover', position: 'top' })
-        .jpeg({ quality: 80, mozjpeg: true })
-        .toBuffer();
-      write(tileKey(style.id, slot), tile);
+      write(tileKey(style.id, slot), await tileFrom(source));
       tiles++;
     }
   }
