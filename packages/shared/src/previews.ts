@@ -54,16 +54,15 @@ export function tileKey(styleId: string, slot: PreviewSlot): string {
  * colour — the badge on the plate names a colour, and a picture that does not
  * show it is the plate telling a lie.
  *
- * **Bump `HERO_REVISION` whenever the framing changes**, for the same reason
- * tiles carry one: the pictures are served immutable for a year, so a changed
- * picture needs a changed key or nobody sees it.
+ * Carries no revision, and that is deliberate. The heads sit at different
+ * depths in these renders, but the fix for that belongs at render time rather
+ * than in the file: the plate is `flex: 1` and so is never quite the 9:16 the
+ * picture is, and it crops a different band of the image on every screen size.
+ * A frame baked into the JPEG can only be right for one of them.
  *
- * r1 was the model's own framing, which put the crown anywhere from 5% to 33%
- * down the frame — the pager visibly jumped as it swiped between two models of
- * the same cut. r2 aligns every render's crown at one depth.
+ * So the file stays as the model drew it — the original, kept — and the
+ * manifest carries a focus point the app aligns on. See `CatalogueImage.focus`.
  */
-export const HERO_REVISION = 2;
-
 export function heroKey(styleId: string, colorId: string, slot: PreviewSlot): string {
-  return `styles/${styleId}/${colorId}/${slot}-r${HERO_REVISION}.jpg`;
+  return `styles/${styleId}/${colorId}/${slot}.jpg`;
 }

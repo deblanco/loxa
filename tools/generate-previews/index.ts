@@ -81,20 +81,16 @@ const TILE_HEIGHT = 252;
 const TILE_CROWN_Y = 0.10;
 
 /**
- * How far down the hero frame the crown sits.
+ * The hero JPEGs are never re-framed.
  *
- * Set to the deepest crown the model produced across the catalogue rather than
- * to a prettier number, and that is the whole design. Aligning heads can only
- * ever push them *down*: the space above a head is backdrop and can be
- * fabricated invisibly, while the space below one is a body and cannot. Choose
- * a shallower target and every render with a lower head would need a torso
- * invented under it — measured on a pale model that artifact hides, on a darker
- * one it is a hard line across the chest.
- *
- * So the deepest head sets the mark and every other render comes down to meet
- * it. Nothing is scaled, so the heads stay the size the model drew them.
+ * An earlier version shifted every render so the crowns lined up, and it was
+ * the wrong layer: the preview plate is `flex: 1`, so it is never quite the
+ * 9:16 the picture is and crops a different band of it on every screen size. A
+ * frame baked into the file can only be right for one of them, and it was
+ * measurably wrong on the phone it was tested on — heads aligned, chins cut
+ * off. The originals stay as the model drew them and the app aligns at render
+ * time, from the focus point the manifest carries.
  */
-const HERO_CROWN_Y = 0.34;
 
 /** How far a pixel must sit from the backdrop to count as the person. */
 const SUBJECT_TOLERANCE = 26;
@@ -162,16 +158,13 @@ interface Flags {
   concurrency: number;
   /** Recut the tiles from renders already on disk. Spends nothing. */
   tilesOnly: boolean;
-  /** Re-align existing renders on the crown. Spends nothing. */
-  reframe: boolean;
 }
 
 function parseFlags(argv: string[]): Flags {
-  const flags: Flags = { dryRun: false, concurrency: DEFAULT_CONCURRENCY, tilesOnly: false, reframe: false };
+  const flags: Flags = { dryRun: false, concurrency: DEFAULT_CONCURRENCY, tilesOnly: false };
   for (const arg of argv) {
     if (arg === '--dry-run') flags.dryRun = true;
     else if (arg === '--tiles-only') flags.tilesOnly = true;
-    else if (arg === '--reframe') flags.reframe = true;
     else if (arg.startsWith('--style=')) flags.style = arg.slice(8);
     else if (arg.startsWith('--colour=')) flags.colour = arg.slice(9);
     else if (arg.startsWith('--color=')) flags.colour = arg.slice(8);
@@ -280,43 +273,6 @@ async function findCrown(source: string | Buffer): Promise<number | null> {
     if (count > width * 0.02) return y / height;
   }
   return null;
-}
-
-/**
- * One hero, aligned on the crown.
- *
- * The gap is filled by stretching the picture's own top row rather than with a
- * flat `#E7E1D8`. The rendered backdrop is never exactly the colour the prompt
- * asked for — close, but carrying its own faint gradient and grain — so a
- * constant fill leaves a visible seam straight across the frame. The top row is
- * that render's own backdrop, so extending it is invisible.
- */
-async function reframeHero(input: Buffer): Promise<Buffer> {
-  const crown = await findCrown(input);
-  if (crown === null) return input;
-
-  const shift = Math.round((HERO_CROWN_Y - crown) * OUT_HEIGHT);
-  // Already deep enough, or deeper: leave it. Raising a head would mean
-  // inventing the body beneath it.
-  if (shift <= 0) return input;
-
-  const strip = await sharp(input)
-    .extract({ left: 0, top: 0, width: OUT_WIDTH, height: 1 })
-    .resize(OUT_WIDTH, shift, { kernel: 'nearest' })
-    .toBuffer();
-  const body = await sharp(input)
-    .extract({ left: 0, top: 0, width: OUT_WIDTH, height: OUT_HEIGHT - shift })
-    .toBuffer();
-
-  return sharp({
-    create: { width: OUT_WIDTH, height: OUT_HEIGHT, channels: 3, background: BACKDROP },
-  })
-    .composite([
-      { input: strip, left: 0, top: 0 },
-      { input: body, left: 0, top: shift },
-    ])
-    .jpeg({ quality: 82, mozjpeg: true })
-    .toBuffer();
 }
 
 /**
@@ -485,20 +441,6 @@ async function main() {
     }
   }
 
-  if (flags.reframe) {
-    let moved = 0;
-    for (const job of jobs) {
-      const path = join(OUT_DIR, job.key);
-      if (!existsSync(path)) continue;
-      const before = await findCrown(path);
-      const out = await reframeHero(readFileSync(path));
-      writeFileSync(path, out);
-      if (before !== null && before < HERO_CROWN_Y) moved++;
-    }
-    console.log(`${jobs.length} renders re-aligned (${moved} moved) · nothing billed`);
-    return;
-  }
-
   if (flags.tilesOnly) {
     let recut = 0;
     for (const style of styles) {
@@ -558,12 +500,10 @@ async function main() {
             break;
           }
 
-          const framed = await reframeHero(
-            await sharp(outcome.jpeg!)
-              .resize(OUT_WIDTH, OUT_HEIGHT, { fit: 'cover', position: 'top' })
-              .jpeg({ quality: 82, mozjpeg: true })
-              .toBuffer(),
-          );
+          const framed = await sharp(outcome.jpeg!)
+            .resize(OUT_WIDTH, OUT_HEIGHT, { fit: 'cover', position: 'top' })
+            .jpeg({ quality: 82, mozjpeg: true })
+            .toBuffer();
 
           const drift = await backdropDrift(framed);
           attempt++;

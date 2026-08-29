@@ -128,10 +128,24 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
    * labelled placeholder it has always drawn.
    */
   const pages = [
-    ...(photo ? [{ key: 'photo', uri: photo.uri }] : []),
+    ...(photo ? [{ key: 'photo', uri: photo.uri, focus: undefined }] : []),
     ...heroKeys(catalogue, selection.styleId, selection.colorId)
-      .map((key) => ({ key: `model-${key}`, uri: assetUrl(key) }))
-      .filter((model): model is { key: string; uri: string } => model.uri !== undefined),
+      .map((key) => ({
+        key: `model-${key}`,
+        uri: assetUrl(key),
+        // Where this render's head sits. The user's own photo has no entry and
+        // does not want one — it is already framed by whoever took it.
+        focus: catalogue.focus?.[key],
+      }))
+      .filter(
+        (
+          model,
+        ): model is {
+          key: string;
+          uri: string;
+          focus: { top: number; bottom: number } | undefined;
+        } => model.uri !== undefined,
+      ),
   ];
 
   const choosePhoto = useCallback(async () => {
@@ -217,7 +231,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
           >
             {pages.map((item) => (
               <Pressable key={item.key} onPress={choosePhoto} style={{ width: plateWidth }}>
-                <PhotoPlate uri={item.uri} style={styles.plate} />
+                <PhotoPlate uri={item.uri} focus={item.focus} style={styles.plate} />
               </Pressable>
             ))}
           </ScrollView>

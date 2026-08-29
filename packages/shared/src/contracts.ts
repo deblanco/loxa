@@ -176,6 +176,32 @@ export const catalogueResponseSchema = z
     colors: z.array(catalogueColorSchema).min(1),
     /** What the preview screen opens on. Both must appear above. */
     defaults: z.object({ styleId: catalogueIdSchema, colorId: catalogueIdSchema }),
+    /**
+     * Where the head sits in each hero, as fractions of the image height.
+     *
+     * `top` is the crown, `bottom` the underside of the head. The app fits that
+     * band into the plate: centred on it, and scaled down when the band would
+     * not otherwise fit. That is what stops a big style — an afro, a high
+     * ponytail — being cropped at the crown on a short plate.
+     *
+     * It lives here, in the manifest, rather than in the pictures. The renders
+     * are 9:16 and the plate is `flex: 1`, so the plate is never quite the same
+     * shape and shows a different band of the image on every screen size: a
+     * frame baked into a JPEG can only be right for one of them. Keeping it as
+     * data also means re-framing the catalogue is an upload rather than a
+     * release, and the original files are never touched.
+     *
+     * Hand-editable, deliberately. Nudging one cut is two numbers here.
+     *
+     * Optional, and absent means "centre the picture" — an older manifest still
+     * renders, just less tidily.
+     */
+    focus: z
+      .record(
+        previewKeySchema,
+        z.object({ top: z.number().min(0).max(1), bottom: z.number().min(0).max(1) }),
+      )
+      .optional(),
   })
   .superRefine((manifest, ctx) => {
     // Referential integrity, checked here so that both the Worker serving a

@@ -14,7 +14,7 @@ describe('preview keys', () => {
   });
 
   it('builds a hero key from a style, a colour and a slot', () => {
-    expect(heroKey('wolf-cut', 'platinum', 1)).toBe('styles/wolf-cut/platinum/1-r2.jpg');
+    expect(heroKey('wolf-cut', 'platinum', 1)).toBe('styles/wolf-cut/platinum/1.jpg');
   });
 
   it('offers two models per style', () => {

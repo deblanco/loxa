@@ -14,6 +14,7 @@
  */
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import sharp from 'sharp';
 import {
   DEFAULT_COLOR_ID,
   DEFAULT_STYLE_ID,
@@ -36,7 +37,56 @@ function exists(key: string): boolean {
   return existsSync(join(OUT_DIR, key));
 }
 
-export function buildManifest(): CatalogueResponse {
+/** `--placeholder`, which the prompt asks the backdrop to be. */
+const BACKDROP = { r: 0xe7, g: 0xe1, b: 0xd8 };
+const SUBJECT_TOLERANCE = 26;
+
+/**
+ * The head band in a render: crown at the top, underside of the head below.
+ *
+ * The backdrop is a flat `#E7E1D8` by instruction, so the crown is solvable —
+ * the first row carrying more than a speck of anything else is the top of the
+ * hair.
+ *
+ * The bottom is a constant below it rather than a second measurement, and that
+ * is a deliberate retreat. Finding the chin means finding the neck, and half
+ * the catalogue has no neck to find: long hair covers it, so the width profile
+ * never dips. Measuring anyway produced the shoulder line on those, a band half
+ * again too tall, and framing that disagreed between a bob and a buzz cut for
+ * no reason. The renders all share a scale — the subject spans 99.4% of the
+ * frame width in every one of them — so head height barely varies and the crown
+ * is the only landmark that genuinely moves.
+ */
+const HEAD_HEIGHT = 0.44;
+
+async function headBand(key: string): Promise<{ top: number; bottom: number } | null> {
+  const { data, info } = await sharp(join(OUT_DIR, key))
+    .resize(200)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const { width, height, channels } = info;
+  for (let y = 0; y < height; y++) {
+    let count = 0;
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * channels;
+      const off = Math.max(
+        Math.abs(data[i] - BACKDROP.r),
+        Math.abs(data[i + 1] - BACKDROP.g),
+        Math.abs(data[i + 2] - BACKDROP.b),
+      );
+      if (off > SUBJECT_TOLERANCE) count++;
+    }
+    // A speck is a compression artifact; a row of them is a head.
+    if (count > width * 0.02) {
+      const top = y / height;
+      return { top: Number(top.toFixed(4)), bottom: Number(Math.min(1, top + HEAD_HEIGHT).toFixed(4)) };
+    }
+  }
+  return null;
+}
+
+export async function buildManifest(): Promise<CatalogueResponse> {
   const styles: CatalogueStyle[] = [];
 
   for (const style of HAIR_STYLES) {
@@ -81,11 +131,25 @@ export function buildManifest(): CatalogueResponse {
   const defaultColor =
     defaultStyle.colors.find((color) => color.id === DEFAULT_COLOR_ID) ?? defaultStyle.colors[0]!;
 
+  // Measured once here rather than on every device: the app has no way to find
+  // a head in a JPEG, and this file is already the thing that says what the
+  // catalogue is.
+  const focus: Record<string, { top: number; bottom: number }> = {};
+  for (const style of styles) {
+    for (const color of style.colors) {
+      for (const key of color.heroes) {
+        const band = await headBand(key);
+        if (band) focus[key] = band;
+      }
+    }
+  }
+
   const manifest: CatalogueResponse = {
     version: 1,
     styles,
     colors,
     defaults: { styleId: defaultStyle.id, colorId: defaultColor.id },
+    focus,
   };
 
   // Parsed with the same schema the Worker and the app use, here rather than
@@ -95,7 +159,7 @@ export function buildManifest(): CatalogueResponse {
 }
 
 if (import.meta.main) {
-  const manifest = buildManifest();
+  const manifest = await buildManifest();
   const heroes = manifest.styles.reduce(
     (total, style) => total + style.colors.reduce((n, color) => n + color.heroes.length, 0),
     0,

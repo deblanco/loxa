@@ -1,5 +1,12 @@
 import { Image } from 'expo-image';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { color, radius } from '../theme';
 import { Meta } from './Text';
 
@@ -14,19 +21,84 @@ import { Meta } from './Text';
 interface Props {
   /** A `data:` URI or a file URI. Absent draws the placeholder. */
   uri?: string | null;
+  /**
+   * The head band in the picture, as fractions of its height, from the
+   * manifest. Given one, the plate centres on that band and scales down until
+   * it fits, instead of centring the whole frame and hoping.
+   *
+   * This is why the catalogue JPEGs are never re-cropped. The renders put the
+   * crown anywhere from 5% to 33% down the frame, but the plate is `flex: 1`
+   * and so is never quite the 9:16 the picture is — it shows a different band
+   * of the image on every screen size. Baking a frame into the file can only be
+   * right for one of them; doing it here is right on all of them, and keeps the
+   * original.
+   */
+  focus?: { top: number; bottom: number };
   label?: string;
   dark?: boolean;
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
 }
 
-export function PhotoPlate({ uri, label, dark, style, children }: Props) {
+/** The renders are all 1080 × 1920. */
+const PREVIEW_RATIO = 1920 / 1080;
+
+/**
+ * How much of the plate's height the head is allowed to take.
+ *
+ * The rest is breathing room, and it is what makes a big style work: an afro or
+ * a high ponytail is scaled down until the crown clears the top edge, rather
+ * than being cropped by it.
+ */
+const HEAD_FILL = 0.78;
+
+export function PhotoPlate({ uri, focus, label, dark, style, children }: Props) {
+  const [box, setBox] = useState<{ width: number; height: number } | null>(null);
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setBox((current) =>
+      current && current.width === width && current.height === height ? current : { width, height },
+    );
+  };
+
+  // Sized so the head band takes HEAD_FILL of the plate, then centred on it.
+  //
+  // Never larger than covering the plate's width, so a small head is not blown
+  // up; never smaller than covering its height, because the picture running out
+  // above the bottom edge is a body stopping in mid-air. Running out at the
+  // sides is fine — the render's backdrop is the plate's own colour, so the gap
+  // cannot be seen.
+  let aligned: { width: number; height: number; top: number; left: number } | null = null;
+  if (focus && box && box.width > 0 && box.height > 0) {
+    const band = Math.max(0.01, focus.bottom - focus.top);
+    const cover = box.width * PREVIEW_RATIO;
+    const height = Math.max(box.height, Math.min(cover, (box.height * HEAD_FILL) / band));
+    const width = height / PREVIEW_RATIO;
+    const centre = (focus.top + focus.bottom) / 2;
+    aligned = {
+      width,
+      height,
+      left: (box.width - width) / 2,
+      top: Math.min(0, Math.max(box.height - height, box.height / 2 - centre * height)),
+    };
+  }
+
   return (
-    <View style={[styles.plate, dark ? styles.dark : styles.light, style]}>
+    <View style={[styles.plate, dark ? styles.dark : styles.light, style]} onLayout={onLayout}>
       {uri ? (
         <Image
           source={{ uri }}
-          style={StyleSheet.absoluteFill}
+          style={
+            aligned
+              ? {
+                  position: 'absolute',
+                  left: aligned.left,
+                  width: aligned.width,
+                  height: aligned.height,
+                  top: aligned.top,
+                }
+              : StyleSheet.absoluteFill
+          }
           contentFit="cover"
           // The catalogue is served from R2 with a year of cache and immutable
           // keys, so a picture fetched once should never be fetched again. RN's
