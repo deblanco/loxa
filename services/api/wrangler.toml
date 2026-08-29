@@ -87,15 +87,23 @@ OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
 # adapter's fail-closed branch would turn that into "nobody is a subscriber"
 # without saying so. The ids below are not secrets — they are path segments.
 #
-# With no key set the stub answers false and every device stays on the free
-# credit. That is deliberate: a deployment that cannot verify a purchase must
-# not assume one.
-# Not borrowed from WhiskerMind, deliberately: its project sells a different
+# With no key set the stub answers false and every device reads as free — which
+# now means no render at all, since the free credit was withdrawn. That is
+# deliberate: a deployment that cannot verify a purchase must not assume one.
+# Loxa's own RevenueCat project, never WhiskerMind's: that one sells a different
 # entitlement ("pro") and different products, so pointing Loxa at it would have
-# every real customer read as free. Left as TODO until Loxa has its own project;
-# until then the stub answers and DEV_PREMIUM covers local work.
-REVENUECAT_PROJECT_ID = "TODO-revenuecat-project-id"
-REVENUECAT_WEEKLY_ENTITLEMENT_ID = "TODO-revenuecat-entitlement-id"
+# every real customer read as free.
+#
+# The entitlement id is here as well as the lookup key because the v2 answer
+# uses it. Measured, not assumed: asked for a real customer's active
+# entitlements, the API named `entl1aeb4e8cd9` and not `loxa_pro`, so a
+# deployment carrying only the lookup key would read a paying subscriber as
+# free — silently, because the adapter fails closed.
+#
+# Both are path segments, not secrets. The `sk_` key is the secret and is set
+# with `wrangler secret put`.
+REVENUECAT_PROJECT_ID = "projeb2c8f9f"
+REVENUECAT_WEEKLY_ENTITLEMENT_ID = "entl1aeb4e8cd9"
 
 # --- Not yet used -----------------------------------------------------------
 # The try-on route is synchronous. The queue earns its keep somewhere around

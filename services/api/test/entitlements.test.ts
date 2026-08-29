@@ -1,4 +1,4 @@
-import { SINGLE_PHOTO_PRODUCT_ID, WEEKLY_PRODUCT_ID } from '@loxa/shared';
+import { SINGLE_PHOTO_PRODUCT_ID, WEEKLY_ENTITLEMENT, WEEKLY_PRODUCT_ID } from '@loxa/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { devEntitlements } from '../src/adapters/entitlements/dev';
 import { revenueCatEntitlements } from '../src/adapters/entitlements/revenuecat';
@@ -34,7 +34,7 @@ afterEach(() => {
 
 describe('revenueCatEntitlements.planFor', () => {
   it('reads the weekly entitlement by its lookup key', async () => {
-    interceptRevenueCat({ entitlements: { items: [{ entitlement_id: 'weekly' }] } });
+    interceptRevenueCat({ entitlements: { items: [{ entitlement_id: WEEKLY_ENTITLEMENT }] } });
     await expect(revenueCatEntitlements(config).planFor(DEVICE)).resolves.toBe('weekly');
   });
 
