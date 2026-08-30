@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { creditChipLabel } from '../format';
 import { color, radius, space } from '../theme';
@@ -10,6 +11,8 @@ import { Body } from './Text';
  * no room for the word "credits" and a bare number in a pill would be a mystery.
  */
 export function CreditChip({ credits, onPress }: { credits: number; onPress?: () => void }) {
+  const { t } = useTranslation();
+
   const content = (
     <View style={styles.chip}>
       <View style={styles.dot} />
@@ -22,7 +25,7 @@ export function CreditChip({ credits, onPress }: { credits: number; onPress?: ()
   if (!onPress) return content;
 
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${credits} credits left`} onPress={onPress}>
+    <Pressable accessibilityRole="button" accessibilityLabel={t('preview.creditsLeft', { count: credits })} onPress={onPress}>
       {content}
     </Pressable>
   );

@@ -45,8 +45,10 @@ export function initialSelection(defaults: { styleId: string; colorId: string })
  * something other than what it is labelled is how a user spends a credit they
  * did not mean to.
  */
-export function primaryActionLabel(selection: Selection): string {
-  return needsCamera(selection) ? 'Take photo & try on' : 'Try On';
+export function primaryActionLabel(
+  selection: Selection,
+): 'preview.takePhotoAndTryOn' | 'preview.tryOn' {
+  return needsCamera(selection) ? 'preview.takePhotoAndTryOn' : 'preview.tryOn';
 }
 
 export function needsCamera(selection: Selection): boolean {

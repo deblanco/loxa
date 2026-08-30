@@ -3,25 +3,31 @@
  *
  * One a day, opt-in, and it has to earn the interruption — so it names a look
  * rather than announcing that the app exists. "Try a wolf cut today" is a
- * suggestion; "Come back to Loxa" is a nag.
+ * suggestion; "Come back to Loxa" is a nag. The lines themselves are in
+ * `src/i18n/locales/`, one set per language.
  *
  * Rotated by day rather than at random so two consecutive days are never the
  * same line, which is what makes a daily notification feel written.
  */
+
+/**
+ * Which line, as the pair of keys that renders it.
+ *
+ * Written out rather than built from a template so the keys are literals and
+ * i18next's typed `t` can check them, which is the whole reason a missing
+ * notification string fails at `tsc` rather than at 18:30.
+ */
 const LINES = [
-  { title: 'Curtain bangs, on you', body: 'Two taps to see it before you commit.' },
-  { title: 'Going lighter?', body: 'Honey blonde and platinum, on your own photo.' },
-  { title: 'The bob is back', body: 'Blunt, chin-length, no layers. Try it on.' },
-  { title: 'Copper season', body: 'See how a warm red reads against your skin.' },
-  { title: 'Short hair, hypothetically', body: 'A pixie takes ten seconds and no scissors.' },
-  { title: 'Beach waves', body: 'Undone, but on purpose. See it on you.' },
-  { title: 'A wolf cut, maybe', body: 'Heavy layers, wispy fringe. Worth a look.' },
+  { title: 'notifications.line1.title', body: 'notifications.line1.body' },
+  { title: 'notifications.line2.title', body: 'notifications.line2.body' },
+  { title: 'notifications.line3.title', body: 'notifications.line3.body' },
+  { title: 'notifications.line4.title', body: 'notifications.line4.body' },
+  { title: 'notifications.line5.title', body: 'notifications.line5.body' },
+  { title: 'notifications.line6.title', body: 'notifications.line6.body' },
+  { title: 'notifications.line7.title', body: 'notifications.line7.body' },
 ] as const;
 
-export interface NotificationCopy {
-  title: string;
-  body: string;
-}
+export type NotificationCopy = (typeof LINES)[number];
 
 export function copyForDay(dayIndex: number): NotificationCopy {
   const line = LINES[((dayIndex % LINES.length) + LINES.length) % LINES.length];

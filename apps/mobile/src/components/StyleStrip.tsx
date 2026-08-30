@@ -1,5 +1,6 @@
 import type { CatalogueResponse } from '@loxa/shared';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { assetUrl } from '../api/assets';
 import { tileFor } from '../catalogue';
@@ -36,14 +37,15 @@ interface Props {
 }
 
 export function StyleStrip({ catalogue, selectedId, onSelect }: Props) {
+  const { t } = useTranslation();
   const [seed] = useState(() => Math.floor(Math.random() * 1000));
 
   return (
     <View>
       <View style={styles.header}>
-        <Meta>Hair styles</Meta>
+        <Meta>{t('strips.styles')}</Meta>
         <Body variant="caption" tone="ink40">
-          All {catalogue.styles.length}
+          {t('strips.all', { count: catalogue.styles.length })}
         </Body>
       </View>
 

@@ -73,4 +73,11 @@ describe('resetAppState', () => {
   it('deletes the looks directory', () => {
     expect(reset).toContain("'looks'");
   });
+
+  it('deletes the profile portrait', () => {
+    // The key alone would leave the picture on disk; the directory alone would
+    // leave the app holding an id whose file has gone. Both, or neither works.
+    expect(reset).toContain("'profile'");
+    expect(declared.has('loxa.profilePhoto.v1')).toBe(true);
+  });
 });

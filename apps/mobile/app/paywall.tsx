@@ -1,6 +1,7 @@
 import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from '@loxa/shared';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
@@ -21,6 +22,7 @@ import { color, motion, radius, space } from '@/theme';
  * checks them with the store, and the balance that comes back is the truth.
  */
 export default function Paywall() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { refresh } = useCredits();
   const rise = useRef(new Animated.Value(0)).current;
@@ -64,17 +66,17 @@ export default function Paywall() {
       >
         <View style={styles.grabber} />
 
-        <Display variant="displayS">Out of credits</Display>
+        <Display variant="displayS">{t('paywall.title')}</Display>
         <Display variant="displayS" italic tone="ink60">
-          until Monday.
+          {t('paywall.titleItalic')}
         </Display>
 
         <View style={styles.options}>
           <Pressable accessibilityRole="button" onPress={buySingle} style={styles.option}>
             <View style={styles.optionText}>
-              <Body weight="medium">One more photo</Body>
+              <Body weight="medium">{t('paywall.single')}</Body>
               <Body variant="caption" tone="ink55" style={styles.note}>
-                Single generation, no subscription
+                {t('paywall.singleNote')}
               </Body>
             </View>
             <Display variant="price">{SINGLE_PHOTO_PRICE_LABEL}</Display>
@@ -88,26 +90,27 @@ export default function Paywall() {
             <View style={styles.optionText}>
               <View style={styles.titleRow}>
                 <Body weight="medium" tone="paper">
-                  Loxa Weekly
+                  {t('paywall.weekly')}
                 </Body>
                 <View style={styles.tag}>
                   <Meta variant="metaSmall" tone="paper">
-                    best value
+                    {t('paywall.bestValue')}
                   </Meta>
                 </View>
               </View>
               <Body variant="caption" tone="paper60" style={styles.note}>
-                {WEEKLY_CREDITS} photos every week
+                {t('paywall.weeklyNote', { count: WEEKLY_CREDITS })}
               </Body>
             </View>
             <Display variant="price" tone="paper">
-              {WEEKLY_PRICE_LABEL.split('/')[0]}/wk
+              {WEEKLY_PRICE_LABEL.split('/')[0]}
+              {t('paywall.perWeek')}
             </Display>
           </Pressable>
         </View>
 
         <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.dismiss}>
-          <Body tone="ink45">Not now</Body>
+          <Body tone="ink45">{t('paywall.notNow')}</Body>
         </Pressable>
 
         <LegalLinks />

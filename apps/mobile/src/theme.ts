@@ -87,6 +87,7 @@ export const type = {
   caption: { size: 12.5, line: 17 },
   tile: { size: 11, line: 14 },
 
+  metaLarge: { size: 12, tracking: 1.9 },
   meta: { size: 10, tracking: 1.4 },
   metaSmall: { size: 9.5, tracking: 0.95 },
   note: { size: 11, line: 18 },

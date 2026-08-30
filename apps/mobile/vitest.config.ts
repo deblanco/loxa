@@ -19,6 +19,7 @@ export default defineConfig({
       provider: 'v8',
       include: [
         'src/face/geometry.ts',
+        'src/i18n/languages.ts',
         'src/face/verdict.ts',
         'src/format.ts',
         'src/notifications/copy.ts',

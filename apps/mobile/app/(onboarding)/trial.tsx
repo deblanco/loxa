@@ -2,6 +2,7 @@ import { WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from '@loxa/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { assetUrl } from '@/api/assets';
 import { Pill } from '@/components/Pill';
@@ -20,11 +21,7 @@ import { color, space } from '@/theme';
  * somebody who says no still gets to use the thing once, which is what makes
  * the trial an offer rather than a toll.
  */
-const PERKS = [
-  `${WEEKLY_CREDITS} photos a week, any style or colour`,
-  'Your own face — not a stock model',
-  'New looks dropped daily',
-] as const;
+const PERKS = ['trial.perkCredits', 'trial.perkOwnFace', 'trial.perkDaily'] as const;
 
 /**
  * The wall, as three columns of four.
@@ -124,6 +121,7 @@ const COLUMNS = [
 type Tile = (typeof COLUMNS)[number]['tiles'][number];
 
 export default function Trial() {
+  const { t } = useTranslation();
   const { complete } = useOnboarding();
 
   async function startTrial() {
@@ -156,9 +154,9 @@ export default function Trial() {
 
       <View style={styles.offer}>
         <View style={styles.headline}>
-          <Meta>3 days free</Meta>
-          <Display variant="displayM">Change your hair</Display>
-          <Display variant="displayM">twenty times a week.</Display>
+          <Meta>{t('trial.badge')}</Meta>
+          <Display variant="displayM">{t('trial.headline')}</Display>
+          <Display variant="displayM">{t('trial.headlineSecond')}</Display>
         </View>
 
         <View style={styles.perks}>
@@ -166,18 +164,18 @@ export default function Trial() {
             <View key={perk} style={styles.perk}>
               <View style={styles.bullet} />
               <Body tone="ink72" style={styles.perkText}>
-                {perk}
+                {t(perk, { count: WEEKLY_CREDITS })}
               </Body>
             </View>
           ))}
         </View>
 
         <View style={styles.actions}>
-          <Pill label="Enable free trial" onPress={startTrial} />
-          <Pill label="Continue free" tone="quiet" onPress={continueFree} />
+          <Pill label={t('trial.start')} onPress={startTrial} />
+          <Pill label={t('trial.continueFree')} tone="quiet" onPress={continueFree} />
           {/* The price before the tap, not after it. */}
           <Meta variant="note" tone="ink40" sentence style={styles.terms}>
-            then {WEEKLY_PRICE_LABEL} · {WEEKLY_CREDITS} photos a week · cancel anytime
+            {t('trial.terms', { price: WEEKLY_PRICE_LABEL, count: WEEKLY_CREDITS })}
           </Meta>
           <LegalLinks />
         </View>

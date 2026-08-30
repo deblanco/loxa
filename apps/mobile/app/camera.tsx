@@ -1,6 +1,14 @@
-import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  AppState,
+  Linking,
+  Pressable,
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Camera as VisionCamera,
@@ -10,11 +18,13 @@ import {
   type TargetCameraPosition,
 } from 'react-native-vision-camera';
 import { FaceConstellation } from '@/components/FaceConstellation';
+import { FlipIcon } from '@/components/FlipIcon';
 import { Pill } from '@/components/Pill';
 import { Body, Meta } from '@/components/Text';
 import { idleGeometry, type FaceGeometry } from '@/face/geometry';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary, prepare, type PreparedPhoto } from '@/photo';
+import { saveProfilePhoto } from '@/store/profile-photo';
 import { color, radius, space } from '@/theme';
 
 /**
@@ -35,6 +45,12 @@ import { color, radius, space } from '@/theme';
  * after the picker both. A shot with nobody in it does not leave this screen.
  *
  * Front camera by default, because the photo is of the person holding the phone.
+ *
+ * Two callers, one screen. From the preview the shot is handed back through the
+ * router and used once; from the profile it is written down as the portrait and
+ * the screen simply closes. Only the title and what happens after the shutter
+ * differ — the oval, the check and the library button are the same question
+ * either way.
  */
 
 /** The guide oval's frame, from `styles.guide`. Both live or neither does. */
@@ -43,8 +59,22 @@ const GUIDE_TOP = 0.16;
 const GUIDE_BOTTOM = 0.22;
 
 export default function Camera() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { hasPermission, requestPermission } = useCameraPermission();
+  // `canRequestPermission` is the difference between a prompt and a dead
+  // button. iOS asks once and only once: after a refusal `requestPermission`
+  // resolves false having shown nothing, so past that point the only way back
+  // is Settings and the button has to say so.
+  const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
+  // The viewfinder is live hardware. It runs while this screen is in front and
+  // not a moment longer — behind the library sheet, on the way to the profile,
+  // or with the app in the background it is off, which is both the battery and
+  // the green dot in the status bar.
+  const focused = useIsFocused();
+  const foreground = useAppActive();
+  const active = focused && foreground;
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const forProfile = from === 'profile';
   const [facing, setFacing] = useState<TargetCameraPosition>('front');
 
   const device = useCameraDevice(facing);
@@ -82,7 +112,7 @@ export default function Camera() {
       return;
     }
     setRejected(null);
-    handOff(result.photo);
+    await handOff(result.photo);
   }
 
   async function fromLibrary() {
@@ -93,10 +123,17 @@ export default function Camera() {
       return;
     }
     setRejected(null);
-    handOff(result.photo);
+    await handOff(result.photo);
   }
 
-  function handOff(photo: PreparedPhoto) {
+  async function handOff(photo: PreparedPhoto) {
+    if (forProfile) {
+      await saveProfilePhoto(photo.base64);
+      // Back rather than replace: the profile pushed this screen and re-reads
+      // the portrait when it comes forward again.
+      router.back();
+      return;
+    }
     router.replace({
       pathname: '/preview',
       params: { photoUri: photo.uri, photoBase64: photo.base64 },
@@ -106,13 +143,16 @@ export default function Camera() {
   if (!hasPermission) {
     return (
       <View style={[styles.screen, styles.ask, { paddingTop: insets.top + space.s10 }]}>
-        <Meta tone="paper60">Camera</Meta>
+        <Meta tone="paper60">{t('camera.permission')}</Meta>
         <Body tone="paper66" style={styles.askText}>
-          Loxa needs the camera to take the photo it restyles. Nothing is uploaded until you press
-          Try On.
+          {t(canRequestPermission ? 'camera.permissionBody' : 'camera.permissionDenied')}
         </Body>
-        <Pill label="Allow camera" tone="light" onPress={requestPermission} />
-        <Pill label="Choose from library" tone="quietOnNight" onPress={fromLibrary} />
+        <Pill
+          label={t(canRequestPermission ? 'camera.allow' : 'camera.openSettings')}
+          tone="light"
+          onPress={canRequestPermission ? requestPermission : () => Linking.openSettings()}
+        />
+        <Pill label={t('camera.chooseFromLibrary')} tone="quietOnNight" onPress={fromLibrary} />
       </View>
     );
   }
@@ -124,7 +164,7 @@ export default function Camera() {
           <VisionCamera
             style={StyleSheet.absoluteFill}
             device={device}
-            isActive
+            isActive={active}
             resizeMode="cover"
             mirrorMode="auto"
             outputs={[photoOutput]}
@@ -138,50 +178,77 @@ export default function Camera() {
           sentence
           style={styles.hint}
         >
-          {rejected ? verdictLine(rejected) : 'centre your face · even light · hair tied back off'}
+          {t(rejected ? verdictLine(rejected) : 'camera.hint')}
         </Meta>
       </View>
 
       <View style={[styles.header, { top: insets.top + space.s4 }]}>
+        {/* Centred on the screen rather than in what is left of the row, so the
+            title does not shift when the close button is the only thing beside
+            it. */}
+        <Meta tone="paper60" style={styles.headerTitle}>
+          {t(forProfile ? 'camera.titleProfile' : 'camera.title')}
+        </Meta>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Close"
+          accessibilityLabel={t('camera.close')}
           onPress={() => router.back()}
           style={styles.round}
         >
           <Body tone="paper">✕</Body>
         </Pressable>
-        <Meta tone="paper60">Photo for this look</Meta>
-        <View style={styles.round} />
       </View>
 
       <View style={[styles.controls, { bottom: insets.bottom + space.s5 }]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Choose from library"
+          accessibilityLabel={t('camera.chooseFromLibrary')}
           onPress={fromLibrary}
-          style={styles.library}
+          hitSlop={space.s4}
+          style={[styles.side, styles.library]}
         >
-          <Meta variant="metaSmall" tone="paper50">
-            library
+          <Meta variant="metaLarge" tone="paper60">
+            {t('camera.library')}
           </Meta>
         </Pressable>
 
-        <Pressable accessibilityRole="button" accessibilityLabel="Take photo" onPress={snap} style={styles.shutterRing}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('camera.takePhoto')} onPress={snap} style={styles.shutterRing}>
           <View style={styles.shutter} />
         </Pressable>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Flip camera"
-          onPress={() => setFacing((current) => (current === 'front' ? 'back' : 'front'))}
-          style={styles.flip}
-        >
-          <Body tone="paper">⟳</Body>
-        </Pressable>
+        <View style={styles.side}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('camera.flip')}
+            onPress={() => setFacing((current) => (current === 'front' ? 'back' : 'front'))}
+            style={styles.flip}
+          >
+            <FlipIcon size={30} />
+          </Pressable>
+        </View>
       </View>
     </View>
   );
+}
+
+/**
+ * Whether the app is in the foreground.
+ *
+ * `useCameraPermission` already re-reads its status on this event, which is
+ * what makes the trip to Settings and back land on a working viewfinder rather
+ * than on the same wall.
+ */
+function useAppActive(): boolean {
+  const [state, setState] = useState(() => AppState.currentState === 'active');
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (next) =>
+      setState(next === 'active'),
+    );
+    return () => subscription.remove();
+  }, []);
+
+  return state;
 }
 
 const styles = StyleSheet.create({
@@ -214,8 +281,9 @@ const styles = StyleSheet.create({
     right: space.gutterTextWide,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
   },
+  headerTitle: { position: 'absolute', left: 0, right: 0, textAlign: 'center' },
   round: {
     width: 34,
     height: 34,
@@ -232,17 +300,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  library: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.tile,
-    backgroundColor: '#211e1c',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingBottom: 5,
-  },
+  // The word, and nothing around it. The tile it used to sit in was a hatched
+  // square that read as a thumbnail with no picture in it — an empty slot where
+  // this is an action.
+  library: { justifyContent: 'center' },
   shutterRing: {
     width: 74,
     height: 74,
@@ -252,12 +313,17 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   shutter: { flex: 1, borderRadius: radius.pill, backgroundColor: color.paper },
+  // The word and the button are given the same width, so the shutter sits on
+  // the centre line rather than wherever the longer of the two leaves it —
+  // "LIBRARY" is wider than a 64pt circle, and in German it is wider still.
+  side: { width: 96 },
   flip: {
-    width: 52,
-    height: 52,
+    width: 64,
+    height: 64,
     borderRadius: radius.pill,
     backgroundColor: 'rgba(255,255,255,0.14)',
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'flex-end',
   },
 });

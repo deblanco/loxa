@@ -11,9 +11,10 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { deviceId } from '@/api/client';
+import { loadLanguage } from '@/i18n';
 import { loadCatalogue } from '@/store/catalogue';
 import { purchases } from '@/purchases';
 import { color } from '@/theme';
@@ -28,11 +29,16 @@ void SplashScreen.preventAutoHideAsync();
  * photograph. The profile is a push from the header, the paywall is a modal,
  * and that is the entire structure.
  *
- * The splash is held until the fonts are in. The design system is a serif for
- * statements and a sans for everything else, and a first frame in the system
- * font then reflowing into the real one is worse than a beat of splash.
+ * The splash is held until the fonts and the language are in. The design
+ * system is a serif for statements and a sans for everything else, and a first
+ * frame in the system font then reflowing into the real one is worse than a
+ * beat of splash. The language is held for the same reason and it is the same
+ * beat: i18next starts on the phone's language synchronously, and this is only
+ * the stored choice correcting it, which must not arrive as a flash of Spanish
+ * on the entry carousel.
  */
 export default function RootLayout() {
+  const [languageLoaded, setLanguageLoaded] = useState(false);
   const [fontsLoaded] = useFonts({
     InstrumentSerif_400Regular,
     InstrumentSerif_400Regular_Italic,
@@ -50,13 +56,17 @@ export default function RootLayout() {
     // usual case — a cached manifest — storage has answered before the preview
     // screen mounts and its loading state is never seen.
     void loadCatalogue();
+
+    void loadLanguage().finally(() => setLanguageLoaded(true));
   }, []);
 
-  useEffect(() => {
-    if (fontsLoaded) void SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+  const ready = fontsLoaded && languageLoaded;
 
-  if (!fontsLoaded) return null;
+  useEffect(() => {
+    if (ready) void SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
     <SafeAreaProvider>

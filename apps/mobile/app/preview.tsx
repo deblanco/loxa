@@ -1,6 +1,7 @@
 import type { CatalogueResponse } from '@loxa/shared';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { assetUrl } from '@/api/assets';
@@ -18,6 +19,7 @@ import { adjacentStyle, clampSelection, colorsFor, findColor, findStyle, heroKey
 import { initialSelection, primaryAction, primaryActionLabel, withSource } from '@/selection';
 import { useCatalogue } from '@/store/catalogue';
 import { useCredits } from '@/store/credits';
+import { readProfilePhoto } from '@/store/profile-photo';
 import { color, radius, space } from '@/theme';
 
 /**
@@ -53,6 +55,7 @@ export default function Preview() {
  * a broken screen, where no strip reads as one still loading.
  */
 function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: () => void }) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   return (
@@ -63,7 +66,7 @@ function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: (
 
       <View style={styles.plateWrap}>
         <PhotoPlate
-          label={offline ? 'the catalogue is not available' : undefined}
+          label={offline ? t('preview.catalogueUnavailable') : undefined}
           style={styles.plate}
         />
       </View>
@@ -71,13 +74,13 @@ function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: (
       <View style={styles.controls}>
         {offline ? (
           <>
-            <Pill label="Try again" onPress={onRetry} />
+            <Pill label={t('common.tryAgain')} onPress={onRetry} />
             <Meta variant="note" tone="ink45" sentence style={styles.centred}>
-              loxa needs a connection the first time
+              {t('preview.needsConnection')}
             </Meta>
           </>
         ) : (
-          <Pill label="Try On" cost={1} disabled onPress={() => {}} />
+          <Pill label={t('preview.tryOn')} cost={1} disabled onPress={() => {}} />
         )}
       </View>
     </View>
@@ -85,6 +88,7 @@ function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: (
 }
 
 function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
   const [selection, setSelection] = useState(() => initialSelection(catalogue.defaults));
@@ -100,6 +104,10 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   // Which end of the new style's pages to land on, once a swipe off the edge
   // has changed the style and the new pages have been laid out.
   const [landing, setLanding] = useState<'first' | 'last' | null>(null);
+  // The portrait behind the header avatar, if one has been taken. Read on focus
+  // because the profile is where it is set, and this screen is what the user
+  // comes back to afterwards.
+  const [portrait, setPortrait] = useState<string | null>(null);
 
   // The camera hands the shot back through the router rather than through a
   // store: it is one value, used once, on the way back to exactly this screen.
@@ -199,6 +207,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   useFocusEffect(
     useCallback(() => {
       void refresh();
+      void readProfilePhoto().then(setPortrait);
     }, [refresh]),
   );
 
@@ -242,10 +251,12 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
           <CreditChip credits={credits?.creditsLeft ?? 0} onPress={() => router.push('/profile')} />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Profile"
+            accessibilityLabel={t(portrait ? 'preview.profile' : 'preview.setUpProfile')}
             onPress={() => router.push('/profile')}
-            style={styles.avatar}
-          />
+          >
+            <PhotoPlate uri={portrait} style={styles.avatar} />
+            {portrait ? null : <PlusBadge />}
+          </Pressable>
         </View>
       </View>
 
@@ -280,7 +291,9 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
           <Pressable onPress={choosePhoto} style={styles.plate}>
             <PhotoPlate
               uri={photo?.uri}
-              label={photo ? undefined : rejected ? verdictLine(rejected) : 'tap to choose a photo'}
+              label={
+                photo ? undefined : t(rejected ? verdictLine(rejected) : 'preview.tapToChoose')
+              }
               style={styles.plate}
             />
           </Pressable>
@@ -306,7 +319,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
         {rejected && photo ? (
           <View style={styles.rejected} pointerEvents="none">
             <Meta variant="note" tone="ink" sentence>
-              {verdictLine(rejected)}
+              {t(verdictLine(rejected))}
             </Meta>
           </View>
         ) : null}
@@ -317,12 +330,15 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
           value={selection.source}
           onChange={(source) => setSelection((current) => withSource(current, source))}
           options={[
-            { value: 'saved', label: 'Saved photo' },
-            { value: 'new', label: selection.hasFreshShot ? 'New photo ✓' : 'New photo' },
+            { value: 'saved', label: t('preview.savedPhoto') },
+            {
+              value: 'new',
+              label: t(selection.hasFreshShot ? 'preview.newPhotoTaken' : 'preview.newPhoto'),
+            },
           ]}
         />
 
-        <Pill label={primaryActionLabel(selection)} cost={1} onPress={onPrimary} />
+        <Pill label={t(primaryActionLabel(selection))} cost={1} onPress={onPrimary} />
       </View>
 
       <ScrollView
@@ -345,6 +361,26 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   );
 }
 
+/**
+ * The empty avatar's invitation.
+ *
+ * The same object as the one on the profile's identity block, at a third the
+ * size: an ink disc with a plus, ringed in paper so it reads over whatever is
+ * behind it. Without it the header carries a flat grey circle, which says
+ * nothing — least of all that there is a profile photo to add.
+ *
+ * The plus is two bars rather than a glyph. At fifteen points a typeface's ＋
+ * is a hinting lottery; two rectangles are the same on every phone.
+ */
+function PlusBadge() {
+  return (
+    <View style={styles.badgeRing} pointerEvents="none">
+      <View style={styles.plusBar} />
+      <View style={[styles.plusBar, styles.plusBarUp]} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
   header: {
@@ -359,10 +395,29 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: radius.pill,
-    backgroundColor: color.placeholder,
     borderWidth: 1,
     borderColor: color.ink12,
   },
+  badgeRing: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 15,
+    height: 15,
+    borderRadius: radius.pill,
+    backgroundColor: color.ink,
+    borderWidth: 1.5,
+    borderColor: color.paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plusBar: {
+    position: 'absolute',
+    width: 7,
+    height: 1.5,
+    backgroundColor: color.paper,
+  },
+  plusBarUp: { transform: [{ rotate: '90deg' }] },
   plateWrap: { flex: 1, marginHorizontal: space.gutterScreen },
   // Over the photo they kept, because the plate's own label only shows when
   // there is no photo under it. Wearing the badge's plate for the same reason

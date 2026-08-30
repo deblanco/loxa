@@ -1,25 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import { verdictLine, type FaceVerdict } from '../src/face/verdict';
+import en from '../src/i18n/locales/en';
 
 const VERDICTS: FaceVerdict[] = ['no-face', 'multiple-faces', 'low-quality'];
 
+/**
+ * The lines themselves live in the locales now, and their shape — one lowercase
+ * clause, then what to do about it — is asserted there, in all five languages.
+ * What is left here is the mapping: that every reason a photo can be turned
+ * away reaches a key, and that no two reasons reach the same one.
+ */
 describe('verdictLine', () => {
-  it('has a line for every reason a photo can be turned away', () => {
+  it('has a key for every reason a photo can be turned away', () => {
     for (const verdict of VERDICTS) {
       expect(verdictLine(verdict)).toBeTruthy();
     }
   });
 
   it('says something different for each one', () => {
-    const lines = new Set(VERDICTS.map(verdictLine));
-    expect(lines.size).toBe(VERDICTS.length);
+    const keys = new Set(VERDICTS.map(verdictLine));
+    expect(keys.size).toBe(VERDICTS.length);
   });
 
-  it('keeps the shape of the hint it replaces: lowercase, and a way out', () => {
+  it('names a key the copy actually has', () => {
+    // A key with no string behind it renders as itself, which on the viewfinder
+    // would read as `verdict.no-face` under somebody's chin.
     for (const verdict of VERDICTS) {
-      const line = verdictLine(verdict);
-      expect(line).toBe(line.toLowerCase());
-      expect(line).toContain(' · ');
+      expect(en.verdict[verdict]).toBeTruthy();
     }
   });
 });

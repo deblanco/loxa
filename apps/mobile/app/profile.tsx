@@ -1,6 +1,7 @@
-import { WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from '@loxa/shared';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from '@loxa/shared';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
@@ -11,10 +12,13 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { Body, Display, Meta } from '@/components/Text';
 import { Toast } from '@/components/Toast';
 import { planLabel, resetLabel } from '@/format';
+import { currentLanguage } from '@/i18n';
+import { LANGUAGE_NAMES } from '@/i18n/languages';
 import { openPrivacy, openTerms } from '@/legal';
 import { disableDaily, enableDaily } from '@/notifications';
 import { purchases } from '@/purchases';
 import { useCredits } from '@/store/credits';
+import { readProfilePhoto } from '@/store/profile-photo';
 import { color, radius, space } from '@/theme';
 
 /**
@@ -26,9 +30,20 @@ import { color, radius, space } from '@/theme';
  * use the app should not be a caption.
  */
 export default function Profile() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
   const [notify, setNotify] = useState(true);
+  const [portrait, setPortrait] = useState<string | null>(null);
+
+  // Re-read on focus rather than once: the camera is pushed from here and
+  // writes the portrait on its way back, so the only moment this screen can
+  // learn about a new one is when it comes forward again.
+  useFocusEffect(
+    useCallback(() => {
+      void readProfilePhoto().then(setPortrait);
+    }, []),
+  );
   const [toast, setToast] = useState<string | null>(null);
 
   function flash(message: string) {
@@ -51,7 +66,7 @@ export default function Profile() {
     const transactionIds = await purchases().restore();
     if (transactionIds.length) await syncPurchases(transactionIds);
     await refresh();
-    flash('Purchases restored');
+    flash(t('profile.restored'));
   }
 
   const left = credits?.creditsLeft ?? 0;
@@ -68,23 +83,23 @@ export default function Profile() {
         <View style={styles.header}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('common.back')}
             onPress={() => router.back()}
             style={styles.round}
           >
             <Chevron />
           </Pressable>
-          <Meta>Profile</Meta>
+          <Meta>{t('profile.title')}</Meta>
           <View style={styles.round} />
         </View>
 
         <View style={styles.identity}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Change your photo"
-            onPress={() => router.push('/camera')}
+            accessibilityLabel={t(portrait ? 'profile.changePhoto' : 'profile.addPhoto')}
+            onPress={() => router.push('/camera?from=profile')}
           >
-            <PhotoPlate style={styles.avatar} />
+            <PhotoPlate uri={portrait} style={styles.avatar} />
             <View style={styles.avatarBadge}>
               <Body variant="bodySmall" tone="paper">
                 ＋
@@ -92,14 +107,14 @@ export default function Profile() {
             </View>
           </Pressable>
           <Meta variant="note" tone="ink45" sentence>
-            tap to change your photo
+            {t(portrait ? 'profile.tapToChangePhoto' : 'profile.tapToAddPhoto')}
           </Meta>
         </View>
 
         <View style={styles.creditCard}>
           <View style={styles.creditTop}>
             <View>
-              <Meta tone="paper50">Credits left</Meta>
+              <Meta tone="paper50">{t('profile.creditsLeft')}</Meta>
               <View style={styles.count}>
                 <Display variant="numeral" tone="paper">
                   {left}
@@ -112,10 +127,10 @@ export default function Profile() {
             </View>
             <View style={styles.resetLines}>
               <Meta variant="note" tone="paper50" sentence style={styles.right}>
-                {credits ? resetLabel(credits.resetsAt, new Date()) : 'resets Monday'}
+                {t(credits ? resetLabel(credits.resetsAt, new Date()) : 'profile.resetsMonday')}
               </Meta>
               <Meta variant="note" tone="paper50" sentence style={styles.right}>
-                no roll-over
+                {t('profile.noRollOver')}
               </Meta>
             </View>
           </View>
@@ -127,11 +142,14 @@ export default function Profile() {
         <View style={styles.group}>
           <View style={styles.groupRow}>
             <View style={styles.rowText}>
-              <Body weight="medium">{planLabel(credits?.plan ?? 'free')}</Body>
+              <Body weight="medium">{t(planLabel(credits?.plan ?? 'free'))}</Body>
               <Body variant="caption" tone="ink55" style={styles.rowNote}>
                 {credits?.plan === 'free'
-                  ? 'No weekly credits — $0.99 per photo'
-                  : `${WEEKLY_PRICE_LABEL} · ${WEEKLY_CREDITS} photos a week`}
+                  ? t('profile.planFreeNote', { price: SINGLE_PHOTO_PRICE_LABEL })
+                  : t('profile.planWeeklyNote', {
+                      price: WEEKLY_PRICE_LABEL,
+                      count: WEEKLY_CREDITS,
+                    })}
               </Body>
             </View>
             <Pressable
@@ -140,16 +158,16 @@ export default function Profile() {
               style={styles.manage}
             >
               <Body variant="caption" tone="paper">
-                Manage
+                {t('profile.manage')}
               </Body>
             </Pressable>
           </View>
 
           <View style={[styles.groupRow, styles.divided]}>
             <View style={styles.rowText}>
-              <Body>Daily style ideas</Body>
+              <Body>{t('profile.notifications')}</Body>
               <Body variant="caption" tone="ink55" style={styles.rowNote}>
-                One notification a day, new looks
+                {t('profile.notificationsNote')}
               </Body>
             </View>
             <Pressable
@@ -164,9 +182,18 @@ export default function Profile() {
         </View>
 
         <View style={styles.rows}>
-          <Row label="Restore purchases" onPress={restore} />
-          <Row label="Privacy policy" onPress={openPrivacy} />
-          <Row label="Terms of use" onPress={openTerms} last />
+          {/* The language sits above the legal pages and below the account
+              ones, because it is the row somebody hunts for when the rest of
+              the screen is in a language they cannot read — and a value beside
+              the label is what makes it findable without reading it. */}
+          <Row
+            label={t('profile.language')}
+            value={LANGUAGE_NAMES[currentLanguage()]}
+            onPress={() => router.push('/language')}
+          />
+          <Row label={t('profile.restore')} onPress={restore} />
+          <Row label={t('profile.privacy')} onPress={openPrivacy} />
+          <Row label={t('profile.terms')} onPress={openTerms} last />
         </View>
         {/* Last on the screen, below the real settings, so it reads as a tool
             rather than as a feature. Returns null outside __DEV__. */}
@@ -178,7 +205,17 @@ export default function Profile() {
   );
 }
 
-function Row({ label, onPress, last }: { label: string; onPress: () => void; last?: boolean }) {
+function Row({
+  label,
+  value,
+  onPress,
+  last,
+}: {
+  label: string;
+  value?: string;
+  onPress: () => void;
+  last?: boolean;
+}) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -186,9 +223,16 @@ function Row({ label, onPress, last }: { label: string; onPress: () => void; las
       style={[styles.link, !last && styles.divided]}
     >
       <Body>{label}</Body>
-      <Body variant="bodySmall" tone="ink30">
-        ›
-      </Body>
+      <View style={styles.linkRight}>
+        {value ? (
+          <Body variant="caption" tone="ink55">
+            {value}
+          </Body>
+        ) : null}
+        <Body variant="bodySmall" tone="ink30">
+          ›
+        </Body>
+      </View>
     </Pressable>
   );
 }
@@ -285,4 +329,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  linkRight: { flexDirection: 'row', alignItems: 'center', gap: space.s2 },
 });

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { openPrivacy, openTerms } from '../legal';
 import { Meta } from './Text';
@@ -11,13 +12,14 @@ import { Meta } from './Text';
  * tap target, not decoration.
  */
 export function LegalLinks({ onNight }: { onNight?: boolean }) {
+  const { t } = useTranslation();
   const tone = onNight ? 'paper50' : 'ink40';
 
   return (
     <View style={styles.row}>
       <Pressable accessibilityRole="link" onPress={openTerms} hitSlop={8}>
         <Meta variant="note" tone={tone} sentence style={styles.link}>
-          Terms
+          {t('legal.terms')}
         </Meta>
       </Pressable>
       <Meta variant="note" tone={tone} sentence>
@@ -25,7 +27,7 @@ export function LegalLinks({ onNight }: { onNight?: boolean }) {
       </Meta>
       <Pressable accessibilityRole="link" onPress={openPrivacy} hitSlop={8}>
         <Meta variant="note" tone={tone} sentence style={styles.link}>
-          Privacy
+          {t('legal.privacy')}
         </Meta>
       </Pressable>
     </View>

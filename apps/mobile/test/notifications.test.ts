@@ -1,14 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { DAILY_LINE_COUNT, copyForDay } from '../src/notifications/copy';
 import { DAILY_HOUR, DAILY_MINUTE, SCHEDULED_DAYS, scheduleFrom } from '../src/notifications/schedule';
+import en from '../src/i18n/locales/en';
 
+/**
+ * The lines themselves moved to the locales, and what they say — a look rather
+ * than the app's name — is asserted there in all five languages. What is left
+ * here is the rotation, which is what this file was always about.
+ */
 describe('copyForDay', () => {
-  it('names a look rather than the app', () => {
-    // "Come back to Loxa" is a nag; "Try a wolf cut today" is a suggestion. The
-    // difference is whether the notification earns the interruption.
+  it('names a key that has copy behind it, in every language', () => {
+    // A key with no string behind it arrives at 18:30 as the literal text
+    // `notifications.line4.title`.
+    const lines = new Set(Object.keys(en.notifications));
     for (let day = 0; day < DAILY_LINE_COUNT; day += 1) {
-      expect(copyForDay(day).title).not.toMatch(/loxa/i);
-      expect(copyForDay(day).body.length).toBeGreaterThan(10);
+      const { title, body } = copyForDay(day);
+      expect(lines.has(title.split('.')[1]!)).toBe(true);
+      expect(lines.has(body.split('.')[1]!)).toBe(true);
     }
   });
 

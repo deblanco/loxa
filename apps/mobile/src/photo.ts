@@ -74,22 +74,41 @@ export async function prepare(uri: string, options: PrepareOptions = {}): Promis
 
   if (!result.base64) throw new Error('could not read the photo');
 
-  const face = await checkFace(result.uri, { minPixelSize: MIN_PIXELS });
+  const photo = { base64: result.base64, uri: result.uri };
+
+  // **A detector that fails is not a verdict.** `checkFace` rejects with
+  // `ERR_FACE_DETECTION` when Vision will not run the request at all, which is
+  // a property of the machine rather than of the photograph — the simulator is
+  // where it shows up. Left to throw it reaches the screen as an unhandled
+  // rejection and a shutter that does nothing.
+  //
+  // So it fails open. The check is an optimisation: it saves a round trip and a
+  // credit on a photo the model was going to refuse anyway. Failing closed
+  // would trade that saving for an app in which no photo can be chosen at all,
+  // which is the worse of the two by a distance.
+  const face = await checkFace(result.uri, { minPixelSize: MIN_PIXELS }).catch(() => null);
+  if (!face) return { ok: true, photo };
+
   if (face.status !== 'READY') return { ok: false, reason: VERDICTS[face.status] };
 
-  return { ok: true, photo: { base64: result.base64, uri: result.uri } };
+  return { ok: true, photo };
 }
 
 /**
  * Pick from the library.
  *
- * Returns null when the user backs out or declines access, which is not an
- * error — it is them saying no, and the screen should simply stay where it is.
+ * **No permission is asked for, because none is required.** The picker runs
+ * out of process — iOS hands back the one image that was chosen and the app
+ * never sees the library — so `launchImageLibraryAsync` has no permission gate
+ * of its own, unlike `launchCameraAsync` beside it. Asking anyway put a full
+ * library-access prompt in front of the user, and a "Don't Allow" then closed
+ * the picker permanently: every route into it — the plate, the camera's library
+ * button, the profile portrait — went dead for a sheet that would have opened.
+ *
+ * Returns null when the user backs out, which is not an error — it is them
+ * saying no, and the screen should simply stay where it is.
  */
 export async function pickFromLibrary(): Promise<PhotoResult | null> {
-  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) return null;
-
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
     allowsEditing: true,

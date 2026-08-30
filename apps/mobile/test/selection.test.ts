@@ -16,7 +16,7 @@ const BASE = initialSelection({ styleId: 'blunt-bob', colorId: 'caramel' });
 
 describe('primaryActionLabel', () => {
   it('is Try On for a saved photo', () => {
-    expect(primaryActionLabel(BASE)).toBe('Try On');
+    expect(primaryActionLabel(BASE)).toBe('preview.tryOn');
   });
 
   it('becomes a camera button when a new photo is wanted and none has been taken', () => {
@@ -24,12 +24,12 @@ describe('primaryActionLabel', () => {
     // camera when it is labelled Try On is how a user spends a credit by
     // accident — or fails to, and thinks the app is broken.
     const selection = withSource(BASE, 'new');
-    expect(primaryActionLabel(selection)).toBe('Take photo & try on');
+    expect(primaryActionLabel(selection)).toBe('preview.takePhotoAndTryOn');
   });
 
   it('goes back to Try On once a shot exists', () => {
     const selection = { ...withSource(BASE, 'new'), hasFreshShot: true };
-    expect(primaryActionLabel(selection)).toBe('Try On');
+    expect(primaryActionLabel(selection)).toBe('preview.tryOn');
     expect(needsCamera(selection)).toBe(false);
   });
 });

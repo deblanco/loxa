@@ -61,6 +61,41 @@ there are two hand-maintained mirrors:
 
 **A token change updates the CSS and both mirrors in the same commit.**
 
+## Language
+
+The app ships in English, Spanish, French, German and Italian. i18next holds the
+copy; `expo-localization` reads the phone.
+
+- **`apps/mobile/src/i18n/locales/en.ts` is the shape as well as the source.**
+  The other four are annotated `: typeof en`, so a missing key or a stray one is
+  a `tsc` failure rather than a raw `preview.tryOn` on somebody's screen.
+  `src/i18n/i18next.d.ts` does the other half: a mistyped key at a call site is
+  a typecheck error too. **A copy change touches `en.ts` and the four mirrors in
+  the same commit**, exactly like a token change.
+- **The pure modules return keys, not sentences.** `format.ts`, `selection.ts`,
+  `face/verdict.ts` and `notifications/copy.ts` decide *which* line; the screen
+  calls `t` on what they hand back. That is what keeps them testable in Node
+  with no i18next loaded.
+- **Default is the phone, then English.** `resolveLanguage` matches on the
+  primary subtag, so `de-CH` is German rather than a fall to English, and it
+  walks the phone's whole list — `ca-ES, es-ES` lands on Spanish. A stored
+  choice overrules the phone outright and forever: somebody who picked English
+  on a German phone meant it.
+- **i18next is initialised synchronously at import**, on the phone's language,
+  because the resources are static. `loadLanguage()` then applies the stored
+  choice behind the splash that is already being held for the fonts — after the
+  first frame it would be a flash of the wrong language on the entry carousel.
+- **Changing language re-schedules the notifications.** iOS holds finished text,
+  not keys, so the week already queued is in the language just left.
+  `rescheduleDaily` reads what iOS is holding rather than asking for permission,
+  so the language screen can never raise a prompt.
+- The catalogue is **not** translated. Cut and colour names arrive with the
+  served manifest and are English in every language — translating them means
+  `HairStyle.name` becoming a per-locale map in `contracts.ts`, a Worker change,
+  a `catalogue.json` rebuild and a re-upload.
+- `DevPanel` is not translated either, and should not be: it is `__DEV__` only
+  and deliberately looks unlike the rest of the app.
+
 ## Catalogue art
 
 The style strip and the preview plate show generated photographs, not stock.

@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { Pill } from '@/components/Pill';
 import { VideoPlate } from '@/components/VideoPlate';
@@ -53,6 +54,7 @@ const SLIDES = [
 ] as const;
 
 export default function Entry() {
+  const { t } = useTranslation();
   const { onboarded } = useOnboarding();
   const [slide, setSlide] = useState(0);
 
@@ -97,25 +99,29 @@ export default function Entry() {
       <View style={styles.pitch}>
         <View style={styles.headline}>
           <Display variant="displayL" tone="paper">
-            Try on any hair
+            {t('entry.headline')}
           </Display>
           <Display variant="displayL" tone="paper" italic style={styles.second}>
-            before the scissors.
+            {t('entry.headlineItalic')}
           </Display>
         </View>
 
         <Body tone="paper66" style={styles.sub}>
-          Photo in, new hair out. Colours, cuts and lengths on your own face in seconds.
+          {t('entry.sub')}
         </Body>
 
-        <Pill label="Get started" tone="light" onPress={() => router.push('/(onboarding)/trial')} />
+        <Pill
+          label={t('entry.cta')}
+          tone="light"
+          onPress={() => router.push('/(onboarding)/trial')}
+        />
 
         <View style={styles.dots}>
           {SLIDES.map((clip, i) => (
             <Pressable
               key={clip.name}
               accessibilityRole="button"
-              accessibilityLabel={`Slide ${i + 1}`}
+              accessibilityLabel={t('entry.slide', { number: i + 1 })}
               onPress={() => setSlide(i)}
               style={[
                 styles.dot,

@@ -1,4 +1,5 @@
 import type { CatalogueColor } from '@loxa/shared';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { color as token, radius, space } from '../theme';
 import { Body, Meta } from './Text';
@@ -22,10 +23,12 @@ interface Props {
 }
 
 export function ColorStrip({ colors, selectedId, onSelect }: Props) {
+  const { t } = useTranslation();
+
   return (
     <View>
       <View style={styles.header}>
-        <Meta>Hair colours</Meta>
+        <Meta>{t('strips.colours')}</Meta>
         <Body variant="caption" tone="ink45">
           {colors.find((hair) => hair.id === selectedId)?.name ?? ''}
         </Body>

@@ -30,18 +30,30 @@ const KEYS = [
    */
   'loxa.catalogue.v1',
   /**
+   * The chosen language. Absent means "follow the phone", which is what a
+   * fresh install is: leaving it behind would put the app back to the entry
+   * carousel still speaking whatever was last picked.
+   */
+  'loxa.language.v1',
+  /**
    * The AsyncStorage mirror of the device id. The keychain copy below is the
    * real one; this exists so a keychain that refuses to write does not mint a
    * new identity on every launch. Both have to go or the survivor is restored.
    */
   'loxa.deviceId',
+  /**
+   * The id of the profile portrait. Its file goes with `DIRS` below; without
+   * the key the app would come back pointing at a picture that is no longer
+   * there and quietly show the invitation over a stale id.
+   */
+  'loxa.profilePhoto.v1',
 ];
 
 /** The keychain entry, which outlives everything else including the app itself. */
 const SECURE_KEYS = ['loxa.deviceId'];
 
-/** Generated looks, written to the documents directory. */
-const DIRS = ['looks'];
+/** Generated looks and the profile portrait, written to the documents directory. */
+const DIRS = ['looks', 'profile'];
 
 export async function resetAppState(): Promise<void> {
   // Scheduled notifications are held by iOS, not by us, so wiping storage would

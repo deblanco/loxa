@@ -4,13 +4,13 @@ import { creditChipLabel, planLabel, resetLabel } from '../src/format';
 describe('resetLabel', () => {
   it('names the day when it is further out', () => {
     expect(resetLabel('2026-08-31T00:00:00.000Z', new Date('2026-08-27T12:00:00Z'))).toBe(
-      'resets Monday',
+      'profile.resetsMonday',
     );
   });
 
   it('says tomorrow when it is tomorrow', () => {
     expect(resetLabel('2026-08-31T00:00:00.000Z', new Date('2026-08-30T12:00:00Z'))).toBe(
-      'resets tomorrow',
+      'profile.resetsTomorrow',
     );
   });
 });
@@ -24,8 +24,8 @@ describe('creditChipLabel', () => {
 
 describe('planLabel', () => {
   it('names each plan', () => {
-    expect(planLabel('weekly')).toBe('Loxa Weekly');
-    expect(planLabel('trial')).toBe('Free trial');
-    expect(planLabel('free')).toBe('Free plan');
+    expect(planLabel('weekly')).toBe('profile.planWeekly');
+    expect(planLabel('trial')).toBe('profile.planTrial');
+    expect(planLabel('free')).toBe('profile.planFree');
   });
 });

@@ -27,6 +27,7 @@
   --text-tile: 11px;        --leading-tile: 1.25;
 
   /* Meta — mono, uppercase, letterspaced */
+  --text-meta-l: 12px;      --tracking-meta-l: 0.16em;  /* a mono word used as a control */
   --text-meta: 10px;        --tracking-meta: 0.14em;
   --text-meta-s: 9.5px;     --tracking-meta-s: 0.1em;
   --text-note: 11px;        --leading-note: 1.6;   /* mono, sentence case */

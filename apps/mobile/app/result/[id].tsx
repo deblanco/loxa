@@ -3,6 +3,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chevron } from '@/components/Chevron';
@@ -27,6 +28,7 @@ import { color, radius, space } from '@/theme';
  * makes the comparison a gesture with an obvious end.
  */
 export default function Result() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { credits } = useCredits();
@@ -46,11 +48,18 @@ export default function Result() {
 
   async function save() {
     if (!look) return;
-    const permission = await MediaLibrary.requestPermissionsAsync();
-    if (!permission.granted) return;
+    // Write-only: this adds one picture to the camera roll and never reads it,
+    // so the prompt is "Add to Photos" rather than access to every photo the
+    // user owns. Asking for the larger of the two is the kind of thing that
+    // gets declined, and declining it used to lose the save button silently.
+    const permission = await MediaLibrary.requestPermissionsAsync(true);
+    if (!permission.granted) {
+      flash(t('result.saveDenied'));
+      return;
+    }
 
     await MediaLibrary.saveToLibraryAsync(look.uri);
-    flash('Saved to your camera roll');
+    flash(t('result.saved'));
   }
 
   async function share() {
@@ -69,7 +78,7 @@ export default function Result() {
       <PhotoPlate
         dark
         uri={comparing ? undefined : look?.uri}
-        label={comparing ? 'original photo' : undefined}
+        label={comparing ? t('result.originalPhoto') : undefined}
         style={styles.plate}
       />
 
@@ -83,18 +92,18 @@ export default function Result() {
       <View style={[styles.header, { top: insets.top + space.s3 }]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back"
+          accessibilityLabel={t('common.back')}
           onPress={() => router.replace('/preview')}
           style={styles.round}
         >
           <Chevron tone="paper" />
         </Pressable>
 
-        <Meta tone="paper60">{credits?.creditsLeft ?? 0} credits left</Meta>
+        <Meta tone="paper60">{t('result.creditsLeft', { count: credits?.creditsLeft ?? 0 })}</Meta>
 
         <Pressable accessibilityRole="button" onPress={save} style={styles.save}>
           <Body variant="bodySmall" tone="paper">
-            Save
+            {t('result.save')}
           </Body>
         </Pressable>
       </View>
@@ -114,15 +123,15 @@ export default function Result() {
           style={styles.compare}
         >
           <Meta variant="note" tone="paper85" sentence>
-            {comparing ? 'showing original' : 'hold to compare'}
+            {t(comparing ? 'result.showingOriginal' : 'result.holdToCompare')}
           </Meta>
         </Pressable>
       </View>
 
       <View style={[styles.actions, { bottom: insets.bottom + space.s5 }]}>
-        <Pill label="Share" tone="light" onPress={share} />
+        <Pill label={t('result.share')} tone="light" onPress={share} />
         <Pill
-          label="Again · 1 credit"
+          label={t('result.again')}
           tone="quietOnNight"
           onPress={() => router.replace('/preview')}
         />

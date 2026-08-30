@@ -15,12 +15,6 @@
 /** Why a photo was turned away. Mirrors expo-face-check's failing statuses. */
 export type FaceVerdict = 'no-face' | 'multiple-faces' | 'low-quality';
 
-const LINES: Record<FaceVerdict, string> = {
-  'no-face': 'no face in that one · try again',
-  'multiple-faces': 'more than one face · one at a time',
-  'low-quality': 'too small or too soft · try a closer photo',
-};
-
-export function verdictLine(verdict: FaceVerdict): string {
-  return LINES[verdict];
+export function verdictLine(verdict: FaceVerdict): `verdict.${FaceVerdict}` {
+  return `verdict.${verdict}`;
 }
