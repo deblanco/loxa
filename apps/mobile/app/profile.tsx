@@ -1,4 +1,4 @@
-import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from '@loxa/shared';
+import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS } from '@loxa/shared';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,10 +16,14 @@ import { currentLanguage } from '@/i18n';
 import { LANGUAGE_NAMES } from '@/i18n/languages';
 import { openPrivacy, openTerms } from '@/legal';
 import { disableDaily, enableDaily } from '@/notifications';
-import { purchases } from '@/purchases';
+import { purchases, useWeeklyPricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
 import { readProfilePhoto } from '@/store/profile-photo';
+import { openReviewPage, reviewStoreUrl } from '@/store/review';
 import { color, radius, space } from '@/theme';
+
+/** Fixed for the life of the process — it comes from the bundled app config. */
+const storeUrl = reviewStoreUrl();
 
 /**
  * Everything that is not trying on hair.
@@ -33,6 +37,7 @@ export default function Profile() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
+  const { price } = useWeeklyPricing();
   const [notify, setNotify] = useState(true);
   const [portrait, setPortrait] = useState<string | null>(null);
 
@@ -147,7 +152,10 @@ export default function Profile() {
                 {credits?.plan === 'free'
                   ? t('profile.planFreeNote', { price: SINGLE_PHOTO_PRICE_LABEL })
                   : t('profile.planWeeklyNote', {
-                      price: WEEKLY_PRICE_LABEL,
+                      // The store's own number, so a subscriber in Berlin reads
+                      // what their card was charged. `perWeek` is the paywall's
+                      // key rather than a second copy of the same abbreviation.
+                      price: `${price}${t('paywall.perWeek')}`,
                       count: WEEKLY_CREDITS,
                     })}
               </Body>
@@ -192,6 +200,10 @@ export default function Profile() {
             onPress={() => router.push('/language')}
           />
           <Row label={t('profile.restore')} onPress={restore} />
+          {/* Absent until the app has an App Store id to point at — a settings
+              row that opens a 404 is worse than no row. The automatic prompt on
+              the result screen does not depend on this. */}
+          {storeUrl ? <Row label={t('profile.rate')} onPress={openReviewPage} /> : null}
           <Row label={t('profile.privacy')} onPress={openPrivacy} />
           <Row label={t('profile.terms')} onPress={openTerms} last />
         </View>

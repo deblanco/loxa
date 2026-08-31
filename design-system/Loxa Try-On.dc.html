@@ -34,7 +34,7 @@
   <div style="display:flex;gap:26px;margin:36px 0 0;flex-wrap:wrap;max-width:1180px">
     <div style="flex:1;min-width:210px;padding:18px 20px;background:#f6f3ee;border:1px solid rgba(13,12,11,.1);border-radius:12px">
       <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(13,12,11,.4);margin-bottom:9px">Assumptions</div>
-      <div style="font-size:13px;line-height:1.65;color:rgba(13,12,11,.72)">$9.99/week = 20 photos, expiring weekly (shown as "resets Monday, no roll-over"). Out of credits → $0.99 single photo. Daily notification is opt-in on the profile.</div>
+      <div style="font-size:13px;line-height:1.65;color:rgba(13,12,11,.72)">$0.99 first week, then $9.99/week = 20 photos, expiring weekly (shown as "resets Monday, no roll-over"). No free trial — the App Store gives one intro offer per subscription and this is it. Out of credits → $0.99 single photo. Daily notification is opt-in on the profile.</div>
     </div>
     <div style="flex:1;min-width:210px;padding:18px 20px;background:#f6f3ee;border:1px solid rgba(13,12,11,.1);border-radius:12px">
       <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(13,12,11,.4);margin-bottom:9px">System</div>
@@ -66,7 +66,7 @@
                 <div style="font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1.03;letter-spacing:-.01em;color:#faf8f5;text-wrap:pretty">Try on any hair<br><span style="font-style:italic;opacity:.82">before the scissors.</span></div>
                 <div style="font-size:14.5px;line-height:1.55;color:rgba(250,248,245,.66);max-width:30ch">Photo in, new hair out. Colours, cuts and lengths on your own face in seconds.</div>
               </div>
-              <div onClick="{{ goTrial }}" style="height:56px;border-radius:999px;background:#faf8f5;color:#0d0c0b;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;cursor:pointer" style-hover="opacity:.88">Get started</div>
+              <div onClick="{{ goOffer }}" style="height:56px;border-radius:999px;background:#faf8f5;color:#0d0c0b;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;cursor:pointer" style-hover="opacity:.88">Get started</div>
               <div style="display:flex;justify-content:center;gap:7px">
                 <sc-for list="{{ slides }}" as="s" hint-placeholder-count="3">
                   <div onClick="{{ s.go }}" style="width:{{ s.dotW }};height:4px;border-radius:9px;cursor:pointer;background:{{ s.dot }};transition:all .4s ease"></div>
@@ -76,7 +76,7 @@
           </div>
         </sc-if>
 
-        <sc-if value="{{ sTrial }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ sOffer }}" hint-placeholder-val="{{ true }}">
           <div style="position:absolute;inset:0;background:#faf8f5;overflow:hidden">
             <div style="position:absolute;top:-140px;left:-90px;right:-90px;height:640px;transform:rotate(-13deg);display:flex;gap:12px">
               <sc-for list="{{ masonry }}" as="col" hint-placeholder-count="3">
@@ -90,9 +90,10 @@
               </sc-for>
             </div>
             <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(250,248,245,.1) 0%,rgba(250,248,245,.62) 40%,rgba(250,248,245,.97) 62%,#faf8f5 100%)"></div>
+            <div onClick="{{ continueFree }}" style="position:absolute;top:60px;right:20px;width:34px;height:34px;border-radius:999px;background:rgba(13,12,11,.45);display:flex;align-items:center;justify-content:center;font-size:15px;color:#faf8f5;cursor:pointer" style-hover="background:rgba(13,12,11,.62)">&#10005;</div>
             <div style="position:absolute;left:26px;right:26px;bottom:44px;display:flex;flex-direction:column;gap:18px">
               <div style="display:flex;flex-direction:column;gap:9px">
-                <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,12,11,.42)">3 days free</div>
+                <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,12,11,.42)">First week {{ introPrice }}</div>
                 <div style="font-family:'Instrument Serif',Georgia,serif;font-size:40px;line-height:1.05;letter-spacing:-.01em">Change your hair<br>twenty times a week.</div>
               </div>
               <div style="display:flex;flex-direction:column;gap:10px">
@@ -103,9 +104,8 @@
                 </sc-for>
               </div>
               <div style="display:flex;flex-direction:column;gap:10px">
-                <div onClick="{{ startTrial }}" style="height:58px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:500;cursor:pointer;box-shadow:0 10px 24px rgba(13,12,11,.18)" style-hover="opacity:.9">Enable free trial</div>
-                <div onClick="{{ continueFree }}" style="height:48px;border-radius:999px;border:1px solid rgba(13,12,11,.18);display:flex;align-items:center;justify-content:center;font-size:15px;color:rgba(13,12,11,.62);cursor:pointer" style-hover="border-color:rgba(13,12,11,.4);color:#0d0c0b">Continue free</div>
-                <div style="text-align:center;font:400 11px/1.5 ui-monospace,monospace;color:rgba(13,12,11,.4)">then {{ priceLine }} · 20 photos a week · cancel anytime</div>
+                <div onClick="{{ subscribe }}" style="height:58px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:500;cursor:pointer;box-shadow:0 10px 24px rgba(13,12,11,.18)" style-hover="opacity:.9">Start for {{ introPrice }}</div>
+                <div style="text-align:center;font:400 11px/1.5 ui-monospace,monospace;color:rgba(13,12,11,.4)">{{ introPrice }} for the first week, then {{ priceLine }} · 20 photos a week · cancel anytime</div>
               </div>
             </div>
           </div>
@@ -261,7 +261,7 @@
                   <div style="font-size:14.5px;font-weight:500">{{ planName }}</div>
                   <div style="font-size:12px;color:rgba(13,12,11,.5);margin-top:2px">{{ planNote }}</div>
                 </div>
-                <div onClick="{{ goTrial }}" style="height:32px;padding:0 14px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;font-size:12.5px;cursor:pointer;flex:none" style-hover="opacity:.85">Manage</div>
+                <div onClick="{{ goOffer }}" style="height:32px;padding:0 14px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;font-size:12.5px;cursor:pointer;flex:none" style-hover="opacity:.85">Manage</div>
               </div>
               <div style="padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(13,12,11,.08)">
                 <div>
@@ -407,7 +407,7 @@
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;entry&quot;,&quot;trial&quot;,&quot;preview&quot;,&quot;gen&quot;,&quot;result&quot;,&quot;profile&quot;,&quot;camera&quot;],&quot;default&quot;:&quot;entry&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;startCredits&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:13,&quot;min&quot;:0,&quot;max&quot;:20,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;creditCap&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:60,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;weeklyPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$9.99/week&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;entry&quot;,&quot;offer&quot;,&quot;preview&quot;,&quot;gen&quot;,&quot;result&quot;,&quot;profile&quot;,&quot;camera&quot;],&quot;default&quot;:&quot;entry&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;startCredits&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:13,&quot;min&quot;:0,&quot;max&quot;:20,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;creditCap&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:60,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;weeklyPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$9.99/week&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;introPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$0.99&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;}}">
 const STYLES = ['Blunt bob','Long layers','Curtain bang','Pixie','Wolf cut','Beach waves','Sleek straight','Braids','Curly shag','Buzz','Long bob','French bob','Bixie','Blunt fringe','Waist length','Blowout','Seventies flick','Mullet','Afro','Locs','Bantu knots','High ponytail','Chignon','Half-up knot'];
 const COLORS = [
   ['Jet black','#14110f'],['Espresso','#3a2418'],['Chestnut','#6b4226'],['Caramel','#a46c3c'],
@@ -415,11 +415,11 @@ const COLORS = [
   ['Cherry','#7d2230'],['Lilac','#b7a3c8']
 ];
 const MODELS = ['your photo · 2 days ago','model · warm skin','model · deep skin','model · fair skin'];
-const SCREENS = [['entry','Entry'],['trial','Trial'],['preview','Preview'],['gen','Generating'],['result','Result'],['profile','Profile'],['camera','Camera']];
+const SCREENS = [['entry','Entry'],['offer','Offer'],['preview','Preview'],['gen','Generating'],['result','Result'],['profile','Profile'],['camera','Camera']];
 const STEPS = ['reading your photo','mapping hairline','painting colour','matching light'];
 
 class Component extends DCLogic {
-  state = { screen: 'entry', slide: 0, model: 0, style: 0, color: 3, credits: 13, plan: 'trial', progress: 0, paywall: false, notif: true, compare: false, toast: '', camShot: false, source: 'saved', camFrom: 'profile', freshShot: false };
+  state = { screen: 'entry', slide: 0, model: 0, style: 0, color: 3, credits: 13, plan: 'weekly', progress: 0, paywall: false, notif: true, compare: false, toast: '', camShot: false, source: 'saved', camFrom: 'profile', freshShot: false };
 
   componentDidMount() {
     this.setState({ screen: this.props.startScreen || 'entry', credits: this.props.startCredits ?? 13 });
@@ -458,15 +458,16 @@ class Component extends DCLogic {
     const s = this.state;
     const cap = this.props.creditCap ?? 20;
     const price = this.props.weeklyPrice || '$9.99/week';
+    const introPrice = this.props.introPrice || '$0.99';
     const styleName = STYLES[s.style];
     const [colorName] = COLORS[s.color];
     return {
-      sEntry: s.screen === 'entry', sTrial: s.screen === 'trial', sPreview: s.screen === 'preview',
+      sEntry: s.screen === 'entry', sOffer: s.screen === 'offer', sPreview: s.screen === 'preview',
       sGen: s.screen === 'gen', sResult: s.screen === 'result', sProfile: s.screen === 'profile', sCamera: s.screen === 'camera',
       showPaywall: s.paywall, toast: s.toast,
       isDark: s.screen === 'entry' || s.screen === 'result' || s.screen === 'camera',
       credits: s.credits, creditCap: cap, creditW: Math.round((s.credits / cap) * 100) + '%',
-      priceLine: price, priceShort: price.split('/')[0] + '/wk',
+      priceLine: price, priceShort: price.split('/')[0] + '/wk', introPrice,
       styleName, colorName,
       modelLabel: s.freshShot && s.model === 0 ? 'your new photo · just now' : MODELS[s.model],
       resultLabel: s.compare ? 'original photo' : 'generated · ' + styleName.toLowerCase(),
@@ -486,8 +487,8 @@ class Component extends DCLogic {
       })),
       genStep: STEPS[Math.min(STEPS.length - 1, Math.floor(s.progress / 26))],
       progressW: s.progress + '%',
-      planName: s.plan === 'trial' ? 'Free trial · 2 days left' : s.plan === 'weekly' ? 'Loxa Weekly' : 'Free plan',
-      planNote: s.plan === 'free' ? 'No credits — pay $0.99 per photo' : price + ' after the trial · ' + cap + ' photos/week',
+      planName: s.plan === 'weekly' ? 'Loxa Weekly' : 'Free plan',
+      planNote: s.plan === 'free' ? 'No credits — pay $0.99 per photo' : price + ' · ' + cap + ' photos/week',
       notifBg: s.notif ? '#0d0c0b' : 'rgba(13,12,11,.18)',
       notifPos: s.notif ? 'flex-end' : 'flex-start',
 
@@ -539,9 +540,9 @@ class Component extends DCLogic {
         go: this.go(key)
       })),
 
-      goTrial: this.go('trial'), goPreview: this.go('preview'), goProfile: this.go('profile'),
+      goOffer: this.go('offer'), goPreview: this.go('preview'), goProfile: this.go('profile'),
       goCamera: () => this.setState({ screen: 'camera', camFrom: 'profile', camShot: false }),
-      startTrial: () => this.setState({ screen: 'preview', plan: 'trial', credits: this.props.creditCap ?? 20 }),
+      subscribe: () => this.setState({ screen: 'preview', plan: 'weekly', credits: this.props.creditCap ?? 20 }),
       continueFree: () => this.setState({ screen: 'preview', plan: 'free', credits: 1 }),
       tryOn: this.tryOn,
       nextModel: () => this.setState(st => ({ model: (st.model + 1) % MODELS.length })),
@@ -571,7 +572,7 @@ class Component extends DCLogic {
       buyWeekly: () => { this.setState({ credits: cap, plan: 'weekly', paywall: false }); this.flash('Loxa Weekly active'); },
       closePaywall: () => this.setState({ paywall: false }),
       drainCredits: () => { this.setState({ credits: 0, screen: 'preview' }); },
-      resetAll: () => this.setState({ screen: 'entry', slide: 0, model: 0, style: 0, color: 3, credits: 13, plan: 'trial', progress: 0, paywall: false, compare: false, toast: '', source: 'saved', freshShot: false, camFrom: 'profile' })
+      resetAll: () => this.setState({ screen: 'entry', slide: 0, model: 0, style: 0, color: 3, credits: 13, plan: 'weekly', progress: 0, paywall: false, compare: false, toast: '', source: 'saved', freshShot: false, camFrom: 'profile' })
     };
   }
 }

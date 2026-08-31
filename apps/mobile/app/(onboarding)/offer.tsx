@@ -1,27 +1,33 @@
-import { WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from '@loxa/shared';
+import { WEEKLY_CREDITS } from '@loxa/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { assetUrl } from '@/api/assets';
 import { Pill } from '@/components/Pill';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { LegalLinks } from '@/components/LegalLinks';
 import { Body, Display, Meta } from '@/components/Text';
-import { purchases } from '@/purchases';
+import { purchases, useWeeklyPricing } from '@/purchases';
 import { useOnboarding } from '@/store/onboarding';
-import { color, space } from '@/theme';
+import { color, radius, space } from '@/theme';
 
 /**
  * The paywall you meet before the app.
  *
  * A tilted, drifting wall of other people's results behind a hard offer. Both
- * doors lead to the same next screen — the point of "Continue free" is that
- * somebody who says no still gets to use the thing once, which is what makes
- * the trial an offer rather than a toll.
+ * doors lead to the same next screen — the point of the corner ✕ is that
+ * somebody who says no still gets to look around, which is what makes this an
+ * offer rather than a toll.
+ *
+ * The offer is the App Store's introductory price: a first week at $0.99, then
+ * $9.99 a week. There is no free trial, and a customer gets one introductory
+ * offer per subscription, so anybody who has subscribed before reads the plain
+ * weekly price here instead — see `useWeeklyPricing`.
  */
-const PERKS = ['trial.perkCredits', 'trial.perkOwnFace', 'trial.perkDaily'] as const;
+const PERKS = ['offer.perkCredits', 'offer.perkOwnFace', 'offer.perkDaily'] as const;
 
 /**
  * The wall, as three columns of four.
@@ -120,19 +126,22 @@ const COLUMNS = [
 
 type Tile = (typeof COLUMNS)[number]['tiles'][number];
 
-export default function Trial() {
+export default function Offer() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { complete } = useOnboarding();
+  const { price, introPrice } = useWeeklyPricing();
 
-  async function startTrial() {
-    // A trial is a purchase as far as the store is concerned, so the entitlement
-    // the Worker later reads is the real one — nothing here grants credits.
+  async function subscribe() {
+    // Nothing here asks for the intro price. The App Store applies it to an
+    // eligible buyer on its own, and the entitlement the Worker later reads is
+    // the same one either way — an intro week is a paid week.
     await purchases().buyWeekly();
     await complete();
     router.replace('/preview');
   }
 
-  async function continueFree() {
+  async function skip() {
     await complete();
     router.replace('/preview');
   }
@@ -152,11 +161,25 @@ export default function Trial() {
         pointerEvents="none"
       />
 
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('offer.skip')}
+        onPress={skip}
+        hitSlop={space.s3}
+        style={[styles.skip, { top: insets.top + space.s2 }]}
+      >
+        <Body weight="medium" tone="paper">✕</Body>
+      </Pressable>
+
       <View style={styles.offer}>
         <View style={styles.headline}>
-          <Meta>{t('trial.badge')}</Meta>
-          <Display variant="displayM">{t('trial.headline')}</Display>
-          <Display variant="displayM">{t('trial.headlineSecond')}</Display>
+          <Meta>
+            {introPrice
+              ? t('offer.badgeIntro', { price: introPrice })
+              : t('offer.badge', { count: WEEKLY_CREDITS })}
+          </Meta>
+          <Display variant="displayM">{t('offer.headline')}</Display>
+          <Display variant="displayM">{t('offer.headlineSecond')}</Display>
         </View>
 
         <View style={styles.perks}>
@@ -171,11 +194,15 @@ export default function Trial() {
         </View>
 
         <View style={styles.actions}>
-          <Pill label={t('trial.start')} onPress={startTrial} />
-          <Pill label={t('trial.continueFree')} tone="quiet" onPress={continueFree} />
-          {/* The price before the tap, not after it. */}
+          <Pill
+            label={introPrice ? t('offer.startIntro', { price: introPrice }) : t('offer.start')}
+            onPress={subscribe}
+          />
+          {/* Both prices before the tap, not after it. */}
           <Meta variant="note" tone="ink40" sentence style={styles.terms}>
-            {t('trial.terms', { price: WEEKLY_PRICE_LABEL, count: WEEKLY_CREDITS })}
+            {introPrice
+              ? t('offer.termsIntro', { price: introPrice, weekly: price, count: WEEKLY_CREDITS })
+              : t('offer.terms', { weekly: price, count: WEEKLY_CREDITS })}
           </Meta>
           <LegalLinks />
         </View>
@@ -243,6 +270,19 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-13deg' }],
   },
   column: { flex: 1, overflow: 'hidden' },
+  skip: {
+    position: 'absolute',
+    right: space.s4,
+    // A dark disc rather than a tinted one: the wall behind it is photographs,
+    // and a ✕ that borrows their colour disappears over pale hair.
+    zIndex: 1,
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    backgroundColor: color.scrim,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   offer: {
     position: 'absolute',
     left: space.gutterHero,

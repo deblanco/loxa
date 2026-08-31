@@ -14,4 +14,5 @@ export function purchases(): PurchasesPort {
   return key ? revenueCatPurchases(key) : fakePurchases();
 }
 
-export type { PurchasesPort };
+export { useWeeklyPricing } from './useWeeklyPricing';
+export type { PurchasesPort, WeeklyPricing } from './types';

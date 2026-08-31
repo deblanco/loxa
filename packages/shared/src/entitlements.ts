@@ -2,10 +2,15 @@
  * What a customer can be.
  *
  * `loxa_pro` is the RevenueCat entitlement's lookup key and the only one that
- * grants an allowance. Everything else — trial included — is a state the app
- * displays, not a permission the Worker checks: a trial *is* the weekly
+ * grants an allowance. Everything else is a state the app displays, not a
+ * permission the Worker checks: an introductory first week *is* the weekly
  * entitlement as far as RevenueCat and this Worker are concerned, which is the
- * point of running the trial through the store instead of through us.
+ * point of running the offer through the store instead of through us.
+ *
+ * `trial` is a leftover. There is no free trial — the App Store's one
+ * introductory offer per subscription is spent on the $0.99 first week — and
+ * `planFor` has only ever returned `weekly` or `free`. It stays in the union
+ * because `plan` is a response field with clients in the wild reading it.
  */
 export const WEEKLY_ENTITLEMENT = 'loxa_pro';
 

@@ -113,7 +113,7 @@ export default function Entry() {
         <Pill
           label={t('entry.cta')}
           tone="light"
-          onPress={() => router.push('/(onboarding)/trial')}
+          onPress={() => router.push('/(onboarding)/offer')}
         />
 
         <View style={styles.dots}>

@@ -16,16 +16,20 @@ const fr: typeof en = {
     slide: 'Diapositive {{number}}',
   },
 
-  trial: {
-    badge: '3 jours offerts',
+  offer: {
+    badgeIntro: 'Première semaine {{price}}',
+    badge: '{{count}} photos par semaine',
     headline: 'Change de cheveux',
     headlineSecond: 'vingt fois par semaine.',
     perkCredits: '{{count}} photos par semaine, coupe et couleur au choix',
     perkOwnFace: 'Ton propre visage, pas un mannequin de banque d’images',
     perkDaily: 'De nouveaux looks chaque jour',
-    start: 'Activer l’essai gratuit',
-    continueFree: 'Continuer gratuitement',
-    terms: 'puis {{price}} · {{count}} photos par semaine · annulable à tout moment',
+    startIntro: 'Commencer pour {{price}}',
+    start: 'S’abonner',
+    skip: 'Continuer sans abonnement',
+    termsIntro:
+      '{{price}} la première semaine, puis {{weekly}} par semaine · {{count}} photos par semaine · annulable à tout moment',
+    terms: '{{weekly}} par semaine · {{count}} photos par semaine · annulable à tout moment',
   },
 
   preview: {
@@ -129,6 +133,7 @@ const fr: typeof en = {
     notificationsNote: 'Une notification par jour, de nouveaux looks',
     restore: 'Restaurer les achats',
     restored: 'Achats restaurés',
+    rate: 'Noter Loxa',
     privacy: 'Politique de confidentialité',
     terms: 'Conditions d’utilisation',
     language: 'Langue',

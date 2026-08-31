@@ -1,8 +1,8 @@
 import {
   HAIR_COLORS,
   HAIR_STYLES,
+  INTRO_PRICE_LABEL,
   SINGLE_PHOTO_PRICE_LABEL,
-  TRIAL_DAYS,
   WEEKLY_CREDITS,
   WEEKLY_PRICE_LABEL,
 } from "@loxa/shared";
@@ -60,7 +60,7 @@ export default function Home() {
                 Coming to the App Store
               </span>
               <span className="font-mono text-[11px] text-[var(--ink-45)]">
-                {TRIAL_DAYS} days free, then {WEEKLY_PRICE_LABEL}
+                First week {INTRO_PRICE_LABEL}, then {WEEKLY_PRICE_LABEL}
               </span>
             </div>
           </div>
@@ -141,7 +141,8 @@ export default function Home() {
               </p>
               <p className="mt-s3 text-[14.5px] leading-relaxed text-[rgba(250,248,245,.66)]">
                 {WEEKLY_CREDITS} photos every week, any style or colour. Credits reset
-                every Monday and do not carry over. {TRIAL_DAYS} days free, cancel anytime.
+                every Monday and do not carry over. First week {INTRO_PRICE_LABEL}, then{" "}
+                {WEEKLY_PRICE_LABEL}. Cancel anytime.
               </p>
             </div>
 

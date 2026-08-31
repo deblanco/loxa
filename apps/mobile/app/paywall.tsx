@@ -1,4 +1,4 @@
-import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from '@loxa/shared';
+import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS } from '@loxa/shared';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
 import { LegalLinks } from '@/components/LegalLinks';
 import { Body, Display, Meta } from '@/components/Text';
-import { purchases } from '@/purchases';
+import { purchases, useWeeklyPricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
 import { color, motion, radius, space } from '@/theme';
 
@@ -18,6 +18,11 @@ import { color, motion, radius, space } from '@/theme';
  * rather than filled: it is the smaller commitment, and burying it under the
  * subscription would make the cheaper choice feel like the hidden one.
  *
+ * The weekly's introductory first week is deliberately *not* shown here. Whoever
+ * is reading this sheet has run out of credits, so they either already hold the
+ * subscription or already declined the offer — and a second $0.99 beside the
+ * $0.99 photo would read as one price attached to two different things.
+ *
  * Nothing here grants a credit. A purchase produces transaction ids, the Worker
  * checks them with the store, and the balance that comes back is the truth.
  */
@@ -25,6 +30,7 @@ export default function Paywall() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { refresh } = useCredits();
+  const { price } = useWeeklyPricing();
   const rise = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -103,7 +109,7 @@ export default function Paywall() {
               </Body>
             </View>
             <Display variant="price" tone="paper">
-              {WEEKLY_PRICE_LABEL.split('/')[0]}
+              {price}
               {t('paywall.perWeek')}
             </Display>
           </Pressable>

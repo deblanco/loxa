@@ -1,4 +1,9 @@
-import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS, WEEKLY_PRICE_LABEL } from "@loxa/shared";
+import {
+  INTRO_PRICE_LABEL,
+  SINGLE_PHOTO_PRICE_LABEL,
+  WEEKLY_CREDITS,
+  WEEKLY_PRICE_LABEL,
+} from "@loxa/shared";
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -27,12 +32,15 @@ export default function Terms() {
         </Section>
 
         <Section title="Credits">
-          A credit is one generated photo. The weekly subscription is{" "}
-          {WEEKLY_PRICE_LABEL} and includes {WEEKLY_CREDITS} photos each week.
-          Credits reset every Monday and do not carry over. If you run out you
-          can buy a single photo for {SINGLE_PHOTO_PRICE_LABEL}. Credits are
-          tied to the device the app is installed on; use Restore purchases if
-          you reinstall or change phone.
+          A credit is one generated photo. The weekly subscription includes{" "}
+          {WEEKLY_CREDITS} photos each week. New subscribers pay{" "}
+          {INTRO_PRICE_LABEL} for the first week, then {WEEKLY_PRICE_LABEL}{" "}
+          until cancelled; the introductory price is offered once per Apple ID,
+          so it does not apply if you have subscribed to Loxa before. Credits
+          reset every Monday and do not carry over. If you run out you can buy a
+          single photo for {SINGLE_PHOTO_PRICE_LABEL}. Credits are tied to the
+          device the app is installed on; use Restore purchases if you reinstall
+          or change phone.
         </Section>
 
         <Section title="Cancelling">

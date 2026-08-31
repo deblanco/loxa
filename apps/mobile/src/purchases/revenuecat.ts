@@ -1,4 +1,4 @@
-import Purchases, { PURCHASES_ERROR_CODE } from 'react-native-purchases';
+import Purchases, { INTRO_ELIGIBILITY_STATUS, PURCHASES_ERROR_CODE } from 'react-native-purchases';
 import { SINGLE_PHOTO_PRODUCT_ID, WEEKLY_PRODUCT_ID } from '@loxa/shared';
 import type { PurchasesPort } from './types';
 
@@ -29,6 +29,35 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
         // failure worth showing an error for.
         if (isCancellation(err)) return false;
         throw err;
+      }
+    },
+
+    async weeklyPricing() {
+      try {
+        const [product] = await Purchases.getProducts([WEEKLY_PRODUCT_ID]);
+        if (!product) return null;
+
+        // `introPrice` is set whenever the *product* carries an offer, which is
+        // always — so it says nothing about whether this customer can have it.
+        // Only the eligibility call knows that, and anything short of a
+        // definite yes prints the plain price: RevenueCat answers UNKNOWN when
+        // it cannot reach the subscription group, and an offer shown to
+        // somebody the App Store then charges $9.99 is a lie told at the sheet.
+        const eligibility = await Purchases.checkTrialOrIntroductoryPriceEligibility([
+          WEEKLY_PRODUCT_ID,
+        ]);
+        const eligible =
+          eligibility[WEEKLY_PRODUCT_ID]?.status ===
+          INTRO_ELIGIBILITY_STATUS.INTRO_ELIGIBILITY_STATUS_ELIGIBLE;
+
+        return {
+          price: product.priceString,
+          introPrice: eligible ? (product.introPrice?.priceString ?? null) : null,
+        };
+      } catch {
+        // A price we could not fetch is not an error worth a screen: the caller
+        // falls back to the shipped label rather than rendering a hole.
+        return null;
       }
     },
 

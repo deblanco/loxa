@@ -24,6 +24,7 @@ export default defineConfig({
         'src/format.ts',
         'src/notifications/copy.ts',
         'src/notifications/schedule.ts',
+        'src/review/policy.ts',
         'src/purchases/fake.ts',
         'src/store/look-record.ts',
         'src/selection.ts',

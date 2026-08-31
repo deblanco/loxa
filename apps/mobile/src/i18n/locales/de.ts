@@ -16,16 +16,20 @@ const de: typeof en = {
     slide: 'Folie {{number}}',
   },
 
-  trial: {
-    badge: '3 Tage gratis',
+  offer: {
+    badgeIntro: 'Erste Woche {{price}}',
+    badge: '{{count}} Fotos pro Woche',
     headline: 'Ändere deine Haare',
     headlineSecond: 'zwanzigmal pro Woche.',
     perkCredits: '{{count}} Fotos pro Woche, jeder Schnitt und jede Farbe',
     perkOwnFace: 'Dein eigenes Gesicht, kein Stockmodel',
     perkDaily: 'Jeden Tag neue Looks',
-    start: 'Gratis testen',
-    continueFree: 'Gratis weiter',
-    terms: 'danach {{price}} · {{count}} Fotos pro Woche · jederzeit kündbar',
+    startIntro: 'Für {{price}} starten',
+    start: 'Abonnieren',
+    skip: 'Ohne Abo fortfahren',
+    termsIntro:
+      '{{price}} für die erste Woche, danach {{weekly}} pro Woche · {{count}} Fotos pro Woche · jederzeit kündbar',
+    terms: '{{weekly}} pro Woche · {{count}} Fotos pro Woche · jederzeit kündbar',
   },
 
   preview: {
@@ -129,6 +133,7 @@ const de: typeof en = {
     notificationsNote: 'Eine Mitteilung am Tag, neue Looks',
     restore: 'Käufe wiederherstellen',
     restored: 'Käufe wiederhergestellt',
+    rate: 'Loxa bewerten',
     privacy: 'Datenschutzerklärung',
     terms: 'Nutzungsbedingungen',
     language: 'Sprache',

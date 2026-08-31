@@ -14,6 +14,7 @@ import { Toast } from '@/components/Toast';
 import { useCredits } from '@/store/credits';
 import { humaniseId } from '@/store/look-record';
 import { readLook, type Look } from '@/store/results';
+import { maybeAskForReview } from '@/store/review';
 import { color, radius, space } from '@/theme';
 
 /**
@@ -40,6 +41,19 @@ export default function Result() {
   useEffect(() => {
     void readLook(id).then(setLook);
   }, [id]);
+
+  // The rating prompt, once the picture is on screen and settled.
+  //
+  // Delayed rather than immediate because the sheet would otherwise land on top
+  // of the thing it is asking about, and cleared on unmount so backing out
+  // inside the pause cancels it — an ask that arrives over the preview screen
+  // is an ask about nothing. Whether it appears at all is `store/review.ts`'s
+  // decision; this only offers it the moment.
+  useEffect(() => {
+    if (!look) return;
+    const timer = setTimeout(() => void maybeAskForReview(), 1500);
+    return () => clearTimeout(timer);
+  }, [look]);
 
   function flash(message: string) {
     setToast(message);

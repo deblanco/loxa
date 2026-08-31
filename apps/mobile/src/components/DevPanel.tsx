@@ -1,7 +1,9 @@
 import { router } from 'expo-router';
+import * as StoreReview from 'expo-store-review';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useDevPremium } from '../dev/premium';
 import { resetAppState } from '../dev/reset';
+import { clearReviewState } from '../store/review';
 import { color, radius, space } from '../theme';
 import { Body, Meta } from './Text';
 
@@ -43,6 +45,18 @@ export function DevPanel({ onChanged }: { onChanged?: () => void }) {
     );
   }
 
+  /**
+   * The rating sheet, without the policy in front of it.
+   *
+   * Clears the stored state as well as asking, so the automatic prompt on the
+   * result screen is reachable again afterwards. **`requestReview` is a no-op
+   * on the Simulator** — this needs a device, and even there an App Store build
+   * obeys the three-a-year cap while TestFlight shows the sheet every time.
+   */
+  function askForReview() {
+    void clearReviewState().then(() => StoreReview.requestReview().catch(() => {}));
+  }
+
   return (
     <View style={styles.panel}>
       <Meta variant="metaSmall" tone="ink40" style={styles.header}>
@@ -59,6 +73,18 @@ export function DevPanel({ onChanged }: { onChanged?: () => void }) {
         <View style={[styles.toggle, premium ? styles.toggleOn : styles.toggleOff]}>
           <View style={styles.knob} />
         </View>
+      </Pressable>
+
+      <Pressable accessibilityRole="button" onPress={askForReview} style={[styles.row, styles.divided]}>
+        <View style={styles.rowText}>
+          <Body variant="bodySmall">Ask for review</Body>
+          <Meta variant="note" tone="ink45" sentence style={styles.note}>
+            skips the roll · nothing happens on the simulator
+          </Meta>
+        </View>
+        <Body variant="bodySmall" tone="ink30">
+          ›
+        </Body>
       </Pressable>
 
       <Pressable accessibilityRole="button" onPress={confirmReset} style={[styles.row, styles.divided]}>

@@ -10,6 +10,7 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { Body, Display, Meta } from '@/components/Text';
 import { humaniseId } from '@/store/look-record';
 import { saveLook } from '@/store/results';
+import { noteRender } from '@/store/review';
 import { color, motion, radius, space } from '@/theme';
 
 /**
@@ -84,6 +85,13 @@ export default function Generating() {
           styleName,
           colorName,
         });
+
+        // Before the cancel guard: a render that was billed and written is a
+        // render, whether or not this screen is still the one on top. This is
+        // also the only place where a look is genuinely new — counting on the
+        // result screen would count it again every time it was reopened.
+        void noteRender();
+
         if (cancelled) return;
 
         setProgress(1);

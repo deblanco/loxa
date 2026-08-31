@@ -47,6 +47,13 @@ const KEYS = [
    * there and quietly show the invitation over a stale id.
    */
   'loxa.profilePhoto.v1',
+  /**
+   * The render count and the dates the rating sheet was raised. An install that
+   * "starts fresh" but remembers it has already asked can never reach the
+   * prompt again — and iOS forgives only three a year, so there is no second
+   * way to get back to it.
+   */
+  'loxa.review.v1',
 ];
 
 /** The keychain entry, which outlives everything else including the app itself. */

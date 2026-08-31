@@ -34,16 +34,20 @@ const en = {
     slide: 'Slide {{number}}',
   },
 
-  trial: {
-    badge: '3 days free',
+  offer: {
+    badgeIntro: 'First week {{price}}',
+    badge: '{{count}} photos a week',
     headline: 'Change your hair',
     headlineSecond: 'twenty times a week.',
     perkCredits: '{{count}} photos a week, any style or colour',
     perkOwnFace: 'Your own face — not a stock model',
     perkDaily: 'New looks dropped daily',
-    start: 'Enable free trial',
-    continueFree: 'Continue free',
-    terms: 'then {{price}} · {{count}} photos a week · cancel anytime',
+    startIntro: 'Start for {{price}}',
+    start: 'Subscribe',
+    skip: 'Continue without subscribing',
+    termsIntro:
+      '{{price}} for the first week, then {{weekly}} a week · {{count}} photos a week · cancel anytime',
+    terms: '{{weekly}} a week · {{count}} photos a week · cancel anytime',
   },
 
   preview: {
@@ -151,6 +155,8 @@ const en = {
     notificationsNote: 'One notification a day, new looks',
     restore: 'Restore purchases',
     restored: 'Purchases restored',
+    /** Opens the App Store page rather than the rating sheet: Apple's sheet must never be the answer to a button press. */
+    rate: 'Rate Loxa',
     privacy: 'Privacy policy',
     terms: 'Terms of use',
     language: 'Language',

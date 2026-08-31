@@ -27,11 +27,31 @@ export const WEEKLY_CREDITS = 20;
  */
 export const FREE_CREDITS = 0;
 
-/** Days of trial before the first charge. */
-export const TRIAL_DAYS = 3;
-
+/**
+ * The prices, as fallback strings.
+ *
+ * What a screen prints when the store cannot be asked. The real number comes
+ * from StoreKit: `weeklyPricing()` on the app's purchases port reads the
+ * storefront's own `priceString`, so a reader in Berlin sees euros. These stay
+ * because a blank where a price goes is worse than a stale currency, and
+ * because the marketing site has no store to ask in the first place.
+ */
 export const WEEKLY_PRICE_LABEL = '$9.99/week';
 export const SINGLE_PHOTO_PRICE_LABEL = '$0.99';
+
+/**
+ * The first week of the subscription, which the App Store bills up front.
+ *
+ * Deliberately the same string as `SINGLE_PHOTO_PRICE_LABEL` and deliberately a
+ * different thing: one buys a week of Loxa Weekly, the other buys one photo.
+ * They never share a screen — the intro price belongs to the onboarding offer,
+ * the single photo to the out-of-credits sheet — which is what keeps two $0.99s
+ * from reading as one.
+ *
+ * There is no free trial. A user gets one introductory offer per subscription
+ * from the App Store, and this is it.
+ */
+export const INTRO_PRICE_LABEL = '$0.99';
 
 /**
  * The ISO-8601 week a date falls in, as `YYYY-Www`.

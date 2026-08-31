@@ -32,6 +32,12 @@ describe("the landing page", () => {
     expect(html).toContain(`${WEEKLY_CREDITS} photos every week`);
   });
 
+  it("states the introductory week beside the price it becomes", () => {
+    // A first week at $0.99 is only honest next to the $9.99 that follows it.
+    expect(html).toContain("First week $0.99");
+    expect(html).toContain("Cancel anytime");
+  });
+
   it("asks the bucket for nothing, host set or not", async () => {
     // The page's pictures ship with it. Nothing here waits on a generator run,
     // so a bucket that is empty — or a host that is unset — changes no pixel.
@@ -90,5 +96,11 @@ describe("the terms", () => {
   it("states the credit rules the app enforces", () => {
     expect(html).toContain("do not carry over");
     expect(html).toContain("$0.99");
+  });
+
+  it("says the introductory price is offered once", () => {
+    // The sentence App Store review looks for, and the one a resubscriber who
+    // was charged $9.99 in their first week would otherwise be right to dispute.
+    expect(html).toContain("once per Apple ID");
   });
 });
