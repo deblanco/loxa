@@ -13,14 +13,12 @@ import { SegmentedControl } from '@/components/SegmentedControl';
 import { StyleStrip } from '@/components/StyleStrip';
 import { Body, Display, Meta } from '@/components/Text';
 import { Wordmark } from '@/components/Wordmark';
-import { verdictLine, type FaceVerdict } from '@/face/verdict';
-import { pickFromLibrary } from '@/photo';
 import { adjacentStyle, clampSelection, colorsFor, findColor, findStyle, heroKeys } from '@/catalogue';
 import { initialSelection, primaryAction, primaryActionLabel, withSource } from '@/selection';
 import { useCatalogue } from '@/store/catalogue';
 import { useCredits } from '@/store/credits';
 import { offerPortrait } from '@/store/portrait-offer';
-import { readProfilePhoto } from '@/store/profile-photo';
+import { readProfilePhoto, readProfilePhotoForRender } from '@/store/profile-photo';
 import { color, radius, space } from '@/theme';
 
 /**
@@ -112,10 +110,9 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
   const [selection, setSelection] = useState(() => initialSelection(catalogue.defaults));
+  // This session's shot, for the `new` source. The `saved` source's photo is the
+  // profile portrait below, which lives on disk rather than in this state.
   const [photo, setPhoto] = useState<{ base64: string; uri: string } | null>(null);
-  // Why the last photo they chose was turned away, if it was. Cleared by the
-  // next one that isn't — including the one the camera hands back.
-  const [rejected, setRejected] = useState<FaceVerdict | null>(null);
   // The plate is a pager, and a pager needs to know how wide one page is. Zero
   // until the first layout, which is why the plain plate renders until then.
   const [plateWidth, setPlateWidth] = useState(0);
@@ -135,8 +132,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   useEffect(() => {
     if (params.photoUri && params.photoBase64) {
       setPhoto({ uri: params.photoUri, base64: params.photoBase64 });
-      setRejected(null);
-      setSelection((current) => ({ ...current, source: 'new', hasFreshShot: true, hasPhoto: true }));
+      setSelection((current) => ({ ...current, source: 'new', hasFreshShot: true }));
     }
   }, [params.photoUri, params.photoBase64]);
 
@@ -151,6 +147,13 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   const colorName = findColor(catalogue, selection.colorId)?.name ?? '';
 
   /**
+   * Whichever photo the selected source stands for: the profile portrait under
+   * `saved`, this session's shot under `new`. Null when that source has none
+   * yet, which is the state the primary button is there to leave.
+   */
+  const own = selection.source === 'saved' ? portrait : (photo?.uri ?? null);
+
+  /**
    * The user's own face first, then the models wearing the same cut and colour.
    *
    * Theirs leads because it is the point of the app — the models are there to
@@ -160,7 +163,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
    * labelled placeholder it has always drawn.
    */
   const pages = [
-    ...(photo ? [{ key: 'photo', uri: photo.uri, focus: undefined }] : []),
+    ...(own ? [{ key: 'photo', uri: own, focus: undefined }] : []),
     ...heroKeys(catalogue, selection.styleId, selection.colorId)
       .map((key) => ({
         key: `model-${key}`,
@@ -207,19 +210,13 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
     setLanding(null);
   }, [landing, pages, plateWidth]);
 
-  const choosePhoto = useCallback(async () => {
-    const picked = await pickFromLibrary();
-    if (!picked) return;
-    if (!picked.ok) {
-      // The photo they already had, if any, stays. Losing a good photo because
-      // the next one had nobody in it would be the worse of the two failures.
-      setRejected(picked.reason);
-      return;
-    }
-    setRejected(null);
-    setPhoto(picked.photo);
-    setSelection((current) => ({ ...current, hasPhoto: true }));
-  }, []);
+  // `hasPhoto` is a question about the selected source, and only this screen can
+  // answer it: the portrait for `saved`, this session's shot for `new`. Kept in
+  // the selection so `selection.ts` never has to know where a picture is kept.
+  useEffect(() => {
+    const has = selection.source === 'saved' ? portrait !== null : photo !== null;
+    setSelection((current) => (current.hasPhoto === has ? current : { ...current, hasPhoto: has }));
+  }, [selection.source, portrait, photo]);
 
   // The balance changes while this screen is not the one on top: a render spends
   // one, a purchase on the paywall adds one. Without this the chip goes stale
@@ -231,8 +228,15 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
     }, [refresh]),
   );
 
+  const action = primaryAction(selection, credits?.creditsLeft ?? null);
+
+  // The plate leads wherever the button leads, except when the button would
+  // render: there the plate is already showing what that render starts from,
+  // and a tap that spends a credit is not a tap anybody meant to make.
+  const onPlate = action === 'generate' ? undefined : onPrimary;
+
   async function onPrimary() {
-    switch (primaryAction(selection, credits?.creditsLeft ?? null)) {
+    switch (action) {
       case 'paywall':
         // Straight to the offer. The Worker would refuse this anyway, but not
         // before the user had watched a progress bar for a round trip.
@@ -241,20 +245,30 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
       case 'camera':
         router.push('/camera');
         return;
-      case 'pick-photo':
-        await choosePhoto();
+      case 'profile-photo':
+        // The camera saves the portrait and comes straight back, so the source
+        // this button belongs to has a photo by the time the screen returns.
+        router.push('/camera?from=profile');
         return;
-      case 'generate':
-        if (!photo) return;
+      case 'generate': {
+        // The saved source's bytes are read here rather than held in state: the
+        // portrait is around 700KB, this screen is the one the user lives on,
+        // and it is needed for exactly as long as it takes to push the route.
+        const shot =
+          selection.source === 'saved' ? await readProfilePhotoForRender() : photo;
+        if (!shot) return;
         // Armed here rather than after the render, because this is the only
         // screen holding both halves of the photo. It is consumed on the result
         // screen, which is reached only once a render has been billed and
         // saved — so a failure never turns into an ask.
-        offerPortrait(photo);
+        //
+        // Only for a fresh shot. Offering the portrait as the portrait is a
+        // question with one answer, and `pendingPortrait` would drop it anyway.
+        if (selection.source === 'new') offerPortrait(shot);
         router.push({
           pathname: '/generating',
           params: {
-            base64: photo.base64,
+            base64: shot.base64,
             styleId: selection.styleId,
             colorId: selection.colorId,
             // The names travel with the render rather than being looked up
@@ -265,6 +279,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
             colorName,
           },
         });
+      }
     }
   }
 
@@ -307,18 +322,16 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
             style={styles.pager}
           >
             {pages.map((item) => (
-              <Pressable key={item.key} onPress={choosePhoto} style={{ width: plateWidth }}>
+              <Pressable key={item.key} onPress={onPlate} style={{ width: plateWidth }}>
                 <PhotoPlate uri={item.uri} focus={item.focus} style={styles.plate} />
               </Pressable>
             ))}
           </ScrollView>
         ) : (
-          <Pressable onPress={choosePhoto} style={styles.plate}>
+          <Pressable onPress={onPlate} style={styles.plate}>
             <PhotoPlate
-              uri={photo?.uri}
-              label={
-                photo ? undefined : t(rejected ? verdictLine(rejected) : 'preview.tapToChoose')
-              }
+              uri={own}
+              label={own ? undefined : t('preview.tapToTakePhoto')}
               style={styles.plate}
             />
           </Pressable>
@@ -338,14 +351,6 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
                 style={[styles.dot, index === page ? styles.dotOn : styles.dotOff]}
               />
             ))}
-          </View>
-        ) : null}
-
-        {rejected && photo ? (
-          <View style={styles.rejected} pointerEvents="none">
-            <Meta variant="note" tone="ink" sentence>
-              {t(verdictLine(rejected))}
-            </Meta>
           </View>
         ) : null}
       </View>
@@ -444,19 +449,6 @@ const styles = StyleSheet.create({
   },
   plusBarUp: { transform: [{ rotate: '90deg' }] },
   plateWrap: { flex: 1, marginHorizontal: space.gutterScreen },
-  // Over the photo they kept, because the plate's own label only shows when
-  // there is no photo under it. Wearing the badge's plate for the same reason
-  // the badge does: this text has a photograph behind it.
-  rejected: {
-    position: 'absolute',
-    bottom: space.s3,
-    alignSelf: 'center',
-    height: 26,
-    paddingHorizontal: 11,
-    borderRadius: radius.pill,
-    backgroundColor: 'rgba(250,248,245,0.9)',
-    justifyContent: 'center',
-  },
   plate: { flex: 1 },
   pager: { flex: 1, borderRadius: radius.plate },
   // A capsule, like the badge: the dots have to read over whatever the photo is.

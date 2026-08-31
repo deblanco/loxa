@@ -71,7 +71,7 @@ describe('the locales', () => {
         // `sentence` ones, and a capital in them is a translation that quietly
         // changed the type style.
         const notes = [
-          locale.preview.tapToChoose,
+          locale.preview.tapToTakePhoto,
           locale.preview.needsConnection,
           locale.camera.hint,
           locale.camera.library,

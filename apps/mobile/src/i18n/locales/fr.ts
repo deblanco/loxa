@@ -35,7 +35,8 @@ const fr: typeof en = {
   preview: {
     tryOn: 'Essayer',
     takePhotoAndTryOn: 'Prendre une photo et essayer',
-    tapToChoose: 'touche pour choisir une photo',
+    takeProfilePhoto: 'Prendre une photo de profil',
+    tapToTakePhoto: 'touche pour prendre une photo',
     savedPhoto: 'Photo enregistrée',
     newPhoto: 'Nouvelle photo',
     newPhotoTaken: 'Nouvelle photo ✓',

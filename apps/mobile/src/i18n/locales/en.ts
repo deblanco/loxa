@@ -53,7 +53,8 @@ const en = {
   preview: {
     tryOn: 'Try On',
     takePhotoAndTryOn: 'Take photo & try on',
-    tapToChoose: 'tap to choose a photo',
+    takeProfilePhoto: 'Take your profile photo',
+    tapToTakePhoto: 'tap to take a photo',
     savedPhoto: 'Saved photo',
     newPhoto: 'New photo',
     newPhotoTaken: 'New photo ✓',

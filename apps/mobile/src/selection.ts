@@ -15,7 +15,14 @@ export interface Selection {
   source: PhotoSource;
   /** True once a photo has been taken this session for the `new` source. */
   hasFreshShot: boolean;
-  /** Whether a photo has been chosen at all. Nothing can be rendered without one. */
+  /**
+   * Whether the selected source actually has a photo behind it. Nothing can be
+   * rendered without one.
+   *
+   * Which photo that is depends on `source`: the profile portrait for `saved`,
+   * this session's shot for `new`. The screen keeps the field in step with
+   * both, so these rules never have to know where a picture is kept.
+   */
   hasPhoto: boolean;
 }
 
@@ -47,8 +54,12 @@ export function initialSelection(defaults: { styleId: string; colorId: string })
  */
 export function primaryActionLabel(
   selection: Selection,
-): 'preview.takePhotoAndTryOn' | 'preview.tryOn' {
-  return needsCamera(selection) ? 'preview.takePhotoAndTryOn' : 'preview.tryOn';
+): 'preview.takePhotoAndTryOn' | 'preview.takeProfilePhoto' | 'preview.tryOn' {
+  if (needsCamera(selection)) return 'preview.takePhotoAndTryOn';
+  if (!selection.hasPhoto) {
+    return selection.source === 'saved' ? 'preview.takeProfilePhoto' : 'preview.takePhotoAndTryOn';
+  }
+  return 'preview.tryOn';
 }
 
 export function needsCamera(selection: Selection): boolean {
@@ -70,7 +81,7 @@ export function withSource(selection: Selection, source: PhotoSource): Selection
 }
 
 /** What pressing the primary button should actually do. */
-export type PrimaryAction = 'paywall' | 'camera' | 'pick-photo' | 'generate';
+export type PrimaryAction = 'paywall' | 'camera' | 'profile-photo' | 'generate';
 
 /**
  * Where the Try On button goes.
@@ -88,6 +99,15 @@ export type PrimaryAction = 'paywall' | 'camera' | 'pick-photo' | 'generate';
 export function primaryAction(selection: Selection, creditsLeft: number | null): PrimaryAction {
   if (creditsLeft !== null && creditsLeft < 1) return 'paywall';
   if (needsCamera(selection)) return 'camera';
-  if (!selection.hasPhoto) return 'pick-photo';
+  // The saved photo *is* the profile portrait, so having none is not a question
+  // to answer with a library — it is a profile that has not been set up. The
+  // library still exists, in the camera screen, which is where a photo that is
+  // not the portrait comes from.
+  //
+  // Under `new` this is only reachable as contradictory state — a fresh shot
+  // claimed with no photo behind it — and the camera is what settles it. It is
+  // answered rather than asserted away because the wrong answer here sends
+  // somebody to the profile to fix a shot they just took.
+  if (!selection.hasPhoto) return selection.source === 'saved' ? 'profile-photo' : 'camera';
   return 'generate';
 }

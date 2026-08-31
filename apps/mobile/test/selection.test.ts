@@ -16,7 +16,13 @@ const BASE = initialSelection({ styleId: 'blunt-bob', colorId: 'caramel' });
 
 describe('primaryActionLabel', () => {
   it('is Try On for a saved photo', () => {
-    expect(primaryActionLabel(BASE)).toBe('preview.tryOn');
+    expect(primaryActionLabel({ ...BASE, hasPhoto: true })).toBe('preview.tryOn');
+  });
+
+  it('asks for the portrait when the saved source has none', () => {
+    // The saved photo is the profile portrait, so having none is a profile that
+    // has not been set up rather than a library that has not been opened.
+    expect(primaryActionLabel(BASE)).toBe('preview.takeProfilePhoto');
   });
 
   it('becomes a camera button when a new photo is wanted and none has been taken', () => {
@@ -28,7 +34,7 @@ describe('primaryActionLabel', () => {
   });
 
   it('goes back to Try On once a shot exists', () => {
-    const selection = { ...withSource(BASE, 'new'), hasFreshShot: true };
+    const selection = { ...withSource(BASE, 'new'), hasFreshShot: true, hasPhoto: true };
     expect(primaryActionLabel(selection)).toBe('preview.tryOn');
     expect(needsCamera(selection)).toBe(false);
   });
@@ -82,8 +88,8 @@ describe('primaryAction', () => {
     expect(primaryAction(withSource(BASE, 'new'), 5)).toBe('camera');
   });
 
-  it('asks for a photo when there is none', () => {
-    expect(primaryAction(BASE, 5)).toBe('pick-photo');
+  it('sends someone with no portrait to take one', () => {
+    expect(primaryAction(BASE, 5)).toBe('profile-photo');
   });
 
   it('generates when there is a photo and a credit', () => {

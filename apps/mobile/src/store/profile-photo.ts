@@ -54,6 +54,29 @@ export async function readProfilePhoto(): Promise<string | null> {
   return file.uri;
 }
 
+/**
+ * The portrait as something to restyle: its URI and the bytes to send.
+ *
+ * Read off disk rather than re-run through `prepare`. Whatever is in this file
+ * has already been downscaled, re-encoded and face-checked — it got here by
+ * being a photo `photo.ts` accepted — so preparing it again would spend a
+ * second Vision pass to reach the same verdict about the same pixels.
+ *
+ * Separate from `readProfilePhoto` because the base64 of a portrait is around
+ * 700KB and almost nobody wants it: the header avatar and the identity block
+ * want a URI. This is the one caller that is about to put the picture on the
+ * wire, and it pays for the read at the moment it presses the button.
+ */
+export async function readProfilePhotoForRender(): Promise<{
+  uri: string;
+  base64: string;
+} | null> {
+  const uri = await readProfilePhoto();
+  if (!uri) return null;
+
+  return { uri, base64: await new File(uri).base64() };
+}
+
 /** Write the portrait, replacing whatever was there. Returns its URI. */
 export async function saveProfilePhoto(base64: string): Promise<string> {
   const previous = await AsyncStorage.getItem(KEY);
