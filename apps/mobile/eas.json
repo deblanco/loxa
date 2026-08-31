@@ -14,7 +14,7 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
         "EXPO_PUBLIC_ASSETS_URL": "https://loxa-assets.blankhexadecimal.com",
-        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "TODO-revenuecat-test-key"
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "test_GcvstKHIFrxuWwTzkFOeLWDTaYb"
       }
     },
     "preview": {
@@ -22,7 +22,7 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
         "EXPO_PUBLIC_ASSETS_URL": "https://loxa-assets.blankhexadecimal.com",
-        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "TODO-revenuecat-test-key"
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "test_GcvstKHIFrxuWwTzkFOeLWDTaYb"
       }
     },
     "testflight": {
@@ -35,14 +35,14 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
         "EXPO_PUBLIC_ASSETS_URL": "https://loxa-assets.blankhexadecimal.com",
-        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "TODO-revenuecat-appl-key"
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "appl_FwsbanTUmkfQtcsxnUWreybJlnv"
       }
     },
     "production": {
       "env": {
         "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
         "EXPO_PUBLIC_ASSETS_URL": "https://loxa-assets.blankhexadecimal.com",
-        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "TODO-revenuecat-appl-key"
+        "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "appl_FwsbanTUmkfQtcsxnUWreybJlnv"
       }
     }
   },
@@ -50,14 +50,14 @@
     "testflight": {
       "ios": {
         "appleId": "hola@blankhexadecimal.com",
-        "ascAppId": "TODO-app-store-connect-app-id",
+        "ascAppId": "6807078260",
         "appleTeamId": "K579SJ8947"
       }
     },
     "production": {
       "ios": {
         "appleId": "hola@blankhexadecimal.com",
-        "ascAppId": "TODO-app-store-connect-app-id",
+        "ascAppId": "6807078260",
         "appleTeamId": "K579SJ8947"
       }
     }
