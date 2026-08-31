@@ -19,24 +19,51 @@ export default function PrivacyPolicy() {
       <div className="max-w-2xl">
       <h1 className="mt-s5 font-serif text-4xl leading-tight">Privacy policy</h1>
       <p className="mt-s2 font-mono text-[11px] text-[var(--ink-45)]">
-        Last updated 27 August 2026
+        Last updated 31 August 2026
       </p>
 
       <div className="mt-s8 space-y-s5 text-[15px] leading-relaxed text-[var(--ink-72)]">
         <Section title="There is no account">
           Loxa has no sign-up, no login and no password. The app generates a
           random identifier on your device the first time it runs, and uses it
-          only to count how many photos you have left. It is not linked to your
-          name, your email address or your Apple ID.
+          for two things: counting how many photos you have left, and telling
+          our billing provider which subscription is yours. It is not linked to
+          your name, your email address or your Apple ID.
+        </Section>
+
+        <Section title="That identifier survives reinstalling">
+          It is kept in the iOS keychain rather than in ordinary app storage,
+          which means deleting Loxa and installing it again gives you back the
+          same identifier — and with it the credits you paid for. That is
+          deliberate: there is no account to recover from, so anything that
+          forgot the identifier would lose a purchase permanently. It is removed
+          when you erase or reset the device, or if you ask us (below).
         </Section>
 
         <Section title="Your photos">
-          The photo you choose is sent to our server, passed to Google&rsquo;s
-          image model to be restyled, and returned to you. The generated image
-          is saved on your device. A copy of the result is held for up to thirty
+          Before anything is sent, your photo is checked on the device itself,
+          using Apple&rsquo;s own face detection, to see whether there is a face
+          in it. That check happens on your phone and its answer is not sent
+          anywhere. Your photo is then made smaller, sent to our server, passed
+          to Google&rsquo;s image model to be restyled, and returned to you.
+        </Section>
+
+        <Section title="What happens to them afterwards">
+          The photo you sent is not stored on our server. The generated image is
+          saved on your device, and a copy of it is held by us for up to thirty
           days so that repeating the same request does not cost you a second
-          credit, and is then deleted automatically. We do not use your photos
-          to train anything, and no human at Loxa looks at them.
+          credit — after that it is deleted automatically. If you set a profile
+          picture, it stays on your device and is never uploaded. We do not use
+          your photos to train anything, and no human at Loxa looks at them.
+        </Section>
+
+        <Section title="What we count">
+          We keep a tally of how often each cut and colour is chosen, so we know
+          which ones to make next. It is a running total per style, with no
+          identifier attached — the tally cannot say who picked what, only that
+          a cut was picked. We use no analytics or advertising SDKs, we do not
+          use the advertising identifier, and we do not track you across other
+          apps or websites.
         </Section>
 
         <Section title="Purchases">
@@ -53,9 +80,11 @@ export default function PrivacyPolicy() {
         </Section>
 
         <Section title="Deleting your data">
-          Deleting the app removes the identifier and every generated photo on
-          the device. The cached result expires on its own within thirty days.
-          To ask us to delete anything sooner, write to{" "}
+          Deleting the app removes every generated photo and your profile
+          picture from the device, but keeps the identifier so a reinstall does
+          not cost you what you paid for. Erasing the device removes that too.
+          Cached results expire on their own within thirty days. To have us
+          delete the identifier and everything attached to it, write to{" "}
           <a href="mailto:hola@blankhexadecimal.com" className="underline underline-offset-4">
             hola@blankhexadecimal.com
           </a>
