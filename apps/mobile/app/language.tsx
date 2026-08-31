@@ -54,7 +54,7 @@ export default function LanguagePicker() {
             <Chevron />
           </Pressable>
           <Meta>{t('language.title')}</Meta>
-          <View style={styles.round} />
+          <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.rows}>
@@ -99,6 +99,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  // Balances the back button so `space-between` centres the title. It takes
+  // the round's footprint and none of its border: an outlined empty circle
+  // opposite a real control reads as a button that does nothing.
+  headerSpacer: { width: 34, height: 34 },
   round: {
     width: 34,
     height: 34,
