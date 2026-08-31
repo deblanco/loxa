@@ -130,14 +130,9 @@ export function PhotoPlate({ uri, focus, fallback, label, dark, style, children 
         <>
           <Hatch dark={dark} />
           {label ? (
-            <View style={styles.label}>
-              <Meta variant="note" tone={dark ? 'paper50' : 'ink45'} sentence style={styles.centered}>
-                {label}
-              </Meta>
-              <Meta variant="note" tone={dark ? 'paper50' : 'ink45'} sentence style={styles.centered}>
-                1080 × 1920
-              </Meta>
-            </View>
+            <Meta variant="note" tone={dark ? 'paper50' : 'ink45'} sentence style={styles.centered}>
+              {label}
+            </Meta>
           ) : null}
         </>
       )}
@@ -185,6 +180,5 @@ const styles = StyleSheet.create({
     height: 12,
     transform: [{ rotate: '-12deg' }],
   },
-  label: { alignItems: 'center' },
   centered: { textAlign: 'center' },
 });

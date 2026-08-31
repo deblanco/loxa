@@ -42,7 +42,8 @@ const de: typeof en = {
     profile: 'Profil',
     setUpProfile: 'Profil einrichten',
     creditsLeft: 'Noch {{count}} Credits',
-    catalogueUnavailable: 'der katalog ist nicht verfügbar',
+    offlineHeadline: 'Noch nichts',
+    offlineHeadlineItalic: 'zum Ausprobieren.',
     needsConnection: 'loxa braucht beim ersten mal eine verbindung',
   },
 

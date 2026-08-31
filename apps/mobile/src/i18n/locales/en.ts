@@ -60,7 +60,8 @@ const en = {
     profile: 'Profile',
     setUpProfile: 'Set up your profile',
     creditsLeft: '{{count}} credits left',
-    catalogueUnavailable: 'the catalogue is not available',
+    offlineHeadline: 'Nothing to try on',
+    offlineHeadlineItalic: 'just yet.',
     needsConnection: 'loxa needs a connection the first time',
   },
 

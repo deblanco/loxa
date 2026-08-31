@@ -72,7 +72,6 @@ describe('the locales', () => {
         // changed the type style.
         const notes = [
           locale.preview.tapToChoose,
-          locale.preview.catalogueUnavailable,
           locale.preview.needsConnection,
           locale.camera.hint,
           locale.camera.library,

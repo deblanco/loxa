@@ -11,7 +11,7 @@ import { PhotoPlate } from '@/components/PhotoPlate';
 import { Pill } from '@/components/Pill';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { StyleStrip } from '@/components/StyleStrip';
-import { Body, Meta } from '@/components/Text';
+import { Body, Display, Meta } from '@/components/Text';
 import { Wordmark } from '@/components/Wordmark';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary } from '@/photo';
@@ -46,18 +46,49 @@ export default function Preview() {
 /**
  * The screen before the catalogue arrives, and if it never does.
  *
- * Built out of the same plate, pill and captions as the real thing rather than
- * out of a spinner: the app owns no `ActivityIndicator`, and its only waiting
- * object is the progress bar, which is for a render of known length. The
- * hatched plate already means "a picture goes here", which is exactly true.
+ * Two states that look nothing alike, because they are not the same news.
  *
- * The controls stay in place, disabled, so nothing reflows when the catalogue
- * lands. The strips are omitted — an empty strip header over nothing reads as
- * a broken screen, where no strip reads as one still loading.
+ * Waiting keeps the plate, the pill and the layout of the real thing, disabled:
+ * the app owns no `ActivityIndicator`, its only waiting object is the progress
+ * bar, and the hatch already means "a picture goes here", which is exactly true
+ * while one is on its way. Nothing reflows when the catalogue lands. The strips
+ * are omitted — an empty strip header over nothing reads as a broken screen,
+ * where no strip reads as one still loading.
+ *
+ * Offline drops the plate entirely. Nothing is going to arrive in it, so a
+ * full-height hatch would be the one thing the design system says it is not: a
+ * failed load dressed as a placeholder. What is left is a statement in the
+ * serif, the reason underneath it in mono, and the one control that can change
+ * the situation — the same shape as the entry screen, which is the other screen
+ * the app shows before it has anything of the user's to show.
  */
 function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: () => void }) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+
+  if (offline) {
+    return (
+      <View style={[styles.screen, { paddingTop: insets.top + space.s4 }]}>
+        <View style={styles.header}>
+          <Wordmark variant="wordmarkSmall" />
+        </View>
+
+        <View style={styles.offline}>
+          <Display variant="displayS">{t('preview.offlineHeadline')}</Display>
+          <Display variant="displayS" italic style={styles.offlineSecond}>
+            {t('preview.offlineHeadlineItalic')}
+          </Display>
+          <Meta variant="note" tone="ink45" sentence style={styles.offlineNote}>
+            {t('preview.needsConnection')}
+          </Meta>
+        </View>
+
+        <View style={[styles.controls, { paddingBottom: insets.bottom + space.s5 }]}>
+          <Pill label={t('common.tryAgain')} onPress={onRetry} />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + space.s4 }]}>
@@ -66,23 +97,11 @@ function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: (
       </View>
 
       <View style={styles.plateWrap}>
-        <PhotoPlate
-          label={offline ? t('preview.catalogueUnavailable') : undefined}
-          style={styles.plate}
-        />
+        <PhotoPlate style={styles.plate} />
       </View>
 
       <View style={styles.controls}>
-        {offline ? (
-          <>
-            <Pill label={t('common.tryAgain')} onPress={onRetry} />
-            <Meta variant="note" tone="ink45" sentence style={styles.centred}>
-              {t('preview.needsConnection')}
-            </Meta>
-          </>
-        ) : (
-          <Pill label={t('preview.tryOn')} cost={1} disabled onPress={() => {}} />
-        )}
+        <Pill label={t('preview.tryOn')} cost={1} disabled onPress={() => {}} />
       </View>
     </View>
   );
@@ -471,7 +490,19 @@ const styles = StyleSheet.create({
     paddingTop: space.s3 + 2,
     gap: 11,
   },
-  centred: { textAlign: 'center' },
+  // The statement sits in the space the plate used to fill, off the optical
+  // centre so it reads as a held page rather than as a dialog.
+  offline: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: space.gutterScreen,
+    paddingBottom: space.s14,
+  },
+  // The same second-line treatment as the entry headline: the italic carries
+  // the emphasis, and a touch of transparency keeps it from outweighing the
+  // line it completes.
+  offlineSecond: { opacity: 0.82 },
+  offlineNote: { marginTop: space.s4 },
   strips: { flexGrow: 0, marginTop: space.gutterText },
   stripsContent: { gap: space.s3 },
 });
