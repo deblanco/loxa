@@ -1,4 +1,5 @@
 import { d1CreditLedger } from './adapters/d1/credit-ledger';
+import { d1UsageStats } from './adapters/d1/usage-stats';
 import { devEntitlements } from './adapters/entitlements/dev';
 import { fallbackRenderer } from './adapters/fallback-renderer';
 import { revenueCatEntitlements } from './adapters/entitlements/revenuecat';
@@ -85,6 +86,10 @@ export function buildTryOnDeps(env: Env, devPremium: boolean): TryOnDeps {
     entitlements: entitlementsFor(env, devPremium),
     cache: kvRenderCache(env.RESULTS_CACHE),
     renderer: rendererFor(env),
+    // Same database as the ledger, and deliberately: `style_use` is 240 rows
+    // that never grow with traffic, and a second store would be a second thing
+    // to provision, keep in step and lose.
+    stats: d1UsageStats(env.DB),
     now: () => new Date(),
   };
 }

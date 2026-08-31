@@ -40,3 +40,27 @@ CREATE TABLE IF NOT EXISTS credit_grant (
 );
 
 CREATE INDEX IF NOT EXISTS credit_grant_device ON credit_grant (device_id);
+
+-- Which cuts and colours people actually pick.
+--
+-- One row per (cut, colour) pair rather than one per render: 24 cuts by 10
+-- colours is 240 rows for the lifetime of the catalogue, so the table does not
+-- grow with traffic and "most used" is an ORDER BY rather than a scan over
+-- every render ever served.
+--
+-- Nothing here identifies a device, and that is the point of counting rather
+-- than logging. The question this table answers is which cuts to render art for
+-- next; a device id would turn a product counter into a record of what somebody
+-- tried on their own face.
+--
+-- Two counters because they cost different money. `renders` is a model call we
+-- paid for. `replays` is a cache hit — someone re-opening a picture that
+-- already existed, which is real use and no spend. Summing them answers
+-- popularity; `renders` alone answers the bill.
+CREATE TABLE IF NOT EXISTS style_use (
+  style_id  TEXT    NOT NULL,
+  color_id  TEXT    NOT NULL,
+  renders   INTEGER NOT NULL DEFAULT 0,
+  replays   INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (style_id, color_id)
+);

@@ -3,6 +3,7 @@ import type { CreditLedgerPort } from '../ports/credit-ledger';
 import type { EntitlementsPort } from '../ports/entitlements';
 import type { HairRendererPort } from '../ports/hair-renderer';
 import type { RenderCachePort } from '../ports/render-cache';
+import type { UsageStatsPort } from '../ports/usage-stats';
 import { renderCacheKey } from './cache-key';
 import { OutOfCreditsError, UnknownStyleError } from './errors';
 import { available, rollForward, spendOne } from './rules';
@@ -12,6 +13,7 @@ export interface TryOnDeps {
   entitlements: EntitlementsPort;
   renderer: HairRendererPort;
   cache: RenderCachePort;
+  stats: UsageStatsPort;
   now: () => Date;
 }
 
@@ -44,6 +46,9 @@ export interface TryOnResult {
  * 4. **Refund on any throw.** The user got nothing; charging for that is theft
  *    with extra steps. The refund writes the row back as it was, which puts the
  *    credit in the pool it actually came from.
+ *
+ * The style counter is written after each of the two ways this returns, and is
+ * the one call here whose failure is swallowed — see `count`.
  */
 export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<TryOnResult> {
   const style = findStyle(command.styleId);
@@ -64,6 +69,9 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
   ]);
 
   if (cached) {
+    // A re-open is still somebody choosing this cut, so it counts — as a
+    // replay, which is use without spend.
+    await count(deps, command, true);
     return { imageBase64: cached, creditsLeft: available(state, plan, now), cached: true };
   }
 
@@ -90,9 +98,29 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
   // a cache miss costs a re-render, a lost image costs the user their picture.
   await deps.cache.put(key, rendered.imageBase64);
 
+  // After the render succeeded, never at the spend: a refunded failure that
+  // counted would inflate whichever style the model happened to be down for.
+  await count(deps, command, false);
+
   return {
     imageBase64: rendered.imageBase64,
     creditsLeft: available(spent, plan, now),
     cached: false,
   };
+}
+
+/**
+ * Count one use, and never fail because of it.
+ *
+ * By the time this is called the picture exists and the credit is gone. Letting
+ * a counter throw here would hand the user nothing while charging them for it,
+ * and the refund is out of reach — it lives in the catch above, which has
+ * already been passed. A statistic is worth less than the render it counts.
+ */
+async function count(deps: TryOnDeps, command: TryOnCommand, cached: boolean): Promise<void> {
+  try {
+    await deps.stats.record(command.styleId, command.colorId, cached);
+  } catch (err) {
+    console.error('style use not counted', err);
+  }
 }

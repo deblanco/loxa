@@ -3,6 +3,7 @@ import type { CreditLedgerPort } from '../src/ports/credit-ledger';
 import type { EntitlementsPort } from '../src/ports/entitlements';
 import type { HairRendererPort, RenderRequest } from '../src/ports/hair-renderer';
 import type { RenderCachePort } from '../src/ports/render-cache';
+import type { UsageStatsPort } from '../src/ports/usage-stats';
 import type { PlanId } from '@loxa/shared';
 
 /**
@@ -76,6 +77,23 @@ export function fakeRenderer(answer: string | Error = 'RENDERED') {
       calls.push(request);
       if (answer instanceof Error) throw answer;
       return { imageBase64: answer };
+    },
+  };
+  return { port, calls };
+}
+
+/**
+ * The style counter, and optionally one that refuses to count.
+ *
+ * The failing variant is the interesting one: core swallows it, so the only way
+ * to prove the render still lands is to make the counter throw.
+ */
+export function fakeUsageStats(fail?: Error) {
+  const calls: { styleId: string; colorId: string; cached: boolean }[] = [];
+  const port: UsageStatsPort = {
+    async record(styleId, colorId, cached) {
+      calls.push({ styleId, colorId, cached });
+      if (fail) throw fail;
     },
   };
   return { port, calls };
