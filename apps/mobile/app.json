@@ -35,7 +35,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Loxa needs your photo library so you can pick the photo to restyle."
+          "photosPermission": "Loxa needs your photo library so you can pick the photo to restyle.",
+          "microphonePermission": false
         }
       ],
       [
