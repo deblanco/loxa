@@ -5,9 +5,10 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { assetUrl } from '@/api/assets';
+import { assetUrl, footageUrls } from '@/api/assets';
 import { Pill } from '@/components/Pill';
 import { PhotoPlate } from '@/components/PhotoPlate';
+import { VideoPlate } from '@/components/VideoPlate';
 import { LegalLinks } from '@/components/LegalLinks';
 import { Body, Display, Meta } from '@/components/Text';
 import { purchases, useWeeklyPricing } from '@/purchases';
@@ -32,19 +33,29 @@ const PERKS = ['offer.perkCredits', 'offer.perkOwnFace', 'offer.perkDaily'] as c
 /**
  * The wall, as three columns of four.
  *
- * Twelve stills rather than twelve clips: the wall is scenery behind an offer,
- * it is tilted thirteen degrees and half of it is under a gradient, and a dozen
- * players on a paywall would spend the battery of somebody who is reading a
- * price. The clips belong on the entry screen, where they are the argument.
+ * Nine stills and three clips, one clip per column. A dozen players on a
+ * paywall would spend the battery of somebody who is reading a price, and the
+ * wall is scenery: it is tilted thirteen degrees and half of it is under a
+ * gradient. But a wall that does not move at all is a screenshot, and the perk
+ * above it claims a hair colour arriving on a face. Three moving tiles are
+ * enough to make that claim; the other nine hold the composition still enough
+ * to read the price over.
  *
- * A tile is a still from a real render — a different face, cut and colour in
- * each — because the perk above it says twenty photos a week and a hatched
- * rectangle is not evidence of that.
+ * One per column, and each on the tallest tile in it, so the moving thing is
+ * never two columns of the same drift apart and is always the tile with the
+ * most of it showing.
+ *
+ * A tile is a real render — a different face, cut and colour in each — because
+ * the perk above it says twenty photos a week and a hatched rectangle is not
+ * evidence of that. The clips are cuts changing on the same woman rather than
+ * three separate people, which is the same argument the entry carousel makes.
  *
  * Served from the bucket where there is one, bundled where there is not, on the
  * same terms as the entry clips: the wall is the screen most likely to be
  * re-shot, and the bundled copy is what stands behind the price on a first
- * launch with no network.
+ * launch with no network. A clip's poster is its own first frame under its own
+ * key, so `wall-02.jpg` is the still of `wall-02.mp4` rather than a twelfth
+ * picture — the same both-or-neither rule `footageUrls` enforces.
  */
 const COLUMNS = [
   {
@@ -59,6 +70,7 @@ const COLUMNS = [
         height: 190,
         name: 'wall-02',
         bundled: require('../../assets/onboarding/wall-02.jpg'),
+        clip: require('../../assets/onboarding/wall-02.mp4'),
       },
       {
         height: 120,
@@ -79,6 +91,7 @@ const COLUMNS = [
         height: 190,
         name: 'wall-05',
         bundled: require('../../assets/onboarding/wall-05.jpg'),
+        clip: require('../../assets/onboarding/wall-05.mp4'),
       },
       {
         height: 120,
@@ -119,6 +132,7 @@ const COLUMNS = [
         height: 190,
         name: 'wall-12',
         bundled: require('../../assets/onboarding/wall-12.jpg'),
+        clip: require('../../assets/onboarding/wall-12.mp4'),
       },
     ],
   },
@@ -216,6 +230,12 @@ export default function Offer() {
  *
  * The tiles are duplicated and the loop travels exactly half the content, so
  * the wrap is invisible — the same trick the CSS `loxa-drift` keyframe uses.
+ *
+ * The duplicate is a second player for a clip tile, so three clips are six
+ * players: a `VideoView` renders the player it is given, and two of them
+ * sharing one would leave whichever lost the race blank. Six small muted
+ * decodes is the price of the seamless wrap; a still standing in for the
+ * duplicate would be the same tile freezing every other pass.
  */
 function DriftColumn({ seconds, tiles }: { seconds: number; tiles: readonly Tile[] }) {
   const drift = useRef(new Animated.Value(0)).current;
@@ -244,14 +264,23 @@ function DriftColumn({ seconds, tiles }: { seconds: number; tiles: readonly Tile
           ],
         }}
       >
-        {[...tiles, ...tiles].map((tile, i) => (
-          <PhotoPlate
-            key={i}
-            uri={assetUrl(`onboarding/${tile.name}.jpg`) ?? tile.bundled}
-            fallback={tile.bundled}
-            style={{ height: tile.height }}
-          />
-        ))}
+        {[...tiles, ...tiles].map((tile, i) =>
+          'clip' in tile ? (
+            <VideoPlate
+              key={i}
+              remote={footageUrls(tile.name)}
+              bundled={{ clip: tile.clip, poster: tile.bundled }}
+              style={[styles.tile, { height: tile.height }]}
+            />
+          ) : (
+            <PhotoPlate
+              key={i}
+              uri={assetUrl(`onboarding/${tile.name}.jpg`) ?? tile.bundled}
+              fallback={tile.bundled}
+              style={{ height: tile.height }}
+            />
+          ),
+        )}
       </Animated.View>
     </View>
   );
@@ -270,16 +299,22 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-13deg' }],
   },
   column: { flex: 1, overflow: 'hidden' },
+  // `VideoPlate` is square by default — it is normally full-bleed behind the
+  // pitch. On the wall it is a tile beside eleven plates and wears their radius.
+  tile: { borderRadius: radius.plate },
   skip: {
     position: 'absolute',
     right: space.s4,
     // A dark disc rather than a tinted one: the wall behind it is photographs,
-    // and a ✕ that borrows their colour disappears over pale hair.
+    // and a ✕ that borrows their colour disappears over pale hair. The sheet's
+    // scrim is not enough of it — at 0.45 the disc is a shade over whatever
+    // has drifted underneath, and half the wall is pale. This is the only way
+    // out of the offer, so it is a control: `--scrim-strong`.
     zIndex: 1,
     width: 34,
     height: 34,
     borderRadius: radius.pill,
-    backgroundColor: color.scrim,
+    backgroundColor: color.scrimStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },

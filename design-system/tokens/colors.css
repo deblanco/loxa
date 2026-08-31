@@ -45,4 +45,8 @@
 
   /* Scrim over the app when the paywall sheet is up. */
   --scrim: rgba(13, 12, 11, 0.45);
+  /* The same ink, opaque enough to be a control rather than a shade: the
+     offer's ✕ sits on a wall of photographs, and at the sheet's 0.45 it
+     disappears into whichever pale tile has drifted under it. */
+  --scrim-strong: rgba(13, 12, 11, 0.72);
 }

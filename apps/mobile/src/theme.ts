@@ -44,6 +44,7 @@ export const color = {
   paper16: 'rgba(250, 248, 245, 0.16)',
 
   scrim: 'rgba(13, 12, 11, 0.45)',
+  scrimStrong: 'rgba(13, 12, 11, 0.72)',
 } as const;
 
 /**

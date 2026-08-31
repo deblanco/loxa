@@ -24,7 +24,7 @@ BUCKET=loxa-assets
 SRC="$(cd "$(dirname "$0")/../../apps/mobile/assets/onboarding" && pwd)"
 
 cd "$SRC"
-files=$(ls entry-*.mp4 entry-*.jpg wall-*.jpg)
+files=$(ls entry-*.mp4 entry-*.jpg wall-*.mp4 wall-*.jpg)
 total=$(echo "$files" | wc -l | tr -d ' ')
 echo "uploading $total objects to $BUCKET/onboarding"
 
