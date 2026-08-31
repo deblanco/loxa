@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     borderColor: color.paper,
     overflow: 'hidden',
   },
-  insetPlate: { width: 76, height: 101, borderRadius: radius.tile },
+  insetPlate: { width: 96, height: 128, borderRadius: radius.tile },
   hint: { textAlign: 'center', paddingTop: space.s3 },
   controls: {
     paddingHorizontal: space.gutterScreen,

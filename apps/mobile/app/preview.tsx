@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { assetUrl } from '@/api/assets';
 import { ColorStrip } from '@/components/ColorStrip';
 import { CreditChip } from '@/components/CreditChip';
+import { PersonMark } from '@/components/PersonMark';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { Pill } from '@/components/Pill';
 import { SegmentedControl } from '@/components/SegmentedControl';
@@ -257,7 +258,11 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
             accessibilityLabel={t(portrait ? 'preview.profile' : 'preview.setUpProfile')}
             onPress={() => router.push('/profile')}
           >
-            <PhotoPlate uri={portrait} style={styles.avatar} />
+            <PhotoPlate
+              uri={portrait}
+              placeholder={<PersonMark />}
+              style={styles.avatar}
+            />
             {portrait ? null : <PlusBadge />}
           </Pressable>
         </View>
@@ -352,8 +357,9 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
  *
  * The same object as the one on the profile's identity block, at a third the
  * size: an ink disc with a plus, ringed in paper so it reads over whatever is
- * behind it. Without it the header carries a flat grey circle, which says
- * nothing — least of all that there is a profile photo to add.
+ * behind it. The `PersonMark` under it says the circle is the profile; this
+ * says the profile has no photograph in it yet, and that tapping is how that
+ * changes. Neither says both on its own.
  *
  * The plus is two bars rather than a glyph. At fifteen points a typeface's ＋
  * is a hinting lottery; two rectangles are the same on every phone.

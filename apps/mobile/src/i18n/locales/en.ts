@@ -166,6 +166,7 @@ const en = {
     planFreeNote: 'No weekly credits — {{price}} per photo',
     planWeeklyNote: '{{price}} · {{count}} photos a week',
     manage: 'Manage',
+    subscribe: 'Subscribe',
     notifications: 'Daily style ideas',
     notificationsNote: 'One notification a day, new looks',
     restore: 'Restore purchases',

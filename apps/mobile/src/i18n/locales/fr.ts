@@ -140,6 +140,7 @@ const fr: typeof en = {
     planFreeNote: 'Pas de crédits hebdomadaires — {{price}} par photo',
     planWeeklyNote: '{{price}} · {{count}} photos par semaine',
     manage: 'Gérer',
+    subscribe: "S'abonner",
     notifications: 'Idées coiffure du jour',
     notificationsNote: 'Une notification par jour, de nouveaux looks',
     restore: 'Restaurer les achats',

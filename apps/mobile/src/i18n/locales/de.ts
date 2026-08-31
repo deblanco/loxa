@@ -140,6 +140,7 @@ const de: typeof en = {
     planFreeNote: 'Keine wöchentlichen Credits — {{price}} pro Foto',
     planWeeklyNote: '{{price}} · {{count}} Fotos pro Woche',
     manage: 'Verwalten',
+    subscribe: 'Abonnieren',
     notifications: 'Tägliche Style-Ideen',
     notificationsNote: 'Eine Mitteilung am Tag, neue Looks',
     restore: 'Käufe wiederherstellen',

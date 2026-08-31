@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
 import { Chevron } from '@/components/Chevron';
 import { DevPanel } from '@/components/DevPanel';
+import { PersonMark } from '@/components/PersonMark';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Body, Display, Meta } from '@/components/Text';
@@ -20,6 +21,7 @@ import { purchases, useWeeklyPricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
 import { readProfilePhoto } from '@/store/profile-photo';
 import { openReviewPage, reviewStoreUrl } from '@/store/review';
+import { openManageSubscriptions } from '@/store/subscription';
 import { color, radius, space } from '@/theme';
 
 /** Fixed for the life of the process — it comes from the bundled app config. */
@@ -81,6 +83,11 @@ export default function Profile() {
   // literally prints "1/0" to a free user holding the credit on the house, and
   // "22/20" to a subscriber who bought two, with a meter to match.
   const cap = Math.max(credits?.cap ?? WEEKLY_CREDITS, left);
+  // Trial counts as subscribed: it is an active subscription that renews into
+  // a paid one, so Apple's settings is where it is cancelled. Unknown credits
+  // read as free, which sends the button to the paywall — the safe way round,
+  // since a free user landing on Apple's list finds nothing of ours in it.
+  const subscribed = credits?.plan === 'weekly' || credits?.plan === 'trial';
 
   return (
     <View style={styles.screen}>
@@ -104,7 +111,11 @@ export default function Profile() {
             accessibilityLabel={t(portrait ? 'profile.changePhoto' : 'profile.addPhoto')}
             onPress={() => router.push('/camera?from=profile')}
           >
-            <PhotoPlate uri={portrait} style={styles.avatar} />
+            <PhotoPlate
+              uri={portrait}
+              placeholder={<PersonMark />}
+              style={styles.avatar}
+            />
             <View style={styles.avatarBadge}>
               <Body variant="bodySmall" tone="paper">
                 ＋
@@ -160,13 +171,22 @@ export default function Profile() {
                     })}
               </Body>
             </View>
+            {/*
+              One button, two destinations, because "manage" means opposite
+              things on either side of a subscription. A free user is being
+              offered one, so it opens our paywall; a subscriber already has
+              one, and the only place it can be cancelled or changed is
+              Apple's. Sending a subscriber to the paywall would be a Manage
+              button that cannot unsubscribe — the single thing anybody presses
+              it for, and a 3.1.2 rejection.
+            */}
             <Pressable
               accessibilityRole="button"
-              onPress={() => router.push('/paywall')}
+              onPress={() => (subscribed ? openManageSubscriptions() : router.push('/paywall'))}
               style={styles.manage}
             >
               <Body variant="caption" tone="paper">
-                {t('profile.manage')}
+                {t(subscribed ? 'profile.manage' : 'profile.subscribe')}
               </Body>
             </Pressable>
           </View>
