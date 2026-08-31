@@ -133,29 +133,25 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   const colorName = findColor(catalogue, selection.colorId)?.name ?? '';
 
   /**
-   * The photo the `saved` source stands for, which is the only one this screen
-   * can show. A `new` photo is taken on the camera and confirmed on the screen
-   * after it, and never comes back here.
-   */
-  const own = selection.source === 'saved' ? portrait : null;
-
-  /**
-   * The user's own face first, then the models wearing the same cut and colour.
+   * The models wearing the cut and colour, and nothing else.
    *
-   * Theirs leads because it is the point of the app — the models are there to
-   * show what the cut looks like before they have committed a photo to it, and
-   * to stop the plate being an empty rectangle on a first run. With no photo and
-   * no asset host configured this is empty, and the plate falls back to the
-   * labelled placeholder it has always drawn.
+   * The user's own face is deliberately not here. This screen is the catalogue:
+   * it shows what a cut looks like, which is what somebody choosing one needs
+   * to see. Their photograph belongs on the confirm screen, where it sits under
+   * the model as the thing about to be restyled — showing it here as well made
+   * the first page of the pager their own unchanged face, which says nothing
+   * about the cut they are looking at.
+   *
+   * With no asset host configured this is empty, and the plate falls back to
+   * the labelled placeholder it has always drawn.
    */
   const pages = [
-    ...(own ? [{ key: 'photo', uri: own, focus: undefined }] : []),
     ...heroKeys(catalogue, selection.styleId, selection.colorId)
       .map((key) => ({
         key: `model-${key}`,
         uri: assetUrl(key),
-        // Where this render's head sits. The user's own photo has no entry and
-        // does not want one — it is already framed by whoever took it.
+        // Where this render's head sits, so the plate can centre on the band
+        // that matters rather than on the middle of the frame.
         focus: catalogue.focus?.[key],
       }))
       .filter(
@@ -172,11 +168,9 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   /**
    * Walk to the neighbouring cut, having been swiped off the end of this one.
    *
-   * It lands on a model rather than on page zero, which is the user's own
-   * untouched photograph and looks identical under every cut — arriving there
-   * would read as the swipe having done nothing at all. Forwards lands on the
-   * first model and backwards on the last, so the models carry on in the
-   * direction the finger was going.
+   * Forwards lands on the new cut's first model and backwards on its last, so
+   * the models carry on in the direction the finger was going rather than
+   * snapping back to the start of the strip.
    */
   function stepStyle(step: 1 | -1) {
     const next = adjacentStyle(catalogue, selection.styleId, step);
@@ -189,8 +183,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   // to fire once: it is cleared here, and only a swipe off an edge sets it.
   useEffect(() => {
     if (!landing || plateWidth === 0) return;
-    const firstModel = pages.findIndex((item) => item.key !== 'photo');
-    const target = Math.max(landing === 'first' ? firstModel : pages.length - 1, 0);
+    const target = landing === 'first' ? 0 : Math.max(pages.length - 1, 0);
     pager.current?.scrollTo({ x: target * plateWidth, animated: false });
     setPage(target);
     setLanding(null);
@@ -214,7 +207,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
     }, [refresh]),
   );
 
-  const action = primaryAction(selection, credits?.creditsLeft ?? null);
+  const action = primaryAction(selection);
 
   // The plate leads wherever the button leads, except when the button would
   // render: there the plate is already showing what that render starts from,
@@ -223,11 +216,6 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
 
   function onPrimary() {
     switch (action) {
-      case 'paywall':
-        // Straight to the offer. The Worker would refuse this anyway, but not
-        // before the user had watched a progress bar for a round trip.
-        router.push('/paywall');
-        return;
       case 'camera':
         // The cut and colour travel with the user. The camera does not read
         // them; it hands them to the confirm screen on the other side, which is
@@ -304,11 +292,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
           </ScrollView>
         ) : (
           <Pressable onPress={onPlate} style={styles.plate}>
-            <PhotoPlate
-              uri={own}
-              label={own ? undefined : t('preview.tapToTakePhoto')}
-              style={styles.plate}
-            />
+            <PhotoPlate label={t('preview.tapToTakePhoto')} style={styles.plate} />
           </Pressable>
         )}
 

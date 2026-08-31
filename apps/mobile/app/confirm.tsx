@@ -114,10 +114,16 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
   }
 
   async function onTryOn() {
-    // The Worker's check is the authority and always runs, spending before the
-    // model call. This one exists so somebody at zero does not watch a progress
-    // bar that was never going to finish. Null is still loading and goes
-    // through: guessing "no" puts a paywall in front of a paying subscriber.
+    // **The only paywall in the flow, and it is here on purpose.** The preview
+    // screen used to turn somebody at zero away before they ever saw this one,
+    // which asked them to buy a thing they had not been shown. By the time this
+    // button is pressed they are looking at the cut and the colour on a face
+    // and have said they want it — which is the moment the offer means
+    // something.
+    //
+    // The Worker's check is the authority regardless and always runs, spending
+    // before the model call. Null is still loading and goes through: guessing
+    // "no" puts a paywall in front of a paying subscriber on a slow network.
     const left = credits?.creditsLeft ?? null;
     if (left !== null && left < 1) {
       router.push('/paywall');

@@ -75,23 +75,21 @@ export function withSource(selection: Selection, source: PhotoSource): Selection
 }
 
 /** What pressing the primary button should actually do. */
-export type PrimaryAction = 'paywall' | 'camera' | 'profile-photo' | 'generate';
+export type PrimaryAction = 'camera' | 'profile-photo' | 'generate';
 
 /**
  * Where the Try On button goes.
  *
- * The credit check comes first, and it is not a duplicate of the Worker's — the
- * Worker's is the authority and always runs, spending before the model call.
- * This one exists so that somebody at zero does not watch a progress bar that
- * was never going to finish, and does not get sent to the camera to take a
- * photo they cannot use.
+ * **The balance is not consulted here, and that is deliberate.** This screen
+ * browses; the confirm screen spends, and asking for money is the spending
+ * screen's job. Somebody at zero credits still gets to the confirm screen and
+ * sees the cut and the colour on a face before the offer arrives — a paywall in
+ * front of a screen they have not seen yet asks them to buy something unseen.
  *
- * `creditsLeft` is null while the balance is still loading. That case goes
- * through: the server will refuse if it must, and guessing "no" would put a
- * paywall in front of a paying subscriber on a slow network.
+ * The Worker's check is the authority regardless, and always runs, spending
+ * before the model call.
  */
-export function primaryAction(selection: Selection, creditsLeft: number | null): PrimaryAction {
-  if (creditsLeft !== null && creditsLeft < 1) return 'paywall';
+export function primaryAction(selection: Selection): PrimaryAction {
   if (needsCamera(selection)) return 'camera';
   // The saved photo *is* the profile portrait, so having none is not a question
   // to answer with a library — it is a profile that has not been set up. The
