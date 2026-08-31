@@ -106,7 +106,11 @@ export default function Result() {
       return;
     }
 
-    await MediaLibrary.saveToLibraryAsync(look.uri);
+    // `Asset.create` rather than `saveToLibraryAsync`: the latter is the legacy
+    // API in SDK 57 and throws rather than warning. It takes the same local
+    // `file://` URI and returns the created asset, which nothing here needs —
+    // this screen adds one picture to the roll and never looks for it again.
+    await MediaLibrary.Asset.create(look.uri);
     flash(t('result.saved'));
   }
 
