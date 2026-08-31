@@ -14,6 +14,7 @@ import {
   Camera as VisionCamera,
   useCameraDevice,
   useCameraPermission,
+  useFrameOutput,
   usePhotoOutput,
   type TargetCameraPosition,
 } from 'react-native-vision-camera';
@@ -21,11 +22,23 @@ import { FaceConstellation } from '@/components/FaceConstellation';
 import { FlipIcon } from '@/components/FlipIcon';
 import { Pill } from '@/components/Pill';
 import { Body, Meta } from '@/components/Text';
-import { idleGeometry, type FaceGeometry } from '@/face/geometry';
+import {
+  affineFromCorners,
+  coverCorners,
+  displacement,
+  idleGeometry,
+  project,
+  smooth,
+  type FaceGeometry,
+  type Landmarks,
+} from '@/face/geometry';
+import { boundsOf, landmarksOf } from '@/face/detected';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary, prepare, type PreparedPhoto } from '@/photo';
 import { saveProfilePhoto } from '@/store/profile-photo';
-import { color, radius, space } from '@/theme';
+import { FaceTracker } from 'face-track';
+import { useSharedValue } from 'react-native-reanimated';
+import { color, motion, radius, space } from '@/theme';
 
 /**
  * Taking the photo.
@@ -52,6 +65,35 @@ import { color, radius, space } from '@/theme';
  * differ — the oval, the check and the library button are the same question
  * either way.
  */
+
+/**
+ * How much of each new frame's landmarks to take.
+ *
+ * A tracked face moves a pixel or two between frames even when it is held
+ * perfectly still, and ten dots twitching in place reads as a rendering fault
+ * rather than as tracking. Low enough to settle, high enough to keep up with a
+ * head that actually turns.
+ */
+const SMOOTHING = 0.35;
+
+/**
+ * How far the face must move between frames to count as moving, in camera-space
+ * units — a fraction of the frame's width.
+ *
+ * Above the noise Vision reports for a face being held still, and below what
+ * the smallest deliberate movement produces. Too low and the constellation
+ * never goes away; too high and it misses a slow turn.
+ */
+const MOVE_THRESHOLD = 0.006;
+
+/**
+ * How long the constellation stays after the face stops moving.
+ *
+ * It is not a pulse on a timer — it answers the person in front of it, so it
+ * has to outlast the pause between two halves of the same movement rather than
+ * flickering through it.
+ */
+const HOLD_MS = motion.shimmer;
 
 /** The guide oval's frame, from `styles.guide`. Both live or neither does. */
 const GUIDE_INSET = 52;
@@ -87,25 +129,120 @@ export default function Camera() {
   const device = useCameraDevice(facing);
   const photoOutput = usePhotoOutput({ qualityPrioritization: 'quality' });
 
-  const [geometry, setGeometry] = useState<FaceGeometry | null>(null);
   const [rejected, setRejected] = useState<FaceVerdict | null>(null);
 
+  // The tracked face, written by the frame thread and read by the overlay on
+  // the UI thread. It never crosses the JS thread: thirty `setState`s a second
+  // behind a live camera is the one thing this screen cannot afford.
+  const tracked = useSharedValue<FaceGeometry | null>(null);
+  // Where the constellation sits when there is no face — inside the guide oval,
+  // which is where the user is being asked to put one. Written on layout only.
+  const idle = useSharedValue<FaceGeometry | null>(null);
+  // The size of the viewfinder, needed on the frame thread to map the frame
+  // onto it. A shared value rather than state for the same reason.
+  const viewSize = useSharedValue({ width: 0, height: 0 });
+  // The previous frame's landmarks, for `smooth` and for measuring movement.
+  // Eight dots twitching in place read as a rendering fault, not as tracking.
+  const previous = useSharedValue<Landmarks | null>(null);
+  // Whether the constellation should be on screen at all. Driven by movement:
+  // it finds the face when the face does something, and gets out of the way of
+  // the one thing the user is trying to look at when it doesn't.
+  const moving = useSharedValue(0);
+  // When the face last moved, so the overlay can outlast a pause mid-movement.
+  const lastMove = useSharedValue(0);
+  // Whether the preview is mirrored, which is true of the front camera under
+  // `mirrorMode="auto"`. A shared value rather than the `facing` state: the
+  // worklet captures what it closes over, so reading state directly would leave
+  // it holding the old camera after a flip.
+  const mirrored = useSharedValue(true);
+  useEffect(() => {
+    mirrored.value = facing === 'front';
+  }, [facing, mirrored]);
+
   // The oval is a fraction of the viewfinder, and the viewfinder is a fraction
-  // of the window, so neither is known until the layout arrives. Once it has,
-  // the constellation is a pure function of it — computed here, and not again
-  // until the box changes size.
-  const onViewfinderLayout = useCallback((event: LayoutChangeEvent) => {
-    const { width, height } = event.nativeEvent.layout;
-    if (!width || !height) return;
-    setGeometry(
-      idleGeometry({
+  // of the window, so neither is known until the layout arrives.
+  const onViewfinderLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { width, height } = event.nativeEvent.layout;
+      if (!width || !height) return;
+      viewSize.value = { width, height };
+      idle.value = idleGeometry({
         x: GUIDE_INSET,
         y: height * GUIDE_TOP,
         width: width - GUIDE_INSET * 2,
         height: height * (1 - GUIDE_TOP - GUIDE_BOTTOM),
-      }),
-    );
-  }, []);
+      });
+    },
+    [idle, viewSize],
+  );
+
+  /**
+   * One frame, on the camera's own thread.
+   *
+   * The frame is disposed on every path out of here, including the ones that
+   * find nothing: an undisposed frame stalls the pipeline and the camera starts
+   * dropping the next ones.
+   */
+  const frameOutput = useFrameOutput({
+    pixelFormat: 'yuv',
+    // Vision does not need the full sensor, and the smaller buffer is the
+    // difference between keeping up and dropping frames.
+    enablePreviewSizedOutputBuffers: true,
+    dropFramesWhileBusy: true,
+    onFrame(frame) {
+      'worklet';
+      const view = viewSize.value;
+      if (view.width === 0) {
+        frame.dispose();
+        return;
+      }
+
+      const buffer = frame.getNativeBuffer();
+      try {
+        const face = FaceTracker.detect(buffer.pointer, frame.orientation, frame.isMirrored);
+        if (!face) {
+          previous.value = null;
+          tracked.value = null;
+          moving.value = 0;
+          return;
+        }
+
+        // A sideways sensor reports its buffer's dimensions, not the ones the
+        // preview is showing. The detector answered in oriented space, so the
+        // frame has to be described the same way.
+        const sideways = frame.orientation === 'left' || frame.orientation === 'right';
+        const size = sideways
+          ? { width: frame.height, height: frame.width }
+          : { width: frame.width, height: frame.height };
+
+        // Measured against the raw landmarks rather than the eased ones: the
+        // smoothing exists to damp movement, so asking it whether anything
+        // moved is asking the wrong end of the pipeline.
+        const raw = landmarksOf(face);
+        const now = Date.now();
+        if (displacement(previous.value, raw) > MOVE_THRESHOLD) lastMove.value = now;
+        moving.value = now - lastMove.value < HOLD_MS ? 1 : 0;
+
+        const eased = smooth(previous.value, raw, SMOOTHING);
+        previous.value = eased;
+
+        // What the *preview* is doing, not the frame. The frame output is not
+        // mirrored and the front camera's preview is.
+        const { topLeft, bottomRight } = coverCorners(size, view, mirrored.value);
+        tracked.value = project(
+          eased,
+          boundsOf(face),
+          // The frame's own corners are the unit box, because the detector
+          // reports in camera space rather than in pixels.
+          affineFromCorners(topLeft, bottomRight, { x: 0, y: 0, width: 1, height: 1 }),
+        );
+      } finally {
+        // Both are the camera's memory, and both stall it if they are held.
+        buffer.release();
+        frame.dispose();
+      }
+    },
+  });
 
   async function snap() {
     const shot = await photoOutput.capturePhotoToFile({ enableShutterSound: true }, {});
@@ -177,10 +314,10 @@ export default function Camera() {
             isActive={active}
             resizeMode="cover"
             mirrorMode="auto"
-            outputs={[photoOutput]}
+            outputs={active ? [photoOutput, frameOutput] : [photoOutput]}
           />
         ) : null}
-        <FaceConstellation geometry={geometry} />
+        <FaceConstellation tracked={tracked} idle={idle} moving={moving} />
         <View style={styles.guide} pointerEvents="none" />
         <Meta
           variant="note"

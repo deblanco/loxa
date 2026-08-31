@@ -1,23 +1,26 @@
 /**
  * The landmark constellation, as coordinates the viewfinder can draw.
  *
- * There is no detector behind these points any more. There used to be: MLKit,
- * reporting a real face in frame coordinates, which this file mapped onto the
- * preview. It cost the app an entire native binary — one with no arm64 slice for
- * the simulator, so the whole project could only be built for a simulator that
- * iOS 26 refuses to run — and what it bought was decoration. The constellation
- * gated no shutter and reached no Worker then, and it does not now.
+ * There is a detector behind these points again. There used to be MLKit, which
+ * cost the app an entire native binary with no arm64 slice for the simulator,
+ * so the whole project could only be built for a simulator that iOS 26 refuses
+ * to run. It is now Apple Vision, through `modules/face-track` — a system
+ * framework, which is the entire point: it has the simulator slice MLKit
+ * lacked, and it is not a dependency so much as part of the phone.
  *
- * So the points are ours: a face-shaped layout in a unit box, mapped onto the
- * guide oval the user is already being asked to put their face inside. The
- * transform below is the same one the detector's output went through, which is
- * why it survived the removal intact.
+ * The transform survived that removal intact, which is why bringing tracking
+ * back needed nothing here but the `'worklet'` directives: these functions run
+ * on the camera's frame thread now, not on the JS thread.
+ *
+ * `IDLE_LANDMARKS` stays as the no-face state, so the oval is never empty while
+ * somebody is still lining up a shot.
  *
  * The file imports nothing, so the Node-only test suite can hold it to the 90%
- * gate while the camera screen stays on the device where it belongs.
+ * gate while the camera screen stays on the device where it belongs. That is
+ * also what makes these safe as worklets.
  *
- * Face *validation* now happens where it always should have — on the photo,
- * once, before a credit is spent. See `src/photo.ts`.
+ * Face *validation* still happens where it should — on the photo, once, before
+ * a credit is spent. See `src/photo.ts`. The constellation gates nothing.
  */
 
 export interface Point {
@@ -34,7 +37,7 @@ export interface Bounds {
 }
 
 /**
- * The ten points of the constellation, in the order they light up.
+ * The eight points of the constellation, in the order they light up.
  *
  * Centre outwards, so it reads as the app finding a face rather than as a wipe
  * across one. `LEFT` is the subject's left, which is the right of the screen.
@@ -48,8 +51,6 @@ export const LANDMARK_ORDER = [
   'MOUTH_BOTTOM',
   'LEFT_CHEEK',
   'RIGHT_CHEEK',
-  'LEFT_EAR',
-  'RIGHT_EAR',
 ] as const;
 
 export type LandmarkKey = (typeof LANDMARK_ORDER)[number];
@@ -66,8 +67,6 @@ export const EDGES: readonly (readonly [LandmarkKey, LandmarkKey])[] = [
   ['MOUTH_RIGHT', 'MOUTH_BOTTOM'],
   ['LEFT_EYE', 'LEFT_CHEEK'],
   ['RIGHT_EYE', 'RIGHT_CHEEK'],
-  ['LEFT_CHEEK', 'LEFT_EAR'],
-  ['RIGHT_CHEEK', 'RIGHT_EAR'],
 ];
 
 /** A landmark set. Every key is optional: a point that is missing is not drawn. */
@@ -110,12 +109,14 @@ export interface FaceGeometry {
  * on its own — there is no mirror flag to read and none to pass in.
  */
 export function affineFromCorners(topLeft: Point, bottomRight: Point, bounds: Bounds): Affine {
+  'worklet';
   const sx = bounds.width === 0 ? 0 : (bottomRight.x - topLeft.x) / bounds.width;
   const sy = bounds.height === 0 ? 0 : (bottomRight.y - topLeft.y) / bounds.height;
   return { sx, sy, tx: topLeft.x - bounds.x * sx, ty: topLeft.y - bounds.y * sy };
 }
 
 export function apply(point: Point, affine: Affine): Point {
+  'worklet';
   return { x: point.x * affine.sx + affine.tx, y: point.y * affine.sy + affine.ty };
 }
 
@@ -124,6 +125,7 @@ export function apply(point: Point, affine: Affine): Point {
  * its own left edge — `transformOrigin: '0 50%'` on the RN side.
  */
 export function edgeGeometry(a: Point, b: Point): EdgeGeometry {
+  'worklet';
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   return {
@@ -141,6 +143,7 @@ export function edgeGeometry(a: Point, b: Point): EdgeGeometry {
  * its ends — a line to a point that is not drawn looks like a bug.
  */
 export function project(landmarks: Landmarks, bounds: Bounds, affine: Affine): FaceGeometry {
+  'worklet';
   const placed = new Map<LandmarkKey, Point>();
   const points: PlacedPoint[] = [];
 
@@ -184,6 +187,7 @@ export function project(landmarks: Landmarks, bounds: Bounds, affine: Affine): F
  * has just arrived does not slide in from wherever the last one was.
  */
 export function smooth(previous: Landmarks | null, next: Landmarks, alpha: number): Landmarks {
+  'worklet';
   if (!previous) return next;
 
   const eased: Landmarks = {};
@@ -199,16 +203,96 @@ export function smooth(previous: Landmarks | null, next: Landmarks, alpha: numbe
   return eased;
 }
 
+/** A width and a height, in whatever space is being described. */
+export interface Size {
+  width: number;
+  height: number;
+}
+
+/**
+ * Where the frame's corners land on a viewfinder that covers.
+ *
+ * The preview is `resizeMode="cover"`, so the frame is scaled until it fills
+ * the view on both axes and the overflow is cropped evenly. These are the two
+ * corners `affineFromCorners` wants — the same pair the native
+ * `convertCameraPointToViewPoint` would return, computed here instead because
+ * that method lives on a view ref the frame thread cannot reach.
+ *
+ * `mirrored` describes **the preview**, not the frame, and that distinction is
+ * the whole bug it fixes. `isMirrored` on a Frame is a property of the output
+ * it came from: the preview output is mirrored for the front camera, the frame
+ * output is not. So the buffer the detector reads is un-mirrored while the
+ * picture on screen is mirrored, and landmarks projected without a flip track
+ * the wrong way — turn your head left and the constellation goes right.
+ *
+ * The caller passes what the *preview* is doing. Swapping the two x's arrives
+ * at `affineFromCorners` as the negative `sx` that function already documents.
+ *
+ * A frame that arrives rotated is described by its displayed size, so the
+ * caller swaps width and height for a sideways sensor before calling.
+ */
+export function coverCorners(
+  frame: Size,
+  view: Size,
+  mirrored: boolean,
+): { topLeft: Point; bottomRight: Point } {
+  'worklet';
+  if (frame.width <= 0 || frame.height <= 0) {
+    return { topLeft: { x: 0, y: 0 }, bottomRight: { x: view.width, y: view.height } };
+  }
+
+  const scale = Math.max(view.width / frame.width, view.height / frame.height);
+  const width = frame.width * scale;
+  const height = frame.height * scale;
+  // Negative when the frame is wider than the view, which is the crop.
+  const left = (view.width - width) / 2;
+  const top = (view.height - height) / 2;
+
+  return mirrored
+    ? { topLeft: { x: left + width, y: top }, bottomRight: { x: left, y: top + height } }
+    : { topLeft: { x: left, y: top }, bottomRight: { x: left + width, y: top + height } };
+}
+
+/**
+ * How far the face moved between two frames, in camera-space units.
+ *
+ * The mean distance across the landmarks both sets share, which is steadier
+ * than any single point: one landmark jittering on a blink is not the face
+ * moving, and averaging over eight of them says so.
+ *
+ * A face that has just arrived counts as motion — there was nothing to compare
+ * it against, and its arrival is exactly the moment worth showing.
+ */
+export function displacement(previous: Landmarks | null, next: Landmarks): number {
+  'worklet';
+  if (!previous) return 1;
+
+  let total = 0;
+  let counted = 0;
+  for (const key of LANDMARK_ORDER) {
+    const from = previous[key];
+    const to = next[key];
+    if (!from || !to) continue;
+    total += Math.hypot(to.x - from.x, to.y - from.y);
+    counted += 1;
+  }
+
+  // No shared landmarks is not stillness — it is a different face, or the same
+  // one seen freshly enough that nothing lines up.
+  return counted === 0 ? 1 : total / counted;
+}
+
 /** The box the idle layout is written in: one unit wide, one unit tall. */
 const UNIT_BOX: Bounds = { x: 0, y: 0, width: 1, height: 1 };
 
 /**
  * A face, where the guide oval says one should be.
  *
- * Ten points in the unit box, laid out on the proportions of a face looking
- * straight ahead — eyes a little above the middle, mouth two thirds down, ears
- * out at the edges. `LEFT` is still the subject's left, which is the right of
- * the screen; the layout is symmetric, so nothing depends on that reading.
+ * Eight points in the unit box, laid out on the proportions of a face looking
+ * straight ahead — eyes a little above the middle, mouth two thirds down,
+ * cheeks out at the sides. `LEFT` is still the subject's left, which is the
+ * right of the screen; the layout is symmetric, so nothing depends on that
+ * reading.
  */
 export const IDLE_LANDMARKS: Record<LandmarkKey, Point> = {
   LEFT_EYE: { x: 0.66, y: 0.36 },
@@ -219,8 +303,6 @@ export const IDLE_LANDMARKS: Record<LandmarkKey, Point> = {
   MOUTH_BOTTOM: { x: 0.5, y: 0.76 },
   LEFT_CHEEK: { x: 0.75, y: 0.55 },
   RIGHT_CHEEK: { x: 0.25, y: 0.55 },
-  LEFT_EAR: { x: 0.88, y: 0.45 },
-  RIGHT_EAR: { x: 0.12, y: 0.45 },
 };
 
 /**
@@ -232,6 +314,7 @@ export const IDLE_LANDMARKS: Record<LandmarkKey, Point> = {
  * never again, and the screen re-renders no more often than it does today.
  */
 export function idleGeometry(rect: Bounds): FaceGeometry {
+  'worklet';
   const affine = affineFromCorners(
     { x: rect.x, y: rect.y },
     { x: rect.x + rect.width, y: rect.y + rect.height },

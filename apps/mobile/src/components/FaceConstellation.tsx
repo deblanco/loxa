@@ -1,165 +1,168 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
-import { LANDMARK_ORDER, type FaceGeometry, type LandmarkKey } from '../face/geometry';
+import { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+  withDelay,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
+import { EDGES, LANDMARK_ORDER, type FaceGeometry, type LandmarkKey } from '../face/geometry';
 import { color, motion, radius } from '../theme';
 
 /**
  * The landmark constellation, over the viewfinder.
  *
- * Ten points on the guide oval, lines between the pairs that make a face, and a
- * hairline that walks from crown to chin forever. It is decoration: it gates
- * nothing, and none of it is sent anywhere. What it says is that the app is
- * looking at a face, which is the same promise the render makes.
+ * Eight points on the face and the lines between the pairs that make one. It is
+ * decoration: it gates no shutter and none of it is sent anywhere. What it says
+ * is that the app is looking at a face, which is the same promise the render
+ * makes.
  *
- * Two kinds of motion, and the system allows no third: the dots arriving is a
- * state change (eased, staggered, `motion.instant` each) and the sweep is
- * ambience (linear, looping, `motion.scan`). Both on the native driver, which is
- * now the only thread any of this runs on: the geometry is a function of the
- * viewfinder's layout, so it is computed once and the JS thread is left alone.
+ * The points move now. They are driven by `modules/face-track` — Apple Vision,
+ * on the camera's own thread — so the whole component runs on shared values and
+ * never re-renders: a face arriving, moving or leaving changes no React state.
+ * That is the same guarantee the static version had, kept while the geometry
+ * became live.
  *
- * Positions are not animated, because they no longer move.
+ * `tracked` is the detected face and `idle` is the layout inside the guide
+ * oval. Falling back to the oval rather than to nothing is what keeps the
+ * viewfinder from emptying while somebody is still lining a shot up.
+ *
+ * It answers movement rather than a timer. A constellation that never leaves
+ * stops reading as detection and starts reading as a decal printed on the
+ * glass, and it sits over the one thing the user is trying to look at — their
+ * own face. One that comes and goes on a clock is no better: it is obviously
+ * ignoring them.
+ *
+ * So the camera screen measures how far the face moved between frames and this
+ * follows: it finds you when you move, holds while you are moving, and clears
+ * away when you settle. Which is also honest — a face being tracked is exactly
+ * when there is something to show.
+ *
+ * One kind of motion now: the dots arriving are a state change, eased and
+ * staggered, `motion.instant` each. There is no ambient loop — nothing here
+ * moves untouched, because everything it does is an answer to the face.
  */
 interface Props {
-  /** The face as it should be drawn, or null when there isn't one. */
-  geometry: FaceGeometry | null;
+  /** The face the detector found, or null when it has found none. */
+  tracked: SharedValue<FaceGeometry | null>;
+  /** Where the constellation rests when there is no face. */
+  idle: SharedValue<FaceGeometry | null>;
+  /** 1 while the face is moving, 0 once it has settled. */
+  moving: SharedValue<number>;
 }
 
 /** How far apart the dots light up. Ten of them, so the lock reads as ~360ms. */
 const STAGGER = 40;
 
-export function FaceConstellation({ geometry }: Props) {
-  // The last geometry we had, kept so the group can fade out over something
-  // rather than vanishing the instant it goes away.
-  const last = useRef<FaceGeometry | null>(geometry);
-  if (geometry) last.current = geometry;
+export function FaceConstellation({ tracked, idle, moving }: Props) {
+  // Whichever face is current. Derived rather than branched at each use, so the
+  // fallback is decided once per frame instead of twenty-two times.
+  const face = useDerivedValue(() => tracked.value ?? idle.value);
 
-  // Built once, on the first render rather than on every one. Ten values
-  // rebuilt on every render of a screen that also carries a camera is litter,
-  // and the animations hold references to them across renders anyway.
-  const store = useRef<Record<LandmarkKey, Animated.Value> | null>(null);
-  if (!store.current) {
-    store.current = Object.fromEntries(
-      LANDMARK_ORDER.map((key) => [key, new Animated.Value(0)]),
-    ) as Record<LandmarkKey, Animated.Value>;
-  }
-  const dots = store.current;
-  const links = useRef(new Animated.Value(0)).current;
-  const sweep = useRef(new Animated.Value(0)).current;
+  const links = useSharedValue(0);
 
-  const present = geometry !== null;
+  // What everything is multiplied by. `moving` flips between 0 and 1 on the
+  // frame thread, and this eases across on the UI thread — a hard cut would
+  // read as a glitch rather than as the app noticing something.
+  const cycle = useDerivedValue(() =>
+    withTiming(moving.value, { duration: motion.fade, easing: Easing.ease }),
+  );
 
+  // The lines follow the points rather than arriving with them, so the face is
+  // joined up only once it has been found.
   useEffect(() => {
-    const values = LANDMARK_ORDER.map((key) => dots[key]);
-    const animation = present
-      ? Animated.parallel([
-          Animated.stagger(
-            STAGGER,
-            values.map((value) =>
-              Animated.timing(value, {
-                toValue: 1,
-                duration: motion.instant,
-                easing: Easing.ease,
-                useNativeDriver: true,
-              }),
-            ),
-          ),
-          // The lines follow the points rather than arriving with them, so the
-          // face is joined up only once it has been found.
-          Animated.timing(links, {
-            toValue: 1,
-            duration: motion.normal,
-            delay: LANDMARK_ORDER.length * STAGGER,
-            easing: Easing.ease,
-            useNativeDriver: true,
-          }),
-        ])
-      : Animated.parallel(
-          [...values, links].map((value) =>
-            Animated.timing(value, {
-              toValue: 0,
-              duration: motion.instant,
-              easing: Easing.ease,
-              useNativeDriver: true,
-            }),
-          ),
-        );
-
-    animation.start();
-    return () => animation.stop();
-  }, [present, dots, links]);
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.timing(sweep, {
-        toValue: 1,
-        duration: motion.scan,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
+    links.value = withDelay(
+      LANDMARK_ORDER.length * STAGGER,
+      withTiming(1, { duration: motion.normal, easing: Easing.ease }),
     );
-    loop.start();
-    return () => loop.stop();
-  }, [sweep]);
-
-  const face = last.current;
-  if (!face) return null;
+  }, [links]);
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {face.edges.map((edge, i) => (
-        <Animated.View
-          key={i}
-          style={[
-            styles.link,
-            {
-              left: edge.left,
-              top: edge.top,
-              width: edge.length,
-              opacity: links,
-              transform: [{ rotate: `${edge.angle}deg` }],
-            },
-          ]}
-        />
+      {EDGES.map(([from, to], index) => (
+        <Link key={`${from}-${to}`} face={face} index={index} opacity={links} cycle={cycle} />
       ))}
 
-      {face.points.map((point) => (
-        <Animated.View
-          key={point.key}
-          style={[styles.dot, { left: point.x, top: point.y, opacity: dots[point.key] }]}
-        />
+      {LANDMARK_ORDER.map((key, index) => (
+        <Dot key={key} face={face} landmark={key} index={index} cycle={cycle} />
       ))}
 
-      <View
-        style={[
-          styles.sweepBox,
-          { left: face.box.left, top: face.box.top, width: face.box.width, height: face.box.height },
-        ]}
-      >
-        <Animated.View
-          style={[
-            styles.sweep,
-            {
-              opacity: Animated.multiply(
-                links,
-                sweep.interpolate({
-                  inputRange: [0, 0.12, 0.88, 1],
-                  outputRange: [0, 1, 1, 0],
-                }),
-              ),
-              transform: [
-                {
-                  translateY: sweep.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, face.box.height],
-                  }),
-                },
-              ],
-            },
-          ]}
-        />
-      </View>
     </View>
   );
+}
+
+/**
+ * One landmark.
+ *
+ * Absent from the geometry means absent from the screen: `project` drops a
+ * point the detector did not report, and a dot left behind at the last place a
+ * missing landmark was seen is worse than no dot.
+ */
+function Dot({
+  face,
+  landmark,
+  index,
+  cycle,
+}: {
+  face: SharedValue<FaceGeometry | null>;
+  landmark: LandmarkKey;
+  index: number;
+  cycle: SharedValue<number>;
+}) {
+  // Its own entrance, delayed by its place in the order, so the constellation
+  // lights up centre-outwards rather than arriving all at once.
+  const entrance = useSharedValue(0);
+  useEffect(() => {
+    entrance.value = withDelay(
+      index * STAGGER,
+      withTiming(1, { duration: motion.instant, easing: Easing.ease }),
+    );
+  }, [entrance, index]);
+
+  const style = useAnimatedStyle(() => {
+    const point = face.value?.points.find((candidate) => candidate.key === landmark);
+    if (!point) return { opacity: 0 };
+    return {
+      opacity: entrance.value * cycle.value,
+      transform: [{ translateX: point.x }, { translateY: point.y }],
+    };
+  });
+
+  return <Animated.View style={[styles.dot, style]} />;
+}
+
+/** One line, positioned and rotated about its own first point. */
+function Link({
+  face,
+  index,
+  opacity,
+  cycle,
+}: {
+  face: SharedValue<FaceGeometry | null>;
+  index: number;
+  opacity: SharedValue<number>;
+  cycle: SharedValue<number>;
+}) {
+  const style = useAnimatedStyle(() => {
+    // The edges are built in `EDGES` order, but any whose ends were not both
+    // found is dropped — so this index is not a position in `EDGES`.
+    const edge = face.value?.edges[index];
+    if (!edge) return { opacity: 0 };
+    return {
+      opacity: opacity.value * cycle.value,
+      width: edge.length,
+      transform: [
+        { translateX: edge.left },
+        { translateY: edge.top },
+        { rotate: `${edge.angle}deg` },
+      ],
+    };
+  });
+
+  return <Animated.View style={[styles.link, style]} />;
 }
 
 const DOT = 3;
@@ -169,6 +172,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: DOT,
     height: DOT,
+    // Translated rather than positioned, so the transform runs on the UI thread
+    // without a layout pass. The offset centres the dot on its landmark.
     marginLeft: -DOT / 2,
     marginTop: -DOT / 2,
     borderRadius: radius.pill,
@@ -182,6 +187,4 @@ const styles = StyleSheet.create({
     // its own middle, which is where RN would put it by default.
     transformOrigin: '0 50%',
   },
-  sweepBox: { position: 'absolute', overflow: 'hidden' },
-  sweep: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: color.paper50 },
 });

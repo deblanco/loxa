@@ -193,7 +193,6 @@ describe('idleGeometry', () => {
       ['LEFT_EYE', 'RIGHT_EYE'],
       ['MOUTH_LEFT', 'MOUTH_RIGHT'],
       ['LEFT_CHEEK', 'RIGHT_CHEEK'],
-      ['LEFT_EAR', 'RIGHT_EAR'],
     ] as const;
 
     for (const [left, right] of pairs) {

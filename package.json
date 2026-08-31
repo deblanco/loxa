@@ -1,7 +1,7 @@
 {
   "name": "loxa",
   "private": true,
-  "workspaces": ["apps/*", "packages/*", "services/api"],
+  "workspaces": ["apps/*", "apps/mobile/modules/*", "packages/*", "services/api"],
   "scripts": {
     "dev:api": "bun run --filter @loxa/api dev",
     "dev:api:lan": "bun run --filter @loxa/api dev:lan",

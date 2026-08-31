@@ -37,6 +37,7 @@
     "expo-status-bar": "~57.0.1",
     "expo-store-review": "~57.0.2",
     "expo-video": "~57.0.3",
+    "face-track": "workspace:*",
     "i18next": "^26.4.0",
     "react": "19.2.3",
     "react-i18next": "^17.0.12",
@@ -48,10 +49,12 @@
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
     "react-native-vision-camera": "^5.2.3",
+    "react-native-vision-camera-worklets": "5.2.3",
     "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "nitrogen": "0.37.1",
     "vitest": "^4.1.10"
   }
 }

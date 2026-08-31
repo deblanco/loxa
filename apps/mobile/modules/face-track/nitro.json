@@ -1,0 +1,20 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["facetrack"],
+  "ios": {
+    "iosModuleName": "FaceTrack"
+  },
+  "android": {
+    "androidNamespace": ["facetrack"],
+    "androidCxxLibName": "FaceTrack"
+  },
+  "autolinking": {
+    "FaceTrack": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridFaceTrack"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules"]
+}
