@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CatalogueResponse } from '@loxa/shared';
 import {
   adjacentStyle,
+  clampPair,
   clampSelection,
   colorsFor,
   findStyle,
@@ -88,6 +89,40 @@ describe('colorsFor', () => {
       'caramel',
       'lilac',
     ]);
+  });
+});
+
+describe('clampPair', () => {
+  it('keeps a pair that exists', () => {
+    expect(clampPair(CATALOGUE, 'blunt-bob', 'lilac')).toEqual({
+      styleId: 'blunt-bob',
+      colorId: 'lilac',
+    });
+  });
+
+  it('holds the colour when the swipe lands on a cut that carries it', () => {
+    // The confirm screen's gesture: walk the cut, keep the colour.
+    expect(clampPair(CATALOGUE, 'wolf-cut', 'lilac')).toEqual({
+      styleId: 'wolf-cut',
+      colorId: 'lilac',
+    });
+  });
+
+  it('falls back when the next cut was never rendered in this colour', () => {
+    // Swiping from blunt-bob in caramel onto the wolf cut, which has only
+    // lilac. The default colour is not there either, so it takes what is.
+    expect(clampPair(CATALOGUE, 'wolf-cut', 'caramel')).toEqual({
+      styleId: 'wolf-cut',
+      colorId: 'lilac',
+    });
+  });
+
+  it('falls back to the default cut when the one asked for is gone', () => {
+    // A manifest refreshed underneath a screen that was naming a withdrawn cut.
+    expect(clampPair(CATALOGUE, 'withdrawn', 'lilac')).toEqual({
+      styleId: 'blunt-bob',
+      colorId: 'lilac',
+    });
   });
 });
 

@@ -73,7 +73,14 @@ export default function Camera() {
   const focused = useIsFocused();
   const foreground = useAppActive();
   const active = focused && foreground;
-  const { from } = useLocalSearchParams<{ from?: string }>();
+  // The cut and colour ride along untouched. They belong to the screen that
+  // sent the user here and to the one waiting on the other side; this screen
+  // has no opinion about them and only has to not drop them.
+  const { from, styleId, colorId } = useLocalSearchParams<{
+    from?: string;
+    styleId?: string;
+    colorId?: string;
+  }>();
   const forProfile = from === 'profile';
   const [facing, setFacing] = useState<TargetCameraPosition>('front');
 
@@ -134,9 +141,12 @@ export default function Camera() {
       router.back();
       return;
     }
+    // Replace rather than push: this screen has done its job, and leaving it
+    // in the stack would put a live viewfinder behind the confirm screen and a
+    // second camera between confirm and the preview underneath it.
     router.replace({
-      pathname: '/preview',
-      params: { photoUri: photo.uri, photoBase64: photo.base64 },
+      pathname: '/confirm',
+      params: { photoUri: photo.uri, photoBase64: photo.base64, styleId, colorId },
     });
   }
 

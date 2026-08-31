@@ -73,6 +73,7 @@ describe('the locales', () => {
         const notes = [
           locale.preview.tapToTakePhoto,
           locale.preview.needsConnection,
+          locale.confirm.swipeHint,
           locale.camera.hint,
           locale.camera.library,
           locale.profile.tapToChangePhoto,

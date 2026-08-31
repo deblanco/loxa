@@ -39,13 +39,18 @@ const it: typeof en = {
     tapToTakePhoto: 'tocca per scattare una foto',
     savedPhoto: 'Foto salvata',
     newPhoto: 'Foto nuova',
-    newPhotoTaken: 'Foto nuova ✓',
     profile: 'Profilo',
     setUpProfile: 'Configura il tuo profilo',
     creditsLeft: '{{count}} crediti rimasti',
     offlineHeadline: 'Niente da provare',
     offlineHeadlineItalic: 'per ora.',
     needsConnection: 'loxa ha bisogno di una connessione la prima volta',
+  },
+
+  confirm: {
+    title: 'Conferma',
+    swipeHint: 'scorri per cambiare taglio',
+    yourPhoto: 'La tua foto',
   },
 
   strips: {

@@ -13,8 +13,6 @@ export interface Selection {
   styleId: string;
   colorId: string;
   source: PhotoSource;
-  /** True once a photo has been taken this session for the `new` source. */
-  hasFreshShot: boolean;
   /**
    * Whether the selected source actually has a photo behind it. Nothing can be
    * rendered without one.
@@ -39,7 +37,6 @@ export function initialSelection(defaults: { styleId: string; colorId: string })
     styleId: defaults.styleId,
     colorId: defaults.colorId,
     source: 'saved',
-    hasFreshShot: false,
     hasPhoto: false,
   };
 }
@@ -56,28 +53,25 @@ export function primaryActionLabel(
   selection: Selection,
 ): 'preview.takePhotoAndTryOn' | 'preview.takeProfilePhoto' | 'preview.tryOn' {
   if (needsCamera(selection)) return 'preview.takePhotoAndTryOn';
-  if (!selection.hasPhoto) {
-    return selection.source === 'saved' ? 'preview.takeProfilePhoto' : 'preview.takePhotoAndTryOn';
-  }
+  if (!selection.hasPhoto) return 'preview.takeProfilePhoto';
   return 'preview.tryOn';
 }
 
+/**
+ * Whether this source has to visit the camera first.
+ *
+ * `new` always does, and now always means it. The camera used to hand its shot
+ * back to this screen, so a fresh one had to be remembered here to stop the
+ * button asking for a second; it now hands off to the confirm screen instead
+ * and never returns, so there is no shot for this screen to remember.
+ */
 export function needsCamera(selection: Selection): boolean {
-  return selection.source === 'new' && !selection.hasFreshShot;
+  return selection.source === 'new';
 }
 
-/**
- * Switching source.
- *
- * Going back to the saved photo drops the fresh shot: leaving it set would make
- * a later switch to `new` skip the camera and silently reuse an old picture.
- */
+/** Switching source. */
 export function withSource(selection: Selection, source: PhotoSource): Selection {
-  return {
-    ...selection,
-    source,
-    hasFreshShot: source === 'new' ? selection.hasFreshShot : false,
-  };
+  return { ...selection, source };
 }
 
 /** What pressing the primary button should actually do. */
@@ -104,10 +98,7 @@ export function primaryAction(selection: Selection, creditsLeft: number | null):
   // library still exists, in the camera screen, which is where a photo that is
   // not the portrait comes from.
   //
-  // Under `new` this is only reachable as contradictory state — a fresh shot
-  // claimed with no photo behind it — and the camera is what settles it. It is
-  // answered rather than asserted away because the wrong answer here sends
-  // somebody to the profile to fix a shot they just took.
-  if (!selection.hasPhoto) return selection.source === 'saved' ? 'profile-photo' : 'camera';
+  // `new` cannot reach here: it is answered by the camera above.
+  if (!selection.hasPhoto) return 'profile-photo';
   return 'generate';
 }

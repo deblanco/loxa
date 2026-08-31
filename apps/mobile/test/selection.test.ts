@@ -25,34 +25,25 @@ describe('primaryActionLabel', () => {
     expect(primaryActionLabel(BASE)).toBe('preview.takeProfilePhoto');
   });
 
-  it('becomes a camera button when a new photo is wanted and none has been taken', () => {
+  it('becomes a camera button whenever a new photo is wanted', () => {
     // The button must say what it will do. A control that silently opens the
     // camera when it is labelled Try On is how a user spends a credit by
     // accident — or fails to, and thinks the app is broken.
     const selection = withSource(BASE, 'new');
     expect(primaryActionLabel(selection)).toBe('preview.takePhotoAndTryOn');
+    expect(needsCamera(selection)).toBe(true);
   });
 
-  it('goes back to Try On once a shot exists', () => {
-    const selection = { ...withSource(BASE, 'new'), hasFreshShot: true, hasPhoto: true };
-    expect(primaryActionLabel(selection)).toBe('preview.tryOn');
-    expect(needsCamera(selection)).toBe(false);
+  it('still asks for the camera once a shot has been taken elsewhere', () => {
+    // A shot taken on the camera is confirmed on the screen after it and never
+    // comes back here, so this screen has none to remember. `new` means the
+    // camera every time it is chosen.
+    const selection = { ...withSource(BASE, 'new'), hasPhoto: true };
+    expect(primaryActionLabel(selection)).toBe('preview.takePhotoAndTryOn');
   });
 });
 
 describe('withSource', () => {
-  it('drops the fresh shot when switching back to the saved photo', () => {
-    // Keeping it would make a later switch to `new` skip the camera and
-    // silently reuse a photo the user has moved on from.
-    const taken = { ...withSource(BASE, 'new'), hasFreshShot: true };
-    expect(withSource(taken, 'saved').hasFreshShot).toBe(false);
-  });
-
-  it('keeps the fresh shot when re-selecting the new photo', () => {
-    const taken = { ...withSource(BASE, 'new'), hasFreshShot: true };
-    expect(withSource(taken, 'new').hasFreshShot).toBe(true);
-  });
-
   it('leaves the style and colour alone', () => {
     const chosen = { ...BASE, styleId: 'pixie', colorId: 'copper' };
     expect(withSource(chosen, 'new')).toEqual(
@@ -74,7 +65,7 @@ describe('primaryAction', () => {
   it('offers the paywall before the camera', () => {
     // Sending someone to photograph themselves for a render they cannot afford
     // is worse than showing the price first.
-    const needsShot = { ...withSource(BASE, 'new'), hasPhoto: false };
+    const needsShot = withSource(BASE, 'new');
     expect(primaryAction(needsShot, 0)).toBe('paywall');
   });
 
@@ -84,8 +75,11 @@ describe('primaryAction', () => {
     expect(primaryAction(withPhoto, null)).toBe('generate');
   });
 
-  it('opens the camera when a new photo is wanted and none taken', () => {
+  it('opens the camera whenever a new photo is wanted', () => {
     expect(primaryAction(withSource(BASE, 'new'), 5)).toBe('camera');
+    // Even with a photo behind the selection: `new` is answered by the camera
+    // before `hasPhoto` is ever consulted.
+    expect(primaryAction({ ...withSource(BASE, 'new'), hasPhoto: true }, 5)).toBe('camera');
   });
 
   it('sends someone with no portrait to take one', () => {

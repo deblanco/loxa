@@ -75,34 +75,57 @@ export function tileFor(
 }
 
 /**
- * Pull a selection back inside the catalogue.
+ * Pull a cut and colour back inside the catalogue.
  *
- * Two ways it can fall outside. A cached manifest can be older than the one
- * that just arrived, so a background refresh can withdraw the very cut the user
- * is looking at. And colours are per-style, so choosing a style that was never
+ * Three ways a pair can fall outside. A cached manifest can be older than the
+ * one that just arrived, so a background refresh can withdraw the very cut the
+ * user is looking at. Colours are per-style, so choosing a style that was never
  * rendered in the current colour would otherwise leave a named colour over an
- * empty plate.
+ * empty plate. And the confirm screen's swipe walks to the neighbouring cut
+ * while holding the colour, which is the same problem arriving from the other
+ * direction — the cut two along may carry six colours where this one carries
+ * ten.
  *
- * Both resolve the same way: keep what is still published, fall back to the
- * default, and never leave the screen naming something it cannot draw.
+ * All three resolve the same way: keep what is still published, fall back to
+ * the default, and never leave a screen naming something it cannot draw.
+ *
+ * Returns the same pair by identity when nothing moved, so a caller can use it
+ * to decide whether there is anything to set.
+ */
+export function clampPair(
+  catalogue: CatalogueResponse,
+  styleId: string,
+  colorId: string,
+): { styleId: string; colorId: string } {
+  const style = findStyle(catalogue, styleId) ?? findStyle(catalogue, catalogue.defaults.styleId);
+
+  // The schema guarantees the default style is in the list, so this only
+  // happens for a manifest that never passed it — which cannot be cached.
+  if (!style) return { styleId, colorId };
+
+  const resolved = style.colors.some((entry) => entry.id === colorId)
+    ? colorId
+    : (style.colors.find((entry) => entry.id === catalogue.defaults.colorId)?.id ??
+      style.colors[0]!.id);
+
+  return { styleId: style.id, colorId: resolved };
+}
+
+/**
+ * The same rule, for the preview screen's whole selection.
+ *
+ * Returns the selection unchanged by identity when the pair was already inside
+ * the catalogue, which is what lets the screen's clamping effect run on every
+ * manifest without causing a render.
  */
 export function clampSelection(
   selection: Selection,
   catalogue: CatalogueResponse,
 ): Selection {
-  const style = findStyle(catalogue, selection.styleId) ?? findStyle(catalogue, catalogue.defaults.styleId);
+  const { styleId, colorId } = clampPair(catalogue, selection.styleId, selection.colorId);
 
-  // The schema guarantees the default style is in the list, so this only
-  // happens for a manifest that never passed it — which cannot be cached.
-  if (!style) return selection;
-
-  const colorId = style.colors.some((entry) => entry.id === selection.colorId)
-    ? selection.colorId
-    : (style.colors.find((entry) => entry.id === catalogue.defaults.colorId)?.id ??
-      style.colors[0]!.id);
-
-  if (style.id === selection.styleId && colorId === selection.colorId) return selection;
-  return { ...selection, styleId: style.id, colorId };
+  if (styleId === selection.styleId && colorId === selection.colorId) return selection;
+  return { ...selection, styleId, colorId };
 }
 
 /**

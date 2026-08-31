@@ -1,5 +1,5 @@
 import type { CatalogueResponse } from '@loxa/shared';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -17,8 +17,7 @@ import { adjacentStyle, clampSelection, colorsFor, findColor, findStyle, heroKey
 import { initialSelection, primaryAction, primaryActionLabel, withSource } from '@/selection';
 import { useCatalogue } from '@/store/catalogue';
 import { useCredits } from '@/store/credits';
-import { offerPortrait } from '@/store/portrait-offer';
-import { readProfilePhoto, readProfilePhotoForRender } from '@/store/profile-photo';
+import { readProfilePhoto } from '@/store/profile-photo';
 import { color, radius, space } from '@/theme';
 
 /**
@@ -110,9 +109,6 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
   const [selection, setSelection] = useState(() => initialSelection(catalogue.defaults));
-  // This session's shot, for the `new` source. The `saved` source's photo is the
-  // profile portrait below, which lives on disk rather than in this state.
-  const [photo, setPhoto] = useState<{ base64: string; uri: string } | null>(null);
   // The plate is a pager, and a pager needs to know how wide one page is. Zero
   // until the first layout, which is why the plain plate renders until then.
   const [plateWidth, setPlateWidth] = useState(0);
@@ -126,16 +122,6 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   // comes back to afterwards.
   const [portrait, setPortrait] = useState<string | null>(null);
 
-  // The camera hands the shot back through the router rather than through a
-  // store: it is one value, used once, on the way back to exactly this screen.
-  const params = useLocalSearchParams<{ photoUri?: string; photoBase64?: string }>();
-  useEffect(() => {
-    if (params.photoUri && params.photoBase64) {
-      setPhoto({ uri: params.photoUri, base64: params.photoBase64 });
-      setSelection((current) => ({ ...current, source: 'new', hasFreshShot: true }));
-    }
-  }, [params.photoUri, params.photoBase64]);
-
   // A refresh in the background can withdraw the cut being looked at, and
   // choosing a style never rendered in the current colour is the same problem
   // from the other side. Both would leave a named look over an empty plate.
@@ -147,11 +133,11 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   const colorName = findColor(catalogue, selection.colorId)?.name ?? '';
 
   /**
-   * Whichever photo the selected source stands for: the profile portrait under
-   * `saved`, this session's shot under `new`. Null when that source has none
-   * yet, which is the state the primary button is there to leave.
+   * The photo the `saved` source stands for, which is the only one this screen
+   * can show. A `new` photo is taken on the camera and confirmed on the screen
+   * after it, and never comes back here.
    */
-  const own = selection.source === 'saved' ? portrait : (photo?.uri ?? null);
+  const own = selection.source === 'saved' ? portrait : null;
 
   /**
    * The user's own face first, then the models wearing the same cut and colour.
@@ -210,13 +196,13 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
     setLanding(null);
   }, [landing, pages, plateWidth]);
 
-  // `hasPhoto` is a question about the selected source, and only this screen can
-  // answer it: the portrait for `saved`, this session's shot for `new`. Kept in
-  // the selection so `selection.ts` never has to know where a picture is kept.
+  // `hasPhoto` only ever asks about the portrait now: `new` is answered by the
+  // camera before the question arises. Kept in the selection so `selection.ts`
+  // never has to know where a picture is kept.
   useEffect(() => {
-    const has = selection.source === 'saved' ? portrait !== null : photo !== null;
+    const has = portrait !== null;
     setSelection((current) => (current.hasPhoto === has ? current : { ...current, hasPhoto: has }));
-  }, [selection.source, portrait, photo]);
+  }, [portrait]);
 
   // The balance changes while this screen is not the one on top: a render spends
   // one, a purchase on the paywall adds one. Without this the chip goes stale
@@ -235,7 +221,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
   // and a tap that spends a credit is not a tap anybody meant to make.
   const onPlate = action === 'generate' ? undefined : onPrimary;
 
-  async function onPrimary() {
+  function onPrimary() {
     switch (action) {
       case 'paywall':
         // Straight to the offer. The Worker would refuse this anyway, but not
@@ -243,43 +229,32 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
         router.push('/paywall');
         return;
       case 'camera':
-        router.push('/camera');
+        // The cut and colour travel with the user. The camera does not read
+        // them; it hands them to the confirm screen on the other side, which is
+        // what stops a shot coming back wearing the catalogue's defaults.
+        router.push({
+          pathname: '/camera',
+          params: { styleId: selection.styleId, colorId: selection.colorId },
+        });
         return;
       case 'profile-photo':
         // The camera saves the portrait and comes straight back, so the source
         // this button belongs to has a photo by the time the screen returns.
         router.push('/camera?from=profile');
         return;
-      case 'generate': {
-        // The saved source's bytes are read here rather than held in state: the
-        // portrait is around 700KB, this screen is the one the user lives on,
-        // and it is needed for exactly as long as it takes to push the route.
-        const shot =
-          selection.source === 'saved' ? await readProfilePhotoForRender() : photo;
-        if (!shot) return;
-        // Armed here rather than after the render, because this is the only
-        // screen holding both halves of the photo. It is consumed on the result
-        // screen, which is reached only once a render has been billed and
-        // saved — so a failure never turns into an ask.
-        //
-        // Only for a fresh shot. Offering the portrait as the portrait is a
-        // question with one answer, and `pendingPortrait` would drop it anyway.
-        if (selection.source === 'new') offerPortrait(shot);
+      case 'generate':
+        // Nothing is spent from this screen any more. The confirm screen owns
+        // the credit, and reads the portrait itself — the bytes are around
+        // 700KB and have no business being carried across a route by the screen
+        // the user lives on.
         router.push({
-          pathname: '/generating',
+          pathname: '/confirm',
           params: {
-            base64: shot.base64,
+            source: 'saved',
             styleId: selection.styleId,
             colorId: selection.colorId,
-            // The names travel with the render rather than being looked up
-            // again downstream. A look outlives the manifest that described it,
-            // and a saved picture must not lose its caption because a cut was
-            // withdrawn months later.
-            styleName: style?.name ?? selection.styleId,
-            colorName,
           },
         });
-      }
     }
   }
 
@@ -361,10 +336,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
           onChange={(source) => setSelection((current) => withSource(current, source))}
           options={[
             { value: 'saved', label: t('preview.savedPhoto') },
-            {
-              value: 'new',
-              label: t(selection.hasFreshShot ? 'preview.newPhotoTaken' : 'preview.newPhoto'),
-            },
+            { value: 'new', label: t('preview.newPhoto') },
           ]}
         />
 

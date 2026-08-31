@@ -57,13 +57,18 @@ const en = {
     tapToTakePhoto: 'tap to take a photo',
     savedPhoto: 'Saved photo',
     newPhoto: 'New photo',
-    newPhotoTaken: 'New photo ✓',
     profile: 'Profile',
     setUpProfile: 'Set up your profile',
     creditsLeft: '{{count}} credits left',
     offlineHeadline: 'Nothing to try on',
     offlineHeadlineItalic: 'just yet.',
     needsConnection: 'loxa needs a connection the first time',
+  },
+
+  confirm: {
+    title: 'Confirm',
+    swipeHint: 'swipe to change the cut',
+    yourPhoto: 'Your photo',
   },
 
   strips: {
