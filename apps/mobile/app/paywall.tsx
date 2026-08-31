@@ -6,6 +6,7 @@ import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
 import { LegalLinks } from '@/components/LegalLinks';
+import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
 import { purchases, useWeeklyPricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
@@ -58,6 +59,24 @@ export default function Paywall() {
 
   return (
     <View style={styles.screen}>
+      {/*
+        The same wall as the onboarding offer, on stills. This used to be a
+        scrim over whatever screen the sheet had covered, which on the way out
+        of the profile is a flat grey rectangle — an empty half-screen above a
+        price is the least persuasive thing on it. The wall is what the money
+        buys, so it is the right thing to be looking at while deciding.
+
+        Under the scrim, not instead of it: the sheet is paper and has to stay
+        the brightest object here, and twelve photographs at full strength
+        would be competing with the two prices for the eye.
+
+        It starts at the status bar rather than above the screen: what shows
+        here is a band, not a full screen, so the offer's head start would push
+        the first row of faces out of sight.
+      */}
+      <ResultWall clips={false} top={insets.top} />
+      <View style={[StyleSheet.absoluteFill, styles.scrim]} pointerEvents="none" />
+
       <Pressable style={StyleSheet.absoluteFill} onPress={() => router.back()} />
 
       <Animated.View
@@ -126,7 +145,11 @@ export default function Paywall() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: color.scrim, justifyContent: 'flex-end' },
+  // Paper rather than see-through. A transparent modal over the screen behind
+  // is what the scrim alone was for; with a wall in it, the gaps between the
+  // tiles would show that screen through the drift.
+  screen: { flex: 1, backgroundColor: color.paper, justifyContent: 'flex-end', overflow: 'hidden' },
+  scrim: { backgroundColor: color.scrim },
   sheet: {
     backgroundColor: color.paper,
     borderTopLeftRadius: radius.sheet,
