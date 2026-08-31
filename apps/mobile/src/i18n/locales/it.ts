@@ -99,6 +99,10 @@ const it: typeof en = {
     holdToCompare: 'tieni premuto per confrontare',
     showingOriginal: 'mostro l’originale',
     originalPhoto: 'foto originale',
+    usePortrait: 'Usare questa foto sul tuo profilo?',
+    usePortraitYes: 'Usa la foto',
+    usePortraitNo: 'Non ora',
+    portraitSaved: 'Salvata come foto del profilo',
   },
 
   paywall: {

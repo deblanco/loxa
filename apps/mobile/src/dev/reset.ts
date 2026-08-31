@@ -3,6 +3,7 @@ import { Directory, Paths } from 'expo-file-system';
 import * as SecureStore from 'expo-secure-store';
 import { resetDeviceIdCache } from '@/api/device-id';
 import { clearCatalogueCache } from '@/store/catalogue';
+import { clearPortraitOffer } from '@/store/portrait-offer';
 import { clearDevPremiumCache } from '@/dev/premium';
 import { disableDaily } from '@/notifications';
 
@@ -54,6 +55,13 @@ const KEYS = [
    * way to get back to it.
    */
   'loxa.review.v1',
+  /**
+   * Whether the result screen has already offered to keep the render's photo
+   * as the profile portrait. It asks once per install and never again, so an
+   * install that "starts fresh" while remembering the refusal can never reach
+   * the card again.
+   */
+  'loxa.portraitAsk.v1',
 ];
 
 /** The keychain entry, which outlives everything else including the app itself. */
@@ -90,4 +98,8 @@ export async function resetAppState(): Promise<void> {
   resetDeviceIdCache();
   clearDevPremiumCache();
   clearCatalogueCache();
+  // The offered photo is held in a module for the process lifetime too, so
+  // without this a reset would leave the previous identity's face armed for the
+  // next render's result screen.
+  await clearPortraitOffer();
 }

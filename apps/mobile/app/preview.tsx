@@ -19,6 +19,7 @@ import { adjacentStyle, clampSelection, colorsFor, findColor, findStyle, heroKey
 import { initialSelection, primaryAction, primaryActionLabel, withSource } from '@/selection';
 import { useCatalogue } from '@/store/catalogue';
 import { useCredits } from '@/store/credits';
+import { offerPortrait } from '@/store/portrait-offer';
 import { readProfilePhoto } from '@/store/profile-photo';
 import { color, radius, space } from '@/theme';
 
@@ -226,6 +227,11 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
         return;
       case 'generate':
         if (!photo) return;
+        // Armed here rather than after the render, because this is the only
+        // screen holding both halves of the photo. It is consumed on the result
+        // screen, which is reached only once a render has been billed and
+        // saved — so a failure never turns into an ask.
+        offerPortrait(photo);
         router.push({
           pathname: '/generating',
           params: {

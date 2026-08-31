@@ -121,6 +121,14 @@ const en = {
     holdToCompare: 'hold to compare',
     showingOriginal: 'showing original',
     originalPhoto: 'original photo',
+    /**
+     * The offer to keep the render's own photograph as the profile portrait.
+     * Raised once per install, and only while there is no portrait yet.
+     */
+    usePortrait: 'Use this photo on your profile?',
+    usePortraitYes: 'Use photo',
+    usePortraitNo: 'Not now',
+    portraitSaved: 'Saved as your profile photo',
   },
 
   paywall: {
