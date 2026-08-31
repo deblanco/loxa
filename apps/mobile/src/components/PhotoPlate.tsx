@@ -45,6 +45,24 @@ interface Props {
    * of the user's own photograph.
    */
   fallback?: number;
+  /**
+   * Drawn in place of the hatch when there is no `uri`. The hatch reads as "a
+   * picture goes here", which is right for a plate the size of the screen and
+   * noise inside a 34pt circle — fourteen bars at that size are a texture, not
+   * a message. The header avatar passes a person mark instead.
+   */
+  placeholder?: React.ReactNode;
+  /**
+   * Where a `cover` image sits when it is taller than the plate. Default is
+   * centred, which on a plate the height of the screen is right and on a short
+   * tile is a band of somebody's chest — every render is a standing portrait,
+   * so the middle of the frame is never the face. `'top'` is what the wall
+   * passes, and it is the difference between twelve haircuts and twelve necks.
+   *
+   * Ignored when `focus` is given: that computes its own alignment from the
+   * manifest's head band, which is strictly better information.
+   */
+  contentPosition?: 'center' | 'top';
   label?: string;
   dark?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -63,7 +81,17 @@ const PREVIEW_RATIO = 1920 / 1080;
  */
 const HEAD_FILL = 0.66;
 
-export function PhotoPlate({ uri, focus, fallback, label, dark, style, children }: Props) {
+export function PhotoPlate({
+  uri,
+  focus,
+  fallback,
+  placeholder,
+  contentPosition = 'center',
+  label,
+  dark,
+  style,
+  children,
+}: Props) {
   const [box, setBox] = useState<{ width: number; height: number } | null>(null);
   const [failed, setFailed] = useState(false);
   const source = failed && fallback !== undefined ? fallback : uri;
@@ -113,6 +141,7 @@ export function PhotoPlate({ uri, focus, fallback, label, dark, style, children 
               : StyleSheet.absoluteFill
           }
           contentFit="cover"
+          contentPosition={aligned ? 'center' : contentPosition}
           // The catalogue is served from R2 with a year of cache and immutable
           // keys, so a picture fetched once should never be fetched again. RN's
           // own Image leans on NSURLCache, which honours that but shares one
@@ -126,6 +155,8 @@ export function PhotoPlate({ uri, focus, fallback, label, dark, style, children 
           // dissolving in is a fifth.
           transition={0}
         />
+      ) : placeholder !== undefined ? (
+        placeholder
       ) : (
         <>
           <Hatch dark={dark} />
