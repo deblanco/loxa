@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CONTACT_EMAIL } from "../app/legal-details";
 import { Wordmark } from "./Wordmark";
 
 /**
@@ -27,7 +28,7 @@ export function SiteFooter() {
             Support
           </Link>
           <a
-            href="mailto:hola@blankhexadecimal.com"
+            href={`mailto:${CONTACT_EMAIL}`}
             className="underline underline-offset-4 hover:text-ink"
           >
             Contact

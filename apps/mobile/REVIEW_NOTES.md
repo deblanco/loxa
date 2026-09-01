@@ -62,7 +62,7 @@ up as 2.1.
 
 - **Sign-in required:** No. There is no account of any kind, so no demo
   credentials. Say this rather than leaving the field ambiguous.
-- **Contact:** the address on the support page — `hola@blankhexadecimal.com`.
+- **Contact:** the address on the support page — `apps@blankhexadecimal.com`.
 - **Attachment:** none needed. If a build is ever rejected for a purchase that
   would not complete, attach a screen recording of the sandbox buy rather than
   arguing it in text.

@@ -77,7 +77,7 @@ describe("the privacy policy", () => {
   });
 
   it("gives a contact address", () => {
-    expect(html).toContain("mailto:hola@blankhexadecimal.com");
+    expect(html).toContain("mailto:apps@blankhexadecimal.com");
   });
 });
 

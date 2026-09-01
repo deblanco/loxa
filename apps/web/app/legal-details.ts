@@ -21,5 +21,5 @@ export const OPERATOR_ADDRESS =
 export const JURISDICTION = "Spain";
 export const COURTS = "the courts of Madrid, Spain";
 
-export const CONTACT_EMAIL = "hola@blankhexadecimal.com";
+export const CONTACT_EMAIL = "apps@blankhexadecimal.com";
 export const LAST_UPDATED = "1 September 2026";
