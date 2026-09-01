@@ -40,8 +40,13 @@ export default function Generating() {
   // The names come with the render rather than from the catalogue. A render
   // already in flight must not wait on a manifest to print its own caption, and
   // this screen then needs no catalogue at all.
-  const { base64, styleId, colorId, styleName, colorName } = useLocalSearchParams<{
+  //
+  // `sourceUri` is only in transit: nothing on this screen reads it, and it is
+  // deliberately not a render dependency — it is the result screen's copy of
+  // the photograph that went in.
+  const { base64, sourceUri, styleId, colorId, styleName, colorName } = useLocalSearchParams<{
     base64: string;
+    sourceUri?: string;
     styleId: string;
     colorId: string;
     styleName?: string;
@@ -95,7 +100,7 @@ export default function Generating() {
         if (cancelled) return;
 
         setProgress(1);
-        router.replace({ pathname: '/result/[id]', params: { id: look.id } });
+        router.replace({ pathname: '/result/[id]', params: { id: look.id, sourceUri } });
       } catch (err) {
         if (cancelled) return;
 

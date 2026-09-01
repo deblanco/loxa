@@ -147,6 +147,10 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
       pathname: '/generating',
       params: {
         base64: shot.base64,
+        // The same shot, for the result screen's corner and its compare. It
+        // travels rather than being written down: it is wanted on exactly one
+        // screen, for exactly as long as the render it belongs to.
+        sourceUri: shot.uri,
         styleId: pair.styleId,
         colorId: pair.colorId,
         // The names travel with the render rather than being looked up again

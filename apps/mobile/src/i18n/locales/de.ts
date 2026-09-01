@@ -97,7 +97,6 @@ const de: typeof en = {
   },
 
   result: {
-    creditsLeft: 'Noch {{count}} Credits',
     save: 'Sichern',
     saved: 'In deinen Aufnahmen gesichert',
     saveDenied: 'Loxa kann nichts zu deinen Fotos hinzufügen',

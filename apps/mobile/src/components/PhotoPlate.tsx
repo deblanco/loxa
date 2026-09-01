@@ -63,6 +63,16 @@ interface Props {
    * manifest's head band, which is strictly better information.
    */
   contentPosition?: 'center' | 'top';
+  /**
+   * `'cover'` fills the plate and crops whatever does not fit; `'contain'` fits
+   * the whole frame and leaves the plate's own colour around it.
+   *
+   * Cover is right nearly everywhere — a catalogue tile is scenery and losing
+   * its edges costs nothing. The result screen is the exception: it is the one
+   * plate whose picture the user paid for, and cropping a fifth of it off the
+   * sides to fill a phone that is narrower than the render is the wrong trade.
+   */
+  contentFit?: 'cover' | 'contain';
   label?: string;
   dark?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -87,6 +97,7 @@ export function PhotoPlate({
   fallback,
   placeholder,
   contentPosition = 'center',
+  contentFit = 'cover',
   label,
   dark,
   style,
@@ -140,7 +151,7 @@ export function PhotoPlate({
                 }
               : StyleSheet.absoluteFill
           }
-          contentFit="cover"
+          contentFit={aligned ? 'cover' : contentFit}
           contentPosition={aligned ? 'center' : contentPosition}
           // The catalogue is served from R2 with a year of cache and immutable
           // keys, so a picture fetched once should never be fetched again. RN's

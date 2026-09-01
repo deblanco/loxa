@@ -97,7 +97,6 @@ const fr: typeof en = {
   },
 
   result: {
-    creditsLeft: '{{count}} crédits restants',
     save: 'Enregistrer',
     saved: 'Enregistrée dans ta pellicule',
     saveDenied: 'Loxa ne peut pas ajouter à tes photos',

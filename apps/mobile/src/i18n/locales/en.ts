@@ -119,7 +119,6 @@ const en = {
   },
 
   result: {
-    creditsLeft: '{{count}} credits left',
     save: 'Save',
     saved: 'Saved to your camera roll',
     saveDenied: 'Loxa cannot add to your photos',

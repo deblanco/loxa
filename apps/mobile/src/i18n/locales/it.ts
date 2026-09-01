@@ -97,7 +97,6 @@ const it: typeof en = {
   },
 
   result: {
-    creditsLeft: '{{count}} crediti rimasti',
     save: 'Salva',
     saved: 'Salvata nel tuo rullino',
     saveDenied: 'Loxa non può aggiungere alle tue foto',
