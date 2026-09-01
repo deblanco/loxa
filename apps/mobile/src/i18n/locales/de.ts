@@ -82,6 +82,15 @@ const de: typeof en = {
     flip: 'Kamera wechseln',
   },
 
+  error: {
+    title: 'Etwas',
+    titleEmphasis: 'hat sich gelöst',
+    body: 'Dieser Bildschirm hat angehalten, bevor er fertig gezeichnet war. Ein neuer Versuch hilft meistens.',
+    renderTitle: 'Der ist uns entwischt',
+    renderBody: 'wir konnten es nicht abschließen · versuche es gleich noch einmal',
+    photoFailed: 'dieses Foto ließ sich nicht öffnen · versuche ein anderes',
+  },
+
   verdict: {
     'no-face': 'kein gesicht darauf · versuch es noch mal',
     'multiple-faces': 'mehr als ein gesicht · eines nach dem anderen',

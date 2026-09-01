@@ -82,6 +82,15 @@ const it: typeof en = {
     flip: 'Cambia fotocamera',
   },
 
+  error: {
+    title: 'Qualcosa',
+    titleEmphasis: 'si è staccato',
+    body: 'Questa schermata si è fermata prima di finire di disegnarsi. Riprovare di solito basta.',
+    renderTitle: 'Quello ci è sfuggito',
+    renderBody: 'non siamo riusciti a completarlo · riprova tra un momento',
+    photoFailed: "quella foto non si è aperta · provane un'altra",
+  },
+
   verdict: {
     'no-face': 'nessun viso in questa · riprova',
     'multiple-faces': 'più di un viso · uno alla volta',

@@ -109,6 +109,28 @@ const en = {
    * Why a photo was turned away. One lowercase clause, then what to do about
    * it — the same shape as the viewfinder hint each one replaces.
    */
+  /**
+   * The two places the app admits something broke.
+   *
+   * `title` and `titleEmphasis` are the boundary's two serif lines, the second
+   * italic, like every other headline in the app. `renderTitle` and
+   * `renderBody` replace the progress bar when a render fails — the screen used
+   * to bounce silently back to preview, which told the user nothing.
+   *
+   * Neither says anything about credits. A render that failed at the model was
+   * refunded, but one that timed out on this end may have been billed and
+   * finished without us, and copy that promises a refund in that case would be
+   * a lie on the one screen where trust is already thin.
+   */
+  error: {
+    title: 'Something',
+    titleEmphasis: 'came loose',
+    body: 'This screen stopped before it finished drawing. Trying again usually settles it.',
+    renderTitle: 'That one got away',
+    renderBody: 'we could not finish it · try again in a moment',
+    photoFailed: 'that photo would not open · try another',
+  },
+
   verdict: {
     'no-face': 'no face in that one · try again',
     'multiple-faces': 'more than one face · one at a time',

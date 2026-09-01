@@ -82,6 +82,15 @@ const fr: typeof en = {
     flip: 'Changer d’appareil',
   },
 
+  error: {
+    title: 'Quelque chose',
+    titleEmphasis: "s'est détaché",
+    body: "Cet écran s'est arrêté avant la fin de l'affichage. Réessayer suffit généralement.",
+    renderTitle: 'Celui-ci nous a échappé',
+    renderBody: "nous n'avons pas pu le terminer · réessayez dans un instant",
+    photoFailed: "cette photo n'a pas pu s'ouvrir · essayez-en une autre",
+  },
+
   verdict: {
     'no-face': 'aucun visage sur celle-ci · réessaie',
     'multiple-faces': 'plus d’un visage · un seul à la fois',

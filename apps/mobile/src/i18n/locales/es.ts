@@ -82,6 +82,15 @@ const es: typeof en = {
     flip: 'Cambiar de cámara',
   },
 
+  error: {
+    title: 'Algo',
+    titleEmphasis: 'se ha soltado',
+    body: 'Esta pantalla se detuvo antes de terminar de dibujarse. Reintentar suele bastar.',
+    renderTitle: 'Ese se nos ha escapado',
+    renderBody: 'no pudimos terminarlo · inténtalo dentro de un momento',
+    photoFailed: 'esa foto no se ha abierto · prueba con otra',
+  },
+
   verdict: {
     'no-face': 'no hay cara en esa · inténtalo otra vez',
     'multiple-faces': 'hay más de una cara · de una en una',

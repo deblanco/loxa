@@ -62,6 +62,12 @@ const KEYS = [
    * the card again.
    */
   'loxa.portraitAsk.v1',
+  /**
+   * Error reports written but not yet sent. A reset is meant to hand back a
+   * fresh install, and a queue full of the previous one's crashes would be
+   * flushed on the next launch and attributed to this one.
+   */
+  'loxa.diagnostics.v1',
 ];
 
 /** The keychain entry, which outlives everything else including the app itself. */

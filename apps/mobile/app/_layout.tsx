@@ -8,18 +8,25 @@ import {
   InstrumentSerif_400Regular_Italic,
 } from '@expo-google-fonts/instrument-serif';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { deviceId } from '@/api/client';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { flushDiagnostics, installDiagnostics, noteRoute, reportHandled } from '@/diagnostics';
 import { loadLanguage } from '@/i18n';
 import { loadCatalogue } from '@/store/catalogue';
 import { purchases } from '@/purchases';
 import { color } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync();
+
+// At module scope, beside the splash, because both have to happen before any
+// component mounts: a crash while the tree is still being built is exactly the
+// one worth catching, and a handler armed inside an effect would miss it.
+installDiagnostics();
 
 /**
  * The whole navigation stack: one Stack, no tab bar.
@@ -38,6 +45,7 @@ void SplashScreen.preventAutoHideAsync();
  * on the entry carousel.
  */
 export default function RootLayout() {
+  const pathname = usePathname();
   const [languageLoaded, setLanguageLoaded] = useState(false);
   const [fontsLoaded] = useFonts({
     InstrumentSerif_400Regular,
@@ -50,27 +58,51 @@ export default function RootLayout() {
   useEffect(() => {
     // The store's customer id is our anonymous device id, which is what lets an
     // app with no login screen still verify a purchase server-side.
-    void deviceId().then((id) => purchases().configure(id));
+    //
+    // The three boots below are `void`ed, so until now a throw in any of them
+    // was an unhandled rejection that went nowhere. They are caught rather than
+    // awaited: none of them is allowed to hold the splash, and the app works
+    // without any of them — it just works worse, which is the thing worth
+    // hearing about.
+    void deviceId()
+      .then((id) => purchases().configure(id))
+      .catch((err: unknown) => reportHandled(err, 'purchases.configure'));
 
     // Started behind the splash, which is held for the fonts anyway. In the
     // usual case — a cached manifest — storage has answered before the preview
     // screen mounts and its loading state is never seen.
-    void loadCatalogue();
+    void loadCatalogue().catch((err: unknown) => reportHandled(err, 'loadCatalogue'));
 
-    void loadLanguage().finally(() => setLanguageLoaded(true));
+    void loadLanguage()
+      .catch((err: unknown) => reportHandled(err, 'loadLanguage'))
+      .finally(() => setLanguageLoaded(true));
   }, []);
 
   const ready = fontsLoaded && languageLoaded;
 
   useEffect(() => {
-    if (ready) void SplashScreen.hideAsync();
+    if (!ready) return;
+    void SplashScreen.hideAsync();
+    // Behind the splash that was already held, and never on the crash path: a
+    // report written on the launch that died is sent on this one.
+    void flushDiagnostics();
   }, [ready]);
+
+  // Which screen the user was on when it broke, and a breadcrumb for how they
+  // got there. One hook here covers every route rather than a call per screen.
+  useEffect(() => {
+    noteRoute(pathname);
+  }, [pathname]);
 
   if (!ready) return null;
 
   return (
     <SafeAreaProvider>
       <StatusBar style="auto" />
+      {/* Inside the provider so the fallback screen has safe-area insets, and
+          around the whole Stack so a screen that throws cannot take the app
+          down to a white rectangle with no way back. */}
+      <ErrorBoundary>
       <Stack
         screenOptions={{
           headerShown: false,
@@ -91,6 +123,7 @@ export default function RootLayout() {
           options={{ presentation: 'transparentModal', animation: 'none' }}
         />
       </Stack>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }

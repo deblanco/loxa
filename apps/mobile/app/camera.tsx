@@ -33,6 +33,7 @@ import {
   type Landmarks,
 } from '@/face/geometry';
 import { boundsOf, landmarksOf } from '@/face/detected';
+import { reportHandled } from '@/diagnostics';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary, prepare, type PreparedPhoto } from '@/photo';
 import { saveProfilePhoto } from '@/store/profile-photo';
@@ -130,6 +131,10 @@ export default function Camera() {
   const photoOutput = usePhotoOutput({ qualityPrioritization: 'quality' });
 
   const [rejected, setRejected] = useState<FaceVerdict | null>(null);
+  // Separate from `rejected`, which is a verdict on the photograph. This is the
+  // photograph never having been read at all — a capture or a decode that threw
+  // rather than a face that was not found.
+  const [photoFailed, setPhotoFailed] = useState(false);
 
   // The tracked face, written by the frame thread and read by the overlay on
   // the UI thread. It never crosses the JS thread: thirty `setState`s a second
@@ -244,30 +249,47 @@ export default function Camera() {
     },
   });
 
+  // Both were unguarded: a capture that threw, or a photo the manipulator could
+  // not read (`photo.ts` throws outright), was an unhandled rejection and the
+  // shutter simply did nothing. Now the hint line says so and we hear about it.
   async function snap() {
-    const shot = await photoOutput.capturePhotoToFile({ enableShutterSound: true }, {});
+    try {
+      const shot = await photoOutput.capturePhotoToFile({ enableShutterSound: true }, {});
 
-    // `filePath` is a filesystem path, not a URL, and the manipulator wants one.
-    const result = await prepare(`file://${shot.filePath}`, { unmirror: facing === 'front' });
-    if (!result.ok) {
-      // Stay here. They are already pointing a camera at something, and the
-      // fastest fix for a shot with nobody in it is the next shot.
-      setRejected(result.reason);
-      return;
+      // `filePath` is a filesystem path, not a URL, and the manipulator wants one.
+      const result = await prepare(`file://${shot.filePath}`, { unmirror: facing === 'front' });
+      if (!result.ok) {
+        // Stay here. They are already pointing a camera at something, and the
+        // fastest fix for a shot with nobody in it is the next shot.
+        setRejected(result.reason);
+        return;
+      }
+      setRejected(null);
+      setPhotoFailed(false);
+      await handOff(result.photo);
+    } catch (err) {
+      reportHandled(err, 'camera.snap');
+      setRejected(null);
+      setPhotoFailed(true);
     }
-    setRejected(null);
-    await handOff(result.photo);
   }
 
   async function fromLibrary() {
-    const result = await pickFromLibrary();
-    if (!result) return;
-    if (!result.ok) {
-      setRejected(result.reason);
-      return;
+    try {
+      const result = await pickFromLibrary();
+      if (!result) return;
+      if (!result.ok) {
+        setRejected(result.reason);
+        return;
+      }
+      setRejected(null);
+      setPhotoFailed(false);
+      await handOff(result.photo);
+    } catch (err) {
+      reportHandled(err, 'camera.pickFromLibrary');
+      setRejected(null);
+      setPhotoFailed(true);
     }
-    setRejected(null);
-    await handOff(result.photo);
   }
 
   async function handOff(photo: PreparedPhoto) {
@@ -321,11 +343,11 @@ export default function Camera() {
         <View style={styles.guide} pointerEvents="none" />
         <Meta
           variant="note"
-          tone={rejected ? 'paper85' : 'paper60'}
+          tone={rejected || photoFailed ? 'paper85' : 'paper60'}
           sentence
           style={styles.hint}
         >
-          {t(rejected ? verdictLine(rejected) : 'camera.hint')}
+          {t(photoFailed ? 'error.photoFailed' : rejected ? verdictLine(rejected) : 'camera.hint')}
         </Meta>
       </View>
 

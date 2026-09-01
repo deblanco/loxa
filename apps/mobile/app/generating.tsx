@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Animated, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ApiRequestError, tryOn } from '@/api/client';
+import { reportHandled } from '@/diagnostics';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { Pill } from '@/components/Pill';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -54,6 +55,7 @@ export default function Generating() {
   }>();
 
   const [progress, setProgress] = useState(0);
+  const [failed, setFailed] = useState(false);
   const shimmer = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
@@ -104,14 +106,20 @@ export default function Generating() {
       } catch (err) {
         if (cancelled) return;
 
-        // Out of credits is the one failure with somewhere to go. Everything
-        // else lands back on preview — the credit was refunded server-side, so
-        // there is nothing to undo here.
+        // Out of credits is the one failure with somewhere to go.
         if (err instanceof ApiRequestError && err.code === 'out_of_credits') {
           router.replace('/paywall');
           return;
         }
-        router.replace('/preview');
+
+        // Everything else used to `router.replace('/preview')` here, silently.
+        // A render that failed at the model, a 500, a thirty-second timeout and
+        // a response that no longer matched the schema all bounced the user
+        // back to the screen they came from with nothing said and nothing
+        // recorded — the largest silent failure in the app. Now it says so, and
+        // tells us.
+        reportHandled(err, 'tryOn');
+        setFailed(true);
       }
     }
 
@@ -128,13 +136,19 @@ export default function Generating() {
       <PhotoPlate style={styles.plate}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.veil, { opacity: shimmer }]} />
         <View style={styles.centre}>
-          <Display variant="displayXs">{t('generating.title')}</Display>
+          <Display variant="displayXs">
+            {t(failed ? 'error.renderTitle' : 'generating.title')}
+          </Display>
           <Meta variant="note" tone="ink45" sentence>
-            {t(step)}
+            {t(failed ? 'error.renderBody' : step)}
           </Meta>
-          <View style={styles.bar}>
-            <ProgressBar progress={progress} />
-          </View>
+          {/* The bar goes rather than freezing. A progress bar stopped at 60%
+              is a screen that is still working; this one is not. */}
+          {!failed && (
+            <View style={styles.bar}>
+              <ProgressBar progress={progress} />
+            </View>
+          )}
         </View>
       </PhotoPlate>
 
@@ -148,7 +162,11 @@ export default function Generating() {
       </View>
 
       <View style={[styles.cancel, { paddingBottom: insets.bottom + space.s3 }]}>
-        <Pill label={t('common.cancel')} tone="quiet" onPress={() => router.replace('/preview')} />
+        <Pill
+          label={t(failed ? 'common.tryAgain' : 'common.cancel')}
+          tone={failed ? 'filled' : 'quiet'}
+          onPress={() => router.replace('/preview')}
+        />
       </View>
     </View>
   );

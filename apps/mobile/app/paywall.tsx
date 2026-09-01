@@ -8,6 +8,7 @@ import { syncPurchases } from '@/api/client';
 import { LegalLinks } from '@/components/LegalLinks';
 import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
+import { reportHandled } from '@/diagnostics';
 import { paywallResetLabel } from '@/format';
 import { purchases, restoreAndSync, usePricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
@@ -50,13 +51,23 @@ export default function Paywall() {
     }).start();
   }, [rise]);
 
+  // Both buy paths were unguarded: a throw from the store, or a `syncPurchases`
+  // that could not reach the Worker, was an unhandled rejection and the sheet
+  // simply sat there. The user is told the same way a failed restore tells
+  // them, and we hear about it — a purchase that took money and did not land a
+  // credit is the one failure worth hearing about immediately.
   async function buySingle() {
-    const transactionIds = await purchases().buySinglePhoto();
-    if (!transactionIds) return;
+    try {
+      const transactionIds = await purchases().buySinglePhoto();
+      if (!transactionIds) return;
 
-    await syncPurchases(transactionIds);
-    await refresh();
-    router.back();
+      await syncPurchases(transactionIds);
+      await refresh();
+      router.back();
+    } catch (err) {
+      reportHandled(err, 'buySinglePhoto');
+      setNotice(t('common.restoreFailed'));
+    }
   }
 
   async function restore() {
@@ -73,9 +84,14 @@ export default function Paywall() {
   }
 
   async function buyWeekly() {
-    if (!(await purchases().buyWeekly())) return;
-    await refresh();
-    router.back();
+    try {
+      if (!(await purchases().buyWeekly())) return;
+      await refresh();
+      router.back();
+    } catch (err) {
+      reportHandled(err, 'buyWeekly');
+      setNotice(t('common.restoreFailed'));
+    }
   }
 
   return (

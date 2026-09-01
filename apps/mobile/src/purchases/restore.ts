@@ -1,4 +1,5 @@
 import { syncPurchases } from '@/api/client';
+import { reportHandled } from '@/diagnostics';
 import { purchases } from './index';
 
 /** What a restore turned up, in the terms a screen needs to report it. */
@@ -30,7 +31,11 @@ export async function restoreAndSync(): Promise<RestoreOutcome> {
       return 'restored';
     }
     return 'nothing';
-  } catch {
+  } catch (err) {
+    // The outcome the caller shows is unchanged; the difference is that we now
+    // hear about it. A restore that fails is how somebody who has already paid
+    // discovers they cannot use what they bought.
+    reportHandled(err, 'restoreAndSync');
     return 'failed';
   }
 }

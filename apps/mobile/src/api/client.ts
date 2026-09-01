@@ -1,11 +1,14 @@
 import {
   apiErrorSchema,
+  diagnosticsResponseSchema,
   catalogueResponseSchema,
   creditsResponseSchema,
   purchaseSyncResponseSchema,
   tryOnResponseSchema,
   type ApiErrorCode,
   type CatalogueResponse,
+  type DiagnosticReport,
+  type DiagnosticsResponse,
   type CreditsResponse,
   type PurchaseSyncResponse,
   type TryOnResponse,
@@ -127,5 +130,22 @@ export async function syncPurchases(transactionIds: string[]): Promise<PurchaseS
   return await request('/v1/purchases/sync', (body) => purchaseSyncResponseSchema.parse(body), {
     method: 'POST',
     body: JSON.stringify({ transactionIds }),
+  });
+}
+
+/**
+ * Tell the Worker what broke.
+ *
+ * The one call whose failure is never worth surfacing: it is already the
+ * failure path. `flushDiagnostics` swallows whatever this throws, and the
+ * reports are dropped rather than retried — see `diagnostics/queue.ts`.
+ *
+ * It sends `X-Device-Id` like every other call because the shared request path
+ * does. The Worker uses it to rate-limit and never stores it beside a report.
+ */
+export async function sendDiagnostics(reports: DiagnosticReport[]): Promise<DiagnosticsResponse> {
+  return await request('/v1/diagnostics', (body) => diagnosticsResponseSchema.parse(body), {
+    method: 'POST',
+    body: JSON.stringify({ reports }),
   });
 }

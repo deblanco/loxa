@@ -30,6 +30,8 @@ export default defineConfig({
         'src/selection.ts',
         'src/catalogue.ts',
         'src/catalogue-cache.ts',
+        'src/diagnostics/breadcrumbs.ts',
+        'src/diagnostics/report.ts',
       ],
       thresholds: { lines: 90, functions: 90, statements: 90 },
     },
