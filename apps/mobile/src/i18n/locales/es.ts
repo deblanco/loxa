@@ -10,6 +10,7 @@ const es: typeof en = {
     restored: 'Compras restauradas',
     restoreNothing: 'No hay nada que restaurar',
     restoreFailed: 'No se pudo conectar con la tienda',
+    confirmingPurchase: 'Confirmando tu compra…',
     subscriptionTermsIntro:
       '{{price}} la primera semana y luego {{weekly}} por semana. Se renueva automáticamente salvo que la canceles al menos 24 horas antes de que termine la semana; el cargo se hace en tu Apple ID.',
     subscriptionTerms:

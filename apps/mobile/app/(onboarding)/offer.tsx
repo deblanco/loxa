@@ -5,12 +5,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PurchaseSettling } from '@/components/PurchaseSettling';
 import { LegalLinks } from '@/components/LegalLinks';
 import { Pill } from '@/components/Pill';
 import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
 import { reportHandled } from '@/diagnostics';
 import { purchases, restoreAndSync, usePricing } from '@/purchases';
+import { refreshCredits } from '@/store/credits';
 import { useOnboarding } from '@/store/onboarding';
 import { color, radius, space } from '@/theme';
 
@@ -40,6 +42,9 @@ export default function Offer() {
   const { complete } = useOnboarding();
   const { price, introPrice } = usePricing();
   const [restoring, setRestoring] = useState(false);
+  // The subscription is bought here but granted by the Worker reading the
+  // entitlement, so this screen has the same settling window the paywall does.
+  const [settling, setSettling] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   /**
@@ -70,10 +75,18 @@ export default function Offer() {
       // The result is deliberately not branched on: a cancelled sheet and a
       // completed purchase both lead to preview, which is what makes this an
       // offer rather than a toll. The paywall is reachable from inside.
-      await purchases().buyWeekly();
+      if (await purchases().buyWeekly()) {
+        setSettling(true);
+        // The allowance is the Worker's to report, and preview reads the
+        // balance on focus — but asking now means the chip is already right
+        // when this screen hands over, rather than right a moment later.
+        await refreshCredits();
+      }
     } catch (err) {
       // A store that threw is not a reason to hold somebody on the gate.
       reportHandled(err, 'offer.buyWeekly');
+    } finally {
+      setSettling(false);
     }
     await leave();
   }
@@ -107,6 +120,7 @@ export default function Offer() {
         accessibilityRole="button"
         accessibilityLabel={t('offer.skip')}
         onPress={() => void leave()}
+        disabled={settling}
         hitSlop={space.s3}
         style={[styles.skip, { top: insets.top + space.s2 }]}
       >
@@ -136,10 +150,14 @@ export default function Offer() {
         </View>
 
         <View style={styles.actions}>
-          <Pill
-            label={introPrice ? t('offer.startIntro', { price: introPrice }) : t('offer.start')}
-            onPress={() => void subscribe()}
-          />
+          {settling ? (
+            <PurchaseSettling />
+          ) : (
+            <Pill
+              label={introPrice ? t('offer.startIntro', { price: introPrice }) : t('offer.start')}
+              onPress={() => void subscribe()}
+            />
+          )}
           {/*
             Every price and the renewal terms before the tap, not after it.
             App Review asks for the length, the price and the fact that it
@@ -154,7 +172,7 @@ export default function Offer() {
           <Pressable
             accessibilityRole="button"
             onPress={() => void restore()}
-            disabled={restoring}
+            disabled={restoring || settling}
             hitSlop={space.s2}
             style={styles.restore}
           >

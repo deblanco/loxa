@@ -10,6 +10,7 @@ const it: typeof en = {
     restored: 'Acquisti ripristinati',
     restoreNothing: 'Niente da ripristinare',
     restoreFailed: 'Store non raggiungibile',
+    confirmingPurchase: 'Conferma dell’acquisto…',
     subscriptionTermsIntro:
       '{{price}} per la prima settimana, poi {{weekly}} a settimana. Si rinnova automaticamente salvo disdetta almeno 24 ore prima della fine della settimana, con addebito sul tuo ID Apple.',
     subscriptionTerms:

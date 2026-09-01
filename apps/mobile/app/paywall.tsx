@@ -6,6 +6,7 @@ import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
 import { LegalLinks } from '@/components/LegalLinks';
+import { PurchaseSettling } from '@/components/PurchaseSettling';
 import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
 import { reportHandled } from '@/diagnostics';
@@ -40,6 +41,10 @@ export default function Paywall() {
   const { credits, refresh } = useCredits();
   const { price, introPrice, singlePhoto } = usePricing();
   const [restoring, setRestoring] = useState(false);
+  // The window between the App Store sheet closing and the balance moving. Both
+  // buy paths hold it, because both have one: the photo waits on our Worker
+  // confirming the transaction, the subscription on the entitlement it reads.
+  const [settling, setSettling] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const rise = useRef(new Animated.Value(0)).current;
 
@@ -59,14 +64,19 @@ export default function Paywall() {
   async function buySingle() {
     try {
       const transactionIds = await purchases().buySinglePhoto();
+      // Null is a cancelled sheet as well as a product the store would not
+      // sell, and neither one has anything to settle.
       if (!transactionIds) return;
 
+      setSettling(true);
       await syncPurchases(transactionIds);
       await refresh();
       router.back();
     } catch (err) {
       reportHandled(err, 'buySinglePhoto');
       setNotice(t('common.restoreFailed'));
+    } finally {
+      setSettling(false);
     }
   }
 
@@ -86,11 +96,15 @@ export default function Paywall() {
   async function buyWeekly() {
     try {
       if (!(await purchases().buyWeekly())) return;
+
+      setSettling(true);
       await refresh();
       router.back();
     } catch (err) {
       reportHandled(err, 'buyWeekly');
       setNotice(t('common.restoreFailed'));
+    } finally {
+      setSettling(false);
     }
   }
 
@@ -114,7 +128,13 @@ export default function Paywall() {
       <ResultWall clips={false} top={insets.top} />
       <View style={[StyleSheet.absoluteFill, styles.scrim]} pointerEvents="none" />
 
-      <Pressable style={StyleSheet.absoluteFill} onPress={() => router.back()} />
+      {/* Not dismissible while a purchase settles: a tap out at that moment
+          reads as cancelling something Apple has already charged for. */}
+      <Pressable
+        style={StyleSheet.absoluteFill}
+        onPress={() => router.back()}
+        disabled={settling}
+      />
 
       <Animated.View
         style={[
@@ -137,43 +157,47 @@ export default function Paywall() {
           {t(credits ? paywallResetLabel(credits.resetsAt, new Date()) : 'paywall.untilMonday')}
         </Display>
 
-        <View style={styles.options}>
-          <Pressable accessibilityRole="button" onPress={buySingle} style={styles.option}>
-            <View style={styles.optionText}>
-              <Body weight="medium">{t('paywall.single')}</Body>
-              <Body variant="caption" tone="ink55" style={styles.note}>
-                {t('paywall.singleNote')}
-              </Body>
-            </View>
-            <Display variant="price">{singlePhoto}</Display>
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={buyWeekly}
-            style={[styles.option, styles.optionFilled]}
-          >
-            <View style={styles.optionText}>
-              <View style={styles.titleRow}>
-                <Body weight="medium" tone="paper">
-                  {t('paywall.weekly')}
+        {settling ? (
+          <PurchaseSettling />
+        ) : (
+          <View style={styles.options}>
+            <Pressable accessibilityRole="button" onPress={buySingle} style={styles.option}>
+              <View style={styles.optionText}>
+                <Body weight="medium">{t('paywall.single')}</Body>
+                <Body variant="caption" tone="ink55" style={styles.note}>
+                  {t('paywall.singleNote')}
                 </Body>
-                <View style={styles.tag}>
-                  <Meta variant="metaSmall" tone="paper">
-                    {t('paywall.bestValue')}
-                  </Meta>
-                </View>
               </View>
-              <Body variant="caption" tone="paper60" style={styles.note}>
-                {t('paywall.weeklyNote', { count: WEEKLY_CREDITS })}
-              </Body>
-            </View>
-            <Display variant="price" tone="paper">
-              {price}
-              {t('paywall.perWeek')}
-            </Display>
-          </Pressable>
-        </View>
+              <Display variant="price">{singlePhoto}</Display>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={buyWeekly}
+              style={[styles.option, styles.optionFilled]}
+            >
+              <View style={styles.optionText}>
+                <View style={styles.titleRow}>
+                  <Body weight="medium" tone="paper">
+                    {t('paywall.weekly')}
+                  </Body>
+                  <View style={styles.tag}>
+                    <Meta variant="metaSmall" tone="paper">
+                      {t('paywall.bestValue')}
+                    </Meta>
+                  </View>
+                </View>
+                <Body variant="caption" tone="paper60" style={styles.note}>
+                  {t('paywall.weeklyNote', { count: WEEKLY_CREDITS })}
+                </Body>
+              </View>
+              <Display variant="price" tone="paper">
+                {price}
+                {t('paywall.perWeek')}
+              </Display>
+            </Pressable>
+          </View>
+        )}
 
         {/*
           The renewal terms belong on this sheet too. It is a point of purchase
@@ -187,13 +211,18 @@ export default function Paywall() {
         </Meta>
 
         <View style={styles.footer}>
-          <Pressable accessibilityRole="button" onPress={() => router.back()} hitSlop={space.s2}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.back()}
+            disabled={settling}
+            hitSlop={space.s2}
+          >
             <Body tone="ink45">{t('paywall.notNow')}</Body>
           </Pressable>
           <Pressable
             accessibilityRole="button"
             onPress={restore}
-            disabled={restoring}
+            disabled={restoring || settling}
             hitSlop={space.s2}
           >
             <Meta variant="note" tone="ink40" sentence>

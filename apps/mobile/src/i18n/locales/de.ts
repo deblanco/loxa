@@ -10,6 +10,7 @@ const de: typeof en = {
     restored: 'Käufe wiederhergestellt',
     restoreNothing: 'Nichts wiederherzustellen',
     restoreFailed: 'Store nicht erreichbar',
+    confirmingPurchase: 'Kauf wird bestätigt…',
     subscriptionTermsIntro:
       '{{price}} für die erste Woche, danach {{weekly}} pro Woche. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ablauf der Woche gekündigt wird; die Abbuchung erfolgt über deine Apple-ID.',
     subscriptionTerms:

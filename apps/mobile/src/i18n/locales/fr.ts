@@ -10,6 +10,7 @@ const fr: typeof en = {
     restored: 'Achats restaurés',
     restoreNothing: 'Rien à restaurer',
     restoreFailed: 'Boutique injoignable',
+    confirmingPurchase: 'Confirmation de votre achat…',
     subscriptionTermsIntro:
       '{{price}} la première semaine, puis {{weekly}} par semaine. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine ; le paiement est débité de ton compte Apple.',
     subscriptionTerms:

@@ -29,6 +29,15 @@ const en = {
     restoreNothing: 'Nothing to restore',
     restoreFailed: 'Could not reach the store',
     /**
+     * Shown between the App Store sheet closing and the credit landing.
+     *
+     * The gap is real: the purchase is confirmed with the store by our
+     * server, so there is a moment where Apple has taken the money and
+     * the balance has not moved yet. Unlabelled, that moment reads as a
+     * purchase that did nothing.
+     */
+    confirmingPurchase: 'Confirming your purchase…',
+    /**
      * The auto-renewal disclosure App Review asks for, in the two shapes a
      * reader can be in. Both paywalls print one of them next to the button, so
      * they live here rather than twice over in five languages.
