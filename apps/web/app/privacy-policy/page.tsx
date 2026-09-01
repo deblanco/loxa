@@ -155,7 +155,7 @@ export default function PrivacyPolicy() {
 
         <Section title="Who to write to">
           Loxa is operated by {OPERATOR}, {OPERATOR_ADDRESS}, which is the data
-          controller for the purposes of {JURISDICTION} data protection law.
+          controller for the purposes of data protection law in {JURISDICTION}.
           Write to{" "}
           <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
             {CONTACT_EMAIL}
