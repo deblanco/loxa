@@ -241,6 +241,92 @@ export const catalogueResponseSchema = z
   });
 export type CatalogueResponse = z.infer<typeof catalogueResponseSchema>;
 
+// --- POST /v1/diagnostics ---------------------------------------------------
+
+/**
+ * What kind of failure this was, which is the only axis worth grouping on.
+ *
+ * `crash` and `unhandled_rejection` are errors that reached nobody: the app was
+ * on its way down or a promise was dropped. `render_error` is a React subtree
+ * that threw and was caught by the boundary. `handled` is the interesting one —
+ * a failure the app already caught and already told the user about, which until
+ * now was invisible to us precisely because it was handled well.
+ */
+export const diagnosticKindSchema = z.enum([
+  'crash',
+  'unhandled_rejection',
+  'render_error',
+  'handled',
+]);
+export type DiagnosticKind = z.infer<typeof diagnosticKindSchema>;
+
+/**
+ * One thing that happened shortly before the error.
+ *
+ * `at` is milliseconds *before* the report rather than a wall clock, because
+ * the report is written on one launch and sent on the next: an absolute
+ * timestamp from a device with a wrong clock would sort the trail wrongly, and
+ * the only question a breadcrumb answers is "what came just before this".
+ */
+export const breadcrumbSchema = z.object({
+  at: z.number().int().min(0),
+  label: z.string().min(1).max(64),
+});
+export type Breadcrumb = z.infer<typeof breadcrumbSchema>;
+
+/**
+ * One thing that went wrong on a phone.
+ *
+ * **The shape is closed on purpose.** There is no free-form context bag and
+ * there never should be: an open map is how a photograph, a device id or a
+ * request body eventually arrives in the table by accident. Every field here
+ * was chosen, and adding one is a decision rather than a convenience.
+ *
+ * Nothing identifies the device. See `schema.sql` for why the row has no
+ * device id, and `apps/mobile/src/diagnostics/report.ts` for the redaction that
+ * keeps a base64 photo out of `message` and `stack`.
+ *
+ * The lengths are ceilings, not expectations. They are here rather than in the
+ * Worker so an oversized report is refused at the boundary instead of becoming
+ * a large write, and so the app can be tested against the same limits.
+ */
+export const diagnosticReportSchema = z.object({
+  kind: diagnosticKindSchema,
+  message: z.string().min(1).max(500),
+  stack: z.string().max(4000).optional(),
+  /** Which screen it happened on — the expo-router path, never a full URL. */
+  route: z.string().max(64).optional(),
+  appVersion: z.string().min(1).max(32),
+  osVersion: z.string().min(1).max(32),
+  locale: z.string().min(1).max(16),
+  breadcrumbs: z.array(breadcrumbSchema).max(20),
+});
+export type DiagnosticReport = z.infer<typeof diagnosticReportSchema>;
+
+/**
+ * A batch, because the queue on the device flushes everything it is holding.
+ *
+ * Twenty is the same bound the device's queue keeps, so a full queue is exactly
+ * one request. A crash loop that produced more has already lost the oldest
+ * reports on the phone, which is the right end to lose them from.
+ */
+export const diagnosticsRequestSchema = z.object({
+  reports: z.array(diagnosticReportSchema).min(1).max(20),
+});
+export type DiagnosticsRequest = z.infer<typeof diagnosticsRequestSchema>;
+
+/**
+ * How many were written.
+ *
+ * Fewer than were sent is not an error: a device over its daily cap is answered
+ * `0` and a 200. The app drops its queue either way — a report that could not
+ * be stored is not worth a retry that would arrive with the next crash anyway.
+ */
+export const diagnosticsResponseSchema = z.object({
+  accepted: z.number().int().min(0),
+});
+export type DiagnosticsResponse = z.infer<typeof diagnosticsResponseSchema>;
+
 // --- Errors -----------------------------------------------------------------
 
 /**

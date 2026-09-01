@@ -3,6 +3,7 @@ import {
   catalogueResponseSchema,
   apiErrorSchema,
   creditsResponseSchema,
+  diagnosticsRequestSchema,
   purchaseSyncRequestSchema,
   tryOnRequestSchema,
 } from '../src/contracts';
@@ -190,5 +191,97 @@ describe('catalogueResponseSchema', () => {
       ],
     });
     expect(parsed.success).toBe(false);
+  });
+});
+
+describe('diagnosticsRequestSchema', () => {
+  const report = {
+    kind: 'handled' as const,
+    message: 'boom',
+    appVersion: '1.0.0',
+    osVersion: 'ios 18.0',
+    locale: 'en',
+    breadcrumbs: [],
+  };
+
+  it('accepts a minimal report and a fully dressed one', () => {
+    expect(diagnosticsRequestSchema.safeParse({ reports: [report] }).success).toBe(true);
+    expect(
+      diagnosticsRequestSchema.safeParse({
+        reports: [
+          {
+            ...report,
+            kind: 'crash',
+            stack: 'Error: boom\n  at x',
+            route: '/preview',
+            breadcrumbs: [{ at: 1200, label: 'route /camera' }],
+          },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects an empty batch', () => {
+    // Nothing to write and nothing to say — a request that costs a D1 round
+    // trip to store zero rows.
+    expect(diagnosticsRequestSchema.safeParse({ reports: [] }).success).toBe(false);
+  });
+
+  it('rejects a batch larger than the device queue can hold', () => {
+    const parsed = diagnosticsRequestSchema.safeParse({
+      reports: Array.from({ length: 21 }, () => report),
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects an unknown kind', () => {
+    expect(
+      diagnosticsRequestSchema.safeParse({ reports: [{ ...report, kind: 'warning' }] }).success,
+    ).toBe(false);
+  });
+
+  it('rejects an empty message', () => {
+    // The column is the whole report. A row that says nothing is a row that
+    // costs storage to tell us a thing happened, without saying what.
+    expect(
+      diagnosticsRequestSchema.safeParse({ reports: [{ ...report, message: '' }] }).success,
+    ).toBe(false);
+  });
+
+  /**
+   * The ceilings are here rather than in the Worker so an oversized report is
+   * refused at the boundary instead of becoming a large write.
+   */
+  it('rejects a message or a stack past its ceiling', () => {
+    expect(
+      diagnosticsRequestSchema.safeParse({ reports: [{ ...report, message: 'x'.repeat(501) }] })
+        .success,
+    ).toBe(false);
+    expect(
+      diagnosticsRequestSchema.safeParse({ reports: [{ ...report, stack: 'x'.repeat(4001) }] })
+        .success,
+    ).toBe(false);
+  });
+
+  it('rejects more breadcrumbs than the trail keeps', () => {
+    const parsed = diagnosticsRequestSchema.safeParse({
+      reports: [
+        {
+          ...report,
+          breadcrumbs: Array.from({ length: 21 }, () => ({ at: 1, label: 'step' })),
+        },
+      ],
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects a breadcrumb aged into the future', () => {
+    // `at` is an age, not a clock. A negative one means the trail was built
+    // against a different `now` than the report was.
+    expect(
+      diagnosticsRequestSchema.safeParse({
+        reports: [{ ...report, breadcrumbs: [{ at: -1, label: 'step' }] }],
+      }).success,
+    ).toBe(false);
   });
 });

@@ -4,3 +4,4 @@ export * from './colors';
 export * from './credits';
 export * from './entitlements';
 export * from './contracts';
+export * from './redact';

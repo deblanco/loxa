@@ -1,11 +1,17 @@
 import {
+  diagnosticsRequestSchema,
   purchaseSyncRequestSchema,
   tryOnRequestSchema,
   type ApiErrorCode,
 } from '@loxa/shared';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { buildCreditsDeps, buildSyncDeps, buildTryOnDeps } from '../../composition';
+import {
+  buildCreditsDeps,
+  buildDiagnosticsDeps,
+  buildSyncDeps,
+  buildTryOnDeps,
+} from '../../composition';
 import {
   OutOfCreditsError,
   PhotoRejectedError,
@@ -14,6 +20,7 @@ import {
 } from '../../core/errors';
 import { readCatalogue } from '../r2/catalogue';
 import { getCredits } from '../../core/get-credits';
+import { reportDiagnostics } from '../../core/report-diagnostics';
 import { syncPurchases } from '../../core/sync-purchases';
 import { tryOn } from '../../core/try-on';
 import type { Env } from '../../env';
@@ -157,6 +164,51 @@ export function createApp() {
         deviceId,
         parsed.data.transactionIds,
         buildSyncDeps(c.env, devPremiumFrom(c)),
+      );
+      return Response.json(result);
+    } catch (err) {
+      return translate(err);
+    }
+  });
+
+  /**
+   * What broke on somebody's phone.
+   *
+   * **Unmetered, and the second route with no credit check.** The rule is that
+   * a new route gets one or does not merge, so this is the argument: it costs a
+   * bounded D1 write rather than a model call, and metering the report of a
+   * failure would mean hearing least from the users having the worst time. A
+   * credit check here would bill someone for telling us we are broken.
+   *
+   * What stands in for the credit check is the quota — fifty a day per device,
+   * counted in KV — because an unmetered route that writes to D1 needs
+   * something between it and a phone in a crash loop.
+   *
+   * The device id is read for that quota and goes no further. Nothing written
+   * to `diagnostic_report` identifies the device, which is a promise made on
+   * the privacy policy page and enforced by the table having no column for it.
+   */
+  app.post('/v1/diagnostics', async (c) => {
+    const deviceId = deviceIdFrom(c);
+    if (!deviceId) return fail('bad_request', 'missing or malformed X-Device-Id');
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return fail('bad_request', 'body is not JSON');
+    }
+
+    const parsed = diagnosticsRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return fail('bad_request', parsed.error.issues[0]?.message ?? 'invalid body');
+    }
+
+    try {
+      const result = await reportDiagnostics(
+        deviceId,
+        parsed.data.reports,
+        buildDiagnosticsDeps(c.env),
       );
       return Response.json(result);
     } catch (err) {

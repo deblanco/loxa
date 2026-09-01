@@ -1,14 +1,17 @@
 import { d1CreditLedger } from './adapters/d1/credit-ledger';
+import { d1Diagnostics } from './adapters/d1/diagnostics';
 import { d1UsageStats } from './adapters/d1/usage-stats';
 import { devEntitlements } from './adapters/entitlements/dev';
 import { fallbackRenderer } from './adapters/fallback-renderer';
 import { revenueCatEntitlements } from './adapters/entitlements/revenuecat';
 import { stubEntitlements } from './adapters/entitlements/stub';
 import { kvRenderCache } from './adapters/kv/render-cache';
+import { kvReportQuota } from './adapters/kv/report-quota';
 import { openRouterHairRenderer } from './adapters/openrouter/hair-renderer';
 import { parseServiceAccountKey } from './adapters/vertex/auth';
 import { vertexHairRenderer } from './adapters/vertex/hair-renderer';
 import type { GetCreditsDeps } from './core/get-credits';
+import type { ReportDiagnosticsDeps } from './core/report-diagnostics';
 import type { SyncPurchasesDeps } from './core/sync-purchases';
 import type { TryOnDeps } from './core/try-on';
 import type { Env } from './env';
@@ -106,6 +109,23 @@ export function buildSyncDeps(env: Env, devPremium: boolean): SyncPurchasesDeps 
   return {
     ledger: d1CreditLedger(env.DB),
     entitlements: entitlementsFor(env, devPremium),
+    now: () => new Date(),
+  };
+}
+
+/**
+ * The diagnostics sink.
+ *
+ * No entitlements and no ledger: reporting a failure is not a metered act, so
+ * there is nothing here to check and nothing to spend. The two bindings are the
+ * table the reports land in and the namespace that holds the rate limit.
+ */
+export function buildDiagnosticsDeps(env: Env): ReportDiagnosticsDeps {
+  return {
+    diagnostics: d1Diagnostics(env.DB),
+    // The same namespace as the render cache, key-prefixed `diag:`. See
+    // `adapters/kv/report-quota.ts`.
+    quota: kvReportQuota(env.RESULTS_CACHE),
     now: () => new Date(),
   };
 }

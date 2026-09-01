@@ -64,3 +64,44 @@ CREATE TABLE IF NOT EXISTS style_use (
   replays   INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (style_id, color_id)
 );
+
+-- What broke on somebody's phone.
+--
+-- The app has no way to tell us that a render failed, a promise was dropped or
+-- a screen threw: it catches what it can, shows what it can, and the rest is
+-- silent. This table is the other end of that. See
+-- `apps/mobile/src/diagnostics/` for what is collected and what is scrubbed
+-- before it leaves the device.
+--
+-- **There is no device_id column, and that is the design.** `style_use` above
+-- carries none for the same reason: a counter that cannot say who is a counter,
+-- and a crash log that can say who is a record of one person's bad afternoon.
+-- The cost is real and was accepted — one phone crashing four hundred times and
+-- four hundred phones crashing once are the same picture from here. The device
+-- id *is* used to rate-limit the endpoint, in KV, and is never written here;
+-- the privacy policy says so in those words. Adding this column later means
+-- changing that page first.
+--
+-- `breadcrumbs` is JSON rather than a child table. It is read by a human
+-- eyeballing one row, never joined or aggregated, and 240 rows of style counts
+-- is the only place in this database where a second table earned itself.
+--
+-- Rows are pruned to thirty days on write — this database has no cron, the same
+-- reason the weekly credit reset is a comparison on read. Thirty days matches
+-- the render cache and the retention the privacy policy already commits to.
+CREATE TABLE IF NOT EXISTS diagnostic_report (
+  id          TEXT PRIMARY KEY,
+  kind        TEXT NOT NULL,
+  message     TEXT NOT NULL,
+  stack       TEXT,
+  route       TEXT,
+  app_version TEXT NOT NULL,
+  os_version  TEXT NOT NULL,
+  locale      TEXT NOT NULL,
+  breadcrumbs TEXT NOT NULL,
+  reported_at TEXT NOT NULL
+);
+
+-- The prune deletes by age on every write, so this index is what stops that
+-- being a scan of the whole table.
+CREATE INDEX IF NOT EXISTS diagnostic_report_at ON diagnostic_report (reported_at);
