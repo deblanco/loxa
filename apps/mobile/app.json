@@ -55,7 +55,8 @@
       ],
       "expo-sharing",
       "expo-image",
-      "expo-localization"
+      "expo-localization",
+      "./plugins/withoutDevNetworking"
     ],
     "experiments": {
       "typedRoutes": true
