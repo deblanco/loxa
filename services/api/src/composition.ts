@@ -43,6 +43,7 @@ export function entitlementsFor(env: Env, devPremium: boolean): EntitlementsPort
       secretKey: env.REVENUECAT_SECRET_KEY,
       projectId: env.REVENUECAT_PROJECT_ID,
       weeklyEntitlementId: env.REVENUECAT_WEEKLY_ENTITLEMENT_ID,
+      singlePhotoProductId: env.REVENUECAT_SINGLE_PHOTO_PRODUCT_ID,
     });
   }
 

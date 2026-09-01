@@ -28,6 +28,8 @@ export interface RevenueCatConfig {
   projectId: string;
   /** RevenueCat's own `entl...` id, when the v2 answer names it that way. */
   weeklyEntitlementId?: string;
+  /** RevenueCat's own `prod...` id for the photo, which is what v2 actually returns. */
+  singlePhotoProductId?: string;
 }
 
 export function revenueCatEntitlements(config: RevenueCatConfig): EntitlementsPort {
@@ -44,6 +46,19 @@ export function revenueCatEntitlements(config: RevenueCatConfig): EntitlementsPo
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Whether a purchase is the photo, in either spelling RevenueCat may use.
+   *
+   * Deliberately not "anything that is not the weekly product": an unknown id
+   * must not become a credit, so this is an allow-list of two.
+   */
+  function isSinglePhoto(productId: string | undefined): boolean {
+    return (
+      productId === SINGLE_PHOTO_PRODUCT_ID ||
+      (config.singlePhotoProductId !== undefined && productId === config.singlePhotoProductId)
+    );
   }
 
   return {
@@ -75,10 +90,17 @@ export function revenueCatEntitlements(config: RevenueCatConfig): EntitlementsPo
 
       // Matched on the store's transaction id *and* the product, so a
       // subscription renewal's id cannot be replayed as a photo purchase.
+      //
+      // The product half is matched against both spellings because v2 answers
+      // with `product_id` as RevenueCat's own `prod...` id, not the store
+      // identifier. Comparing only against the store id meant no photo purchase
+      // ever verified and no credit was ever granted — a paid $0.99 that
+      // returned nothing, and silently, because failing closed here looks
+      // exactly like a purchase that did not happen.
       return body.items.some(
         (item) =>
           (item.id === transactionId || item.store_purchase_identifier === transactionId) &&
-          item.product_id === SINGLE_PHOTO_PRODUCT_ID,
+          isSinglePhoto(item.product_id),
       );
     },
   };

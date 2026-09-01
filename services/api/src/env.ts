@@ -82,6 +82,24 @@ export interface Env {
   REVENUECAT_WEEKLY_ENTITLEMENT_ID?: string;
 
   /**
+   * RevenueCat's own id for the $0.99 photo — `prod...`.
+   *
+   * **Without it no photo purchase is ever verified, and no credit is granted.**
+   * The v2 purchase object's `product_id` is RevenueCat's internal id, not the
+   * store identifier: a customer who has just bought `loxa_single_photo_099`
+   * comes back as `prod4c50338ed7`, so matching on the store id alone never
+   * matches and `verifyPurchase` answers a confident, silent no.
+   *
+   * The store id stays accepted alongside it — one of the two shapes is what
+   * every API revision has returned so far, and accepting both is what
+   * `REVENUECAT_WEEKLY_ENTITLEMENT_ID` already does for entitlements.
+   *
+   * From the product's "REST API Identifier" in the RevenueCat dashboard. A
+   * path-free constant, not a secret, so it lives in wrangler.toml.
+   */
+  REVENUECAT_SINGLE_PHOTO_PRODUCT_ID?: string;
+
+  /**
    * Development only: lets a request ask to be treated as a subscriber.
    *
    * Set to "1" in .dev.vars, which is git-ignored and never deployed — the same

@@ -104,6 +104,10 @@ OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
 # with `wrangler secret put`.
 REVENUECAT_PROJECT_ID = "projeb2c8f9f"
 REVENUECAT_WEEKLY_ENTITLEMENT_ID = "entl1aeb4e8cd9"
+# RevenueCat's own id for loxa_single_photo_099. The v2 purchase object names
+# products by this, not by the store identifier, so without it no photo
+# purchase verifies and no credit is granted.
+REVENUECAT_SINGLE_PHOTO_PRODUCT_ID = "prod4c50338ed7"
 
 # --- Not yet used -----------------------------------------------------------
 # The try-on route is synchronous. The queue earns its keep somewhere around

@@ -99,6 +99,35 @@ describe('revenueCatEntitlements.verifyPurchase', () => {
     await expect(revenueCatEntitlements(config).verifyPurchase(DEVICE, 'tx_1')).resolves.toBe(true);
   });
 
+  it('confirms it when v2 names the product by RevenueCat\'s own id', async () => {
+    // What production actually returns: `product_id` is the `prod...` id, not
+    // the store identifier. Matching only on the store id meant every $0.99
+    // photo was paid for and never granted.
+    interceptRevenueCat({
+      purchases: { items: [{ store_purchase_identifier: 'tx_1', product_id: 'prod4c50338ed7' }] },
+    });
+    await expect(
+      revenueCatEntitlements({ ...config, singlePhotoProductId: 'prod4c50338ed7' }).verifyPurchase(
+        DEVICE,
+        'tx_1',
+      ),
+    ).resolves.toBe(true);
+  });
+
+  it('refuses a RevenueCat product id it was not told about', async () => {
+    // An unknown `prod...` is not a photo. Treating "not the weekly product" as
+    // "the photo" would turn any future consumable into a free credit.
+    interceptRevenueCat({
+      purchases: { items: [{ store_purchase_identifier: 'tx_1', product_id: 'prod_something_else' }] },
+    });
+    await expect(
+      revenueCatEntitlements({ ...config, singlePhotoProductId: 'prod4c50338ed7' }).verifyPurchase(
+        DEVICE,
+        'tx_1',
+      ),
+    ).resolves.toBe(false);
+  });
+
   it('refuses an id that belongs to a subscription renewal', async () => {
     // Otherwise a renewal could be replayed as a $0.99 photo, over and over.
     interceptRevenueCat({ purchases: { items: [{ id: 'tx_1', product_id: WEEKLY_PRODUCT_ID }] } });
