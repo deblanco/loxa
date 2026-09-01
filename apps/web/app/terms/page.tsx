@@ -7,10 +7,27 @@ import {
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import {
+  CONTACT_EMAIL,
+  COURTS,
+  JURISDICTION,
+  LAST_UPDATED,
+  OPERATOR,
+  OPERATOR_ADDRESS,
+} from "../legal-details";
 
 export const metadata: Metadata = { title: "Terms of use — Loxa" };
 
-/** Required by App Store review, and linked from the app's profile screen. */
+/**
+ * Required by App Store review, and linked from the app's profile screen and
+ * from both paywalls.
+ *
+ * This doubles as the EULA. Apple's standard licence agreement applies unless
+ * you supply your own, and supplying your own carries two obligations that are
+ * easy to miss: the terms must be at least as protective of the user as
+ * Apple's, and Apple must be named as a third-party beneficiary able to enforce
+ * them. Both are below.
+ */
 export default function Terms() {
   return (
     <>
@@ -19,7 +36,7 @@ export default function Terms() {
       <div className="max-w-2xl">
       <h1 className="mt-s5 font-serif text-4xl leading-tight">Terms of use</h1>
       <p className="mt-s2 font-mono text-[11px] text-[var(--ink-45)]">
-        Last updated 27 August 2026
+        Last updated {LAST_UPDATED}
       </p>
 
       <div className="mt-s8 space-y-s5 text-[15px] leading-relaxed text-[var(--ink-72)]">
@@ -31,6 +48,13 @@ export default function Terms() {
           not as a guarantee.
         </Section>
 
+        <Section title="Who can use it">
+          You need to be 16 or older to use Loxa. If you are younger than that,
+          please do not use the app. We do not knowingly take photos or
+          purchases from anyone under 16, and if we learn that we have, we will
+          delete what we hold.
+        </Section>
+
         <Section title="Credits">
           A credit is one generated photo. The weekly subscription includes{" "}
           {WEEKLY_CREDITS} photos each week. New subscribers pay{" "}
@@ -38,28 +62,121 @@ export default function Terms() {
           until cancelled; the introductory price is offered once per Apple ID,
           so it does not apply if you have subscribed to Loxa before. Credits
           reset every Monday and do not carry over. If you run out you can buy a
-          single photo for {SINGLE_PHOTO_PRICE_LABEL}. Credits are tied to the
-          device the app is installed on; use Restore purchases if you reinstall
-          or change phone.
+          single photo for {SINGLE_PHOTO_PRICE_LABEL}. Prices are shown in your
+          own currency in the app, and the price the App Store charges is the
+          one that counts. Credits are tied to the device the app is installed
+          on; use Restore purchases if you reinstall or change phone.
         </Section>
 
         <Section title="Cancelling">
-          Subscriptions renew until cancelled, and are managed in your Apple ID
-          settings rather than in the app. Cancelling stops the next renewal; the
-          week you have paid for runs to its end.
+          The subscription renews automatically each week until you cancel.
+          Cancel at least 24 hours before the week ends, in your Apple ID
+          settings rather than in the app — cancelling stops the next renewal,
+          and the week you have paid for runs to its end. Payment is charged to
+          your Apple ID when you confirm the purchase and at each renewal.
+        </Section>
+
+        <Section title="Refunds">
+          Apple sells the subscription and the single photos, takes the payment
+          and handles refunds — we cannot issue one. Ask Apple at{" "}
+          <a
+            href="https://reportaproblem.apple.com"
+            className="underline underline-offset-4"
+          >
+            reportaproblem.apple.com
+          </a>
+          . Where the law gives you a right to withdraw from a purchase, that
+          right stands whatever else these terms say. A credit that has been
+          spent on a generated photo has been used, and we cannot restore it,
+          though we are happy to hear from you if something went wrong.
         </Section>
 
         <Section title="Your photos, your rights">
           You keep every right you have in the photos you upload and in the
-          images Loxa generates from them. You confirm that you may use the photo
-          you upload — in practice, that it is of you, or that whoever is in it
-          agreed. Do not upload photos of other people without their permission.
+          images Loxa generates from them. We claim no ownership of either. You
+          give us permission to do the one thing the app exists to do: send your
+          photo to the image model, have it restyled, and return the result to
+          you — and to keep the result briefly so that repeating the same
+          request does not cost you a second credit. That permission covers
+          nothing else. We do not use your photos to train anything, we do not
+          publish them, and it ends when the image does.
         </Section>
 
-        <Section title="Contact">
-          <a href="mailto:hola@blankhexadecimal.com" className="underline underline-offset-4">
-            hola@blankhexadecimal.com
+        <Section title="What not to upload">
+          You confirm that you may use the photo you upload — in practice, that
+          it is of you, or that whoever is in it agreed. Do not upload photos of
+          other people without their permission, photos of children, or anything
+          illegal, and do not use Loxa to impersonate someone, to harass anyone,
+          or to make images intended to deceive. Do not try to break, overload
+          or work around the app or its servers, and do not use it through
+          anything other than the app itself.
+        </Section>
+
+        <Section title="No guarantee">
+          Loxa is provided as it is. We do not promise that it will always be
+          available, that a generated image will resemble what a stylist could
+          actually achieve, or that the app will be free of faults. To the
+          extent the law allows, we exclude the implied warranties that would
+          otherwise apply. Nothing here takes away consumer rights you have
+          under the law where you live.
+        </Section>
+
+        <Section title="Limits on our liability">
+          To the extent the law allows, we are not liable for indirect or
+          consequential loss, for lost data, or for anything that follows from a
+          decision you made about your hair on the strength of a generated
+          image. Where we are liable, our total liability is limited to what you
+          paid us in the twelve months before the claim. We do not exclude
+          liability for death or personal injury caused by our negligence, for
+          fraud, or for anything else the law does not let us exclude.
+        </Section>
+
+        <Section title="Ending your access">
+          You can stop using Loxa at any time by deleting the app, and cancel
+          the subscription in your Apple ID settings. We may suspend or end
+          access if these terms are broken — for instance by uploading photos of
+          people who did not agree — and if we do, we will refund any unused
+          time on a subscription unless the reason for ending it was serious.
+        </Section>
+
+        <Section title="Changes to these terms">
+          We may change these terms as the app changes. The date at the top says
+          when they were last updated, and continuing to use Loxa after a change
+          means the new terms apply. If a change materially reduces what you get
+          for what you pay, you can cancel; the week you have paid for still
+          runs to its end.
+        </Section>
+
+        <Section title="Apple">
+          These terms are between you and {OPERATOR}, not Apple. Apple is not
+          responsible for Loxa or for anything in it, has no obligation to
+          support it, and is not responsible for any claim you might have about
+          it — including product liability, a failure to meet a legal
+          requirement, or a claim under consumer protection law. Apple and its
+          subsidiaries are third-party beneficiaries of these terms and may
+          enforce them against you directly. You confirm you are not in a
+          country subject to a US Government embargo, and that you are not on a
+          US Government list of prohibited or restricted parties.
+        </Section>
+
+        <Section title="Law and courts">
+          These terms are governed by the law of {JURISDICTION}, and{" "}
+          {COURTS} have exclusive jurisdiction over any dispute — except that if
+          you are a consumer, you keep the protection of the mandatory law of
+          the country you live in, and may bring a claim in your own courts.
+        </Section>
+
+        <Section title="If part of this does not hold">
+          If any part of these terms turns out to be unenforceable, the rest of
+          them continue to apply.
+        </Section>
+
+        <Section title="Who we are">
+          Loxa is operated by {OPERATOR}, {OPERATOR_ADDRESS}. Write to us at{" "}
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
+            {CONTACT_EMAIL}
           </a>
+          .
         </Section>
       </div>
       </div>

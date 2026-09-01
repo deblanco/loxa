@@ -1,15 +1,30 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import {
+  CONTACT_EMAIL,
+  JURISDICTION,
+  LAST_UPDATED,
+  OPERATOR,
+  OPERATOR_ADDRESS,
+} from "../legal-details";
 
 export const metadata: Metadata = { title: "Privacy policy — Loxa" };
 
 /**
- * Required by App Store review, and the URL the app links to from the profile.
+ * Required by App Store review, and the URL the app links to from the profile
+ * and from both paywalls.
  *
  * Written as the truth about what the app actually does, which is unusually
  * short because the app collects unusually little: no account, no email, an
  * anonymous device id, and photos that are not kept.
+ *
+ * Every factual claim below is checkable against the code, and was checked:
+ * the input photo is never written to a store (`core/try-on.ts`), the render is
+ * cached for thirty days (`adapters/kv/render-cache.ts`), the device id is the
+ * only identifier the Worker sees (`adapters/http/device.ts`), and the style
+ * tally carries no device id (`schema.sql`). Keep it that way — a claim here
+ * that the code stops honouring is worse than no claim at all.
  */
 export default function PrivacyPolicy() {
   return (
@@ -19,7 +34,7 @@ export default function PrivacyPolicy() {
       <div className="max-w-2xl">
       <h1 className="mt-s5 font-serif text-4xl leading-tight">Privacy policy</h1>
       <p className="mt-s2 font-mono text-[11px] text-[var(--ink-45)]">
-        Last updated 31 August 2026
+        Last updated {LAST_UPDATED}
       </p>
 
       <div className="mt-s8 space-y-s5 text-[15px] leading-relaxed text-[var(--ink-72)]">
@@ -45,7 +60,18 @@ export default function PrivacyPolicy() {
           using Apple&rsquo;s own face detection, to see whether there is a face
           in it. That check happens on your phone and its answer is not sent
           anywhere. Your photo is then made smaller, sent to our server, passed
-          to Google&rsquo;s image model to be restyled, and returned to you.
+          to an image model to be restyled, and returned to you.
+        </Section>
+
+        <Section title="Which model, and whose">
+          The model is Google&rsquo;s. We reach it in one of two ways: normally
+          through Google Cloud directly, and — when Google will not answer,
+          which happens because our rate limit there is low — through OpenRouter,
+          which routes the same request to the same model on its own account.
+          Your photo therefore passes through Google, and sometimes through
+          OpenRouter as well. Neither is given anything about you beyond the
+          photo and the style asked for: no identifier, no name, nothing that
+          says which request belongs to whom.
         </Section>
 
         <Section title="What happens to them afterwards">
@@ -79,14 +105,60 @@ export default function PrivacyPolicy() {
           whether you opened one.
         </Section>
 
+        <Section title="Where this happens, and how it is kept">
+          Our server runs on Cloudflare&rsquo;s network, which is worldwide, so
+          a request is handled near you and the cached result is held on that
+          network. The image model runs on Google&rsquo;s infrastructure. That
+          means your photo may be processed outside the country you are in,
+          including in the United States. Everything travels over an encrypted
+          connection, the cached result is reachable only by a key derived from
+          the photo itself — so nobody can ask for yours without already having
+          it — and access to the systems that hold any of it is limited to the
+          people who run Loxa.
+        </Section>
+
+        <Section title="Your rights">
+          Because there is no account, most of what we hold is a number of
+          credits attached to a random identifier. You can still ask us what
+          that is, ask us to correct it, or ask us to delete it, and if you are
+          in the UK or the EU you can complain to your data protection
+          authority. We handle your photo to provide the app you asked for, and
+          we keep the credit count to run the subscription you bought — those
+          are the two reasons we process anything, and we do not process
+          anything for advertising.
+        </Section>
+
+        <Section title="Children">
+          Loxa is not for people under 16. We do not knowingly hold a photo or a
+          purchase from anyone younger, and if we learn that we have, we will
+          delete it.
+        </Section>
+
         <Section title="Deleting your data">
           Deleting the app removes every generated photo and your profile
           picture from the device, but keeps the identifier so a reinstall does
           not cost you what you paid for. Erasing the device removes that too.
           Cached results expire on their own within thirty days. To have us
           delete the identifier and everything attached to it, write to{" "}
-          <a href="mailto:hola@blankhexadecimal.com" className="underline underline-offset-4">
-            hola@blankhexadecimal.com
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
+            {CONTACT_EMAIL}
+          </a>
+          . Deleting it ends any credits attached to it, including bought ones,
+          because there is nothing else that could identify them as yours.
+        </Section>
+
+        <Section title="Changes to this policy">
+          If what the app does changes, this page changes with it, and the date
+          at the top says when. We will not quietly start collecting something
+          this page says we do not.
+        </Section>
+
+        <Section title="Who to write to">
+          Loxa is operated by {OPERATOR}, {OPERATOR_ADDRESS}, which is the data
+          controller for the purposes of {JURISDICTION} data protection law.
+          Write to{" "}
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
+            {CONTACT_EMAIL}
           </a>
           .
         </Section>

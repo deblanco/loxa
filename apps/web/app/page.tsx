@@ -30,7 +30,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 const STEPS = [
   { n: "01", title: "Take a photo", body: "Front camera, even light, hair down. Or pick one you already have." },
   { n: "02", title: "Pick a look", body: `${HAIR_STYLES.length} cuts and ${HAIR_COLORS.length} colours, in any combination.` },
-  { n: "03", title: "See yourself", body: "Your own face, new hair, in about five seconds. Share it or try another." },
+  { n: "03", title: "See yourself", body: "Your own face, new hair, usually in a few seconds. Share it or try another." },
 ] as const;
 
 export default function Home() {
@@ -159,12 +159,20 @@ export default function Home() {
           </div>
         </section>
 
-        {/* The one promise worth making twice */}
+        {/*
+          The one promise worth making twice — and it has to be the promise the
+          privacy policy actually makes. This used to say "we do not keep it"
+          flatly, which is true of the photo you send and not of the picture
+          that comes back: that one is cached for thirty days so a repeat does
+          not cost a second credit. A marketing line that overshoots the policy
+          it links to is the wrong one to be caught on.
+        */}
         <section className="mx-auto max-w-5xl px-s6 pb-s8">
           <p className="max-w-[52ch] font-serif text-2xl leading-snug">
             It is your face, not a model with your haircut.{" "}
             <span className="text-[var(--ink-45)]">
-              Every render is made from your own photo, and we do not keep it.
+              Every render is made from your own photo, and the photo you send
+              is never stored.
             </span>
           </p>
         </section>

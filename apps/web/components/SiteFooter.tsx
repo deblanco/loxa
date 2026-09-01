@@ -4,8 +4,10 @@ import { Wordmark } from "./Wordmark";
 /**
  * The legal links live here on every page.
  *
- * Both URLs also go into App Store Connect and into the app's own screens, so
- * they have to keep resolving — see `apps/mobile/src/legal.ts`.
+ * All three URLs also go into App Store Connect — privacy and terms into their
+ * own fields and into the app's own screens (see `apps/mobile/src/legal.ts`),
+ * and support into the Support URL field, which will not take a `mailto:`. So
+ * they have to keep resolving.
  */
 export function SiteFooter() {
   return (
@@ -20,6 +22,9 @@ export function SiteFooter() {
           </Link>
           <Link href="/terms" className="underline underline-offset-4 hover:text-ink">
             Terms of use
+          </Link>
+          <Link href="/support" className="underline underline-offset-4 hover:text-ink">
+            Support
           </Link>
           <a
             href="mailto:hola@blankhexadecimal.com"
