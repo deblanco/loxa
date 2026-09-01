@@ -9,6 +9,7 @@ import { LegalLinks } from '@/components/LegalLinks';
 import { Pill } from '@/components/Pill';
 import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
+import { reportHandled } from '@/diagnostics';
 import { purchases, restoreAndSync, usePricing } from '@/purchases';
 import { useOnboarding } from '@/store/onboarding';
 import { color, radius, space } from '@/theme';
@@ -41,13 +42,40 @@ export default function Offer() {
   const [restoring, setRestoring] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
-  async function subscribe() {
-    // Nothing here asks for the intro price. The App Store applies it to an
-    // eligible buyer on its own, and the entitlement the Worker later reads is
-    // the same one either way — an intro week is a paid week.
-    await purchases().buyWeekly();
-    await complete();
+  /**
+   * Leave the offer, whatever happened on the way out.
+   *
+   * Every exit routes through here, and it navigates even when `complete()`
+   * throws. That is the whole point: `complete()` writes to AsyncStorage, the
+   * ✕ is the only way off this screen, and a write that failed used to reject
+   * into nothing — leaving a new user pinned to the gate with no route into
+   * the app at all. Seeing onboarding once more is the cheaper failure by a
+   * wide margin.
+   */
+  async function leave() {
+    try {
+      await complete();
+    } catch (err) {
+      reportHandled(err, 'onboarding.complete');
+    }
     router.replace('/preview');
+  }
+
+  async function subscribe() {
+    try {
+      // Nothing here asks for the intro price. The App Store applies it to an
+      // eligible buyer on its own, and the entitlement the Worker later reads
+      // is the same one either way — an intro week is a paid week.
+      //
+      // The result is deliberately not branched on: a cancelled sheet and a
+      // completed purchase both lead to preview, which is what makes this an
+      // offer rather than a toll. The paywall is reachable from inside.
+      await purchases().buyWeekly();
+    } catch (err) {
+      // A store that threw is not a reason to hold somebody on the gate.
+      reportHandled(err, 'offer.buyWeekly');
+    }
+    await leave();
   }
 
   async function restore() {
@@ -58,16 +86,10 @@ export default function Offer() {
     // A restore that found a subscription lands in the app; the entitlement is
     // the Worker's to read, and this screen has nothing left to ask for.
     if (outcome === 'restored') {
-      await complete();
-      router.replace('/preview');
+      await leave();
       return;
     }
     setNotice(t(outcome === 'nothing' ? 'common.restoreNothing' : 'common.restoreFailed'));
-  }
-
-  async function skip() {
-    await complete();
-    router.replace('/preview');
   }
 
   return (
@@ -84,7 +106,7 @@ export default function Offer() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('offer.skip')}
-        onPress={skip}
+        onPress={() => void leave()}
         hitSlop={space.s3}
         style={[styles.skip, { top: insets.top + space.s2 }]}
       >
@@ -116,7 +138,7 @@ export default function Offer() {
         <View style={styles.actions}>
           <Pill
             label={introPrice ? t('offer.startIntro', { price: introPrice }) : t('offer.start')}
-            onPress={subscribe}
+            onPress={() => void subscribe()}
           />
           {/*
             Every price and the renewal terms before the tap, not after it.
@@ -131,7 +153,7 @@ export default function Offer() {
 
           <Pressable
             accessibilityRole="button"
-            onPress={restore}
+            onPress={() => void restore()}
             disabled={restoring}
             hitSlop={space.s2}
             style={styles.restore}
