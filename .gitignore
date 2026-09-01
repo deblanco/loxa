@@ -34,3 +34,8 @@ design-system/models/*.png
 # Cached catalogue art for the store screenshots, refetched by
 # tools/store-screenshots/generate.py. The bucket is the source.
 screenshots/store/.art/
+
+# TypeScript incremental build state. A local cache of what tsc already
+# checked, rewritten by every `bun run typecheck` — it dirties the tree on a
+# command that changes nothing.
+*.tsbuildinfo
