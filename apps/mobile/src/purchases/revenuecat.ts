@@ -119,6 +119,28 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
       return customerInfo.nonSubscriptionTransactions.map((t) => t.transactionIdentifier);
     },
 
+    /**
+     * Imported at press time rather than at module load.
+     *
+     * `react-native-purchases-ui` is a native module, and a dev client built
+     * before it was added does not have the pod. A top-level import would make
+     * that a crash on the first screen; deferring it makes it a `false` here
+     * and Apple's page instead — which is where this button went before.
+     */
+    async presentCustomerCenter() {
+      try {
+        const { default: RevenueCatUI } = await import('react-native-purchases-ui');
+        await RevenueCatUI.presentCustomerCenter();
+        return true;
+      } catch (err) {
+        // Worth hearing about: the commonest cause is Customer Center not
+        // being configured in the RevenueCat dashboard, which is invisible
+        // from here and looks exactly like the old behaviour.
+        reportHandled(err, 'customerCenter');
+        return false;
+      }
+    },
+
     async managementUrl() {
       try {
         const { managementURL } = await Purchases.getCustomerInfo();

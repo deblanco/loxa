@@ -58,4 +58,13 @@ export interface PurchasesPort {
    * cue to fall back.
    */
   managementUrl(): Promise<string | null>;
+  /**
+   * RevenueCat's Customer Center, if it can be shown.
+   *
+   * The sheet with the active plan on it, plus restore, change plan, cancel and
+   * request a refund — the things somebody who presses "Manage" is actually
+   * looking for, in one place and inside the app. Resolves false when it cannot
+   * be presented, which is the caller's cue to fall back to a URL.
+   */
+  presentCustomerCenter(): Promise<boolean>;
 }

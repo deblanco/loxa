@@ -23,13 +23,31 @@ import { purchases } from '@/purchases';
  */
 const MANAGE_URL = 'https://apps.apple.com/account/subscriptions';
 
+/**
+ * Three destinations, best first.
+ *
+ * 1. **RevenueCat's Customer Center**, a sheet inside the app showing the
+ *    active plan with restore, change plan, cancel and refund on it. This is
+ *    what "Manage" should open: leaving the app to a list that may not even
+ *    mention us is a worse answer to "what am I paying for".
+ * 2. **The store's own management URL**, which is where *this* subscription
+ *    actually lives — including a sandbox one, which is not on the production
+ *    list at all.
+ * 3. **Apple's generic page**, which is what this did unconditionally before.
+ *
+ * Each step down is a real degradation and none of them is a dead end, which
+ * matters: 3.1.2 wants a functional link, and a Manage button that does nothing
+ * because a dashboard was misconfigured is worse than one that opens the wrong
+ * list.
+ */
 export async function openManageSubscriptions(): Promise<void> {
+  const store = purchases();
+
+  if (await store.presentCustomerCenter().catch(() => false)) return;
+
   // Null whenever there is no active subscription, which includes the case the
-  // profile already guards against by sending a free reader to the paywall
-  // instead. The fallback is what this function did unconditionally before.
-  const url = await purchases()
-    .managementUrl()
-    .catch(() => null);
+  // profile already guards against by sending a free reader to the paywall.
+  const url = await store.managementUrl().catch(() => null);
 
   void Linking.openURL(url ?? MANAGE_URL);
 }

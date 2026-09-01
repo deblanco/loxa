@@ -34,6 +34,11 @@ export function fakePurchases(): PurchasesPort {
     async restore() {
       return [];
     },
+    async presentCustomerCenter() {
+      // There is no customer to centre on: the simulator's purchases are
+      // invented and RevenueCat was never configured.
+      return false;
+    },
     async managementUrl() {
       // Nothing was really bought, so there is nothing to manage. The caller
       // falls back to Apple's generic page, which is the honest destination.
