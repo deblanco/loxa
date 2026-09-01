@@ -4,6 +4,7 @@ import {
   available,
   refundOne,
   rollForward,
+  settle,
   spendOne,
   weeklyAllowance,
   type CreditState,
@@ -22,6 +23,50 @@ describe('weeklyAllowance', () => {
   it('gives a subscriber twenty and a free user none', () => {
     expect(weeklyAllowance('weekly')).toBe(20);
     expect(weeklyAllowance('free')).toBe(0);
+  });
+});
+
+describe('settle', () => {
+  it('starts the allowance over when a subscription is bought', () => {
+    // The bug this exists for: five credits spent earlier in the week under a
+    // subscription that has since lapsed, then a new one bought on Thursday.
+    // Without this the buyer is shown 15 of the 20 they just paid for.
+    const s = state({ weekUsed: 5, lastPlan: 'free' });
+    expect(settle(s, 'weekly', THURSDAY)).toEqual(
+      expect.objectContaining({ weekUsed: 0, lastPlan: 'weekly' }),
+    );
+    expect(available(s, 'weekly', THURSDAY)).toBe(20);
+  });
+
+  it('leaves an existing subscriber alone', () => {
+    // Otherwise every read would refill the allowance and the week would never
+    // be spent at all.
+    const s = state({ weekUsed: 5, lastPlan: 'weekly' });
+    expect(settle(s, 'weekly', THURSDAY).weekUsed).toBe(5);
+    expect(available(s, 'weekly', THURSDAY)).toBe(15);
+  });
+
+  it('does not refill on the way out of a subscription', () => {
+    // Losing a subscription does not give back what it spent, and a free user
+    // has no weekly allowance to refill anyway.
+    const s = state({ weekUsed: 5, lastPlan: 'weekly' });
+    expect(settle(s, 'free', THURSDAY)).toEqual(
+      expect.objectContaining({ weekUsed: 5, lastPlan: 'free' }),
+    );
+  });
+
+  it('treats a device it has never seen subscribed as a purchase', () => {
+    // `lastPlan` is null for every row written before the column existed. The
+    // reset it costs is harmless: their allowance is the one they are paying
+    // for right now.
+    expect(settle(state({ weekUsed: 4 }), 'weekly', THURSDAY).weekUsed).toBe(0);
+  });
+
+  it('rolls the week first, so Monday still wins', () => {
+    const s = state({ weekUsed: 9, lastPlan: 'weekly' });
+    expect(settle(s, 'weekly', NEXT_MONDAY)).toEqual(
+      expect.objectContaining({ week: '2026-W36', weekUsed: 0 }),
+    );
   });
 });
 
@@ -94,7 +139,12 @@ describe('spendOne', () => {
 
   it('returns null with nothing to take', () => {
     expect(spendOne(state(), 'free', THURSDAY)).toBeNull();
-    expect(spendOne(state({ weekUsed: 20, freeUsed: 1 }), 'weekly', THURSDAY)).toBeNull();
+    // `lastPlan` matters now: an exhausted subscriber is one who was already
+    // subscribed. Arriving as a subscriber for the first time is a purchase,
+    // and a purchase refills the allowance.
+    expect(
+      spendOne(state({ weekUsed: 20, freeUsed: 1, lastPlan: 'weekly' }), 'weekly', THURSDAY),
+    ).toBeNull();
   });
 
   it('rolls the week before deciding', () => {

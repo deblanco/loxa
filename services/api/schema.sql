@@ -16,6 +16,14 @@
 -- because it was paid for separately and must survive the reset that wipes the
 -- allowance.
 --
+-- `last_plan` is the plan the row was last written under, and it exists so that
+-- buying a subscription can start its allowance at zero. The calendar week and
+-- the subscription period are different clocks: without this, somebody who
+-- spent five credits earlier in the week, lapsed, and subscribed again on the
+-- Thursday was shown 15 of 20 for a subscription they had just paid full price
+-- for. Null means a device seen before this column existed, which costs one
+-- harmless reset the first time it is seen subscribed.
+--
 -- Spending goes weekly allowance, then the bought ones — so the credit somebody
 -- paid cash for is always the last to go.
 CREATE TABLE IF NOT EXISTS device_credits (
@@ -23,8 +31,15 @@ CREATE TABLE IF NOT EXISTS device_credits (
   week          TEXT,
   week_used     INTEGER NOT NULL DEFAULT 0,
   free_used     INTEGER NOT NULL DEFAULT 0,
-  extra_credits INTEGER NOT NULL DEFAULT 0
+  extra_credits INTEGER NOT NULL DEFAULT 0,
+  last_plan     TEXT
 );
+
+-- Existing databases predate `last_plan`, and this file is only ever run
+-- against an empty one. On a live database:
+--   wrangler d1 execute loxa --remote --command \
+--     "ALTER TABLE device_credits ADD COLUMN last_plan TEXT"
+
 
 -- One row per consumable purchase we have already honoured.
 --

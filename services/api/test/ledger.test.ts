@@ -35,7 +35,7 @@ describe('read', () => {
   });
 
   it('reads back what was written', async () => {
-    const state = { week: '2026-W35', weekUsed: 3, freeUsed: 1, extraCredits: 2 };
+    const state = { week: '2026-W35', weekUsed: 3, freeUsed: 1, extraCredits: 2, lastPlan: 'weekly' as const };
     await ledger().write(DEVICE, state);
     await expect(ledger().read(DEVICE)).resolves.toEqual(state);
   });

@@ -17,9 +17,23 @@ export interface CreditState {
   freeUsed: number;
   /** Credits from $0.99 purchases. Survive the weekly reset. */
   extraCredits: number;
+  /**
+   * The plan this row was last written under. Null for a device seen for the
+   * first time.
+   *
+   * Only `settle` reads it, and only to notice the moment a device becomes a
+   * subscriber. See there for why that moment has to zero the counter.
+   */
+  lastPlan: PlanId | null;
 }
 
-export const EMPTY_STATE: CreditState = { week: null, weekUsed: 0, freeUsed: 0, extraCredits: 0 };
+export const EMPTY_STATE: CreditState = {
+  week: null,
+  weekUsed: 0,
+  freeUsed: 0,
+  extraCredits: 0,
+  lastPlan: null,
+};
 
 /**
  * How many credits a plan's weekly allowance is worth.
@@ -46,9 +60,36 @@ export function rollForward(state: CreditState, now: Date): CreditState {
   return { ...state, week, weekUsed: 0 };
 }
 
+/**
+ * The row as it should be read now, for this plan.
+ *
+ * Two resets, not one. `rollForward` is the calendar's: every Monday the
+ * allowance refills. This is the subscription's: **buying a subscription starts
+ * its allowance at zero, whatever day of the week it is.**
+ *
+ * Without it the two clocks disagree in the user's pocket. Somebody who spends
+ * five credits on Tuesday, lets the subscription lapse, buys ten photos, and
+ * subscribes again on Thursday was shown 15 of 20 — the five belonged to a
+ * subscription that had already ended, and they had just paid full price for
+ * the next twenty. It is not farmable: a reset costs another $9.99, and the App
+ * Store allows one introductory price per subscription, so the cheap week
+ * cannot be bought twice.
+ *
+ * Only ever *forward* into a subscription. Losing one does not restore the
+ * allowance it spent, and re-reading a row while still subscribed changes
+ * nothing, so the reset happens once per subscription rather than once per
+ * request.
+ */
+export function settle(state: CreditState, plan: PlanId, now: Date): CreditState {
+  const rolled = rollForward(state, now);
+  if (rolled.lastPlan === plan) return rolled;
+  if (plan === 'free') return { ...rolled, lastPlan: plan };
+  return { ...rolled, weekUsed: 0, lastPlan: plan };
+}
+
 /** Credits available right now, across all three pools. */
 export function available(state: CreditState, plan: PlanId, now: Date): number {
-  const rolled = rollForward(state, now);
+  const rolled = settle(state, plan, now);
   const weekly = Math.max(0, weeklyAllowance(plan) - rolled.weekUsed);
   const free = Math.max(0, FREE_CREDITS - rolled.freeUsed);
   return weekly + free + rolled.extraCredits;
@@ -81,7 +122,9 @@ export interface Spend {
  * ordinary state of a free user, on their first render as much as their tenth.
  */
 export function spendOne(state: CreditState, plan: PlanId, now: Date): Spend | null {
-  const rolled = rollForward(state, now);
+  // `settle`, not `rollForward`: a spend is the first thing that persists the
+  // row, so it is where a subscription's fresh allowance gets written down.
+  const rolled = settle(state, plan, now);
 
   if (rolled.weekUsed < weeklyAllowance(plan)) {
     return { state: { ...rolled, weekUsed: rolled.weekUsed + 1 }, pool: 'weekly' };
