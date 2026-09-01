@@ -99,9 +99,9 @@ describe('tryOn', () => {
   });
 
   it('refunds a bought credit as a bought credit, not as an allowance', async () => {
-    // The pool a credit came from is decided by the state before the take and
-    // cannot be read back off the state after it, which is why the refund
-    // writes the old row rather than reconstructing one.
+    // The pool a credit came from cannot be read back off the state after the
+    // take, which is why `spendOne` names it and the refund is handed that name
+    // rather than inferring one.
     const ledger = fakeLedger({ week: '2026-W35', extraCredits: 1 });
     const d = {
       ledger: ledger.port,
@@ -109,6 +109,35 @@ describe('tryOn', () => {
       renderer: fakeRenderer(new RendererUnavailableError('down')).port,
       stats: fakeUsageStats().port,
       entitlements: fakeEntitlements('free'),
+      now: fixedClock,
+    };
+
+    await expect(tryOn(COMMAND, d)).rejects.toThrow();
+    expect(ledger.state).toEqual(expect.objectContaining({ weekUsed: 0, extraCredits: 1 }));
+  });
+
+  it('keeps a purchase that landed while the model was working', async () => {
+    // The refund used to restore the row as it was read before the render, so a
+    // $0.99 sync inside that window was overwritten back to nothing. The worst
+    // kind of lost write: `credit_grant` is keyed on the transaction id, so the
+    // grant had already happened and no restore would ever repeat it. The user
+    // paid and got neither the photo nor the credit.
+    const ledger = fakeLedger({ week: '2026-W35' });
+    const d = {
+      ledger: ledger.port,
+      cache: fakeCache().port,
+      renderer: {
+        async render() {
+          const current = await ledger.port.read(COMMAND.deviceId);
+          await ledger.port.write(COMMAND.deviceId, {
+            ...current,
+            extraCredits: current.extraCredits + 1,
+          });
+          throw new RendererUnavailableError('down');
+        },
+      },
+      stats: fakeUsageStats().port,
+      entitlements: fakeEntitlements('weekly'),
       now: fixedClock,
     };
 

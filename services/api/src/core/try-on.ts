@@ -6,7 +6,7 @@ import type { RenderCachePort } from '../ports/render-cache';
 import type { UsageStatsPort } from '../ports/usage-stats';
 import { renderCacheKey } from './cache-key';
 import { OutOfCreditsError, UnknownStyleError } from './errors';
-import { available, rollForward, spendOne } from './rules';
+import { available, refundOne, spendOne } from './rules';
 
 export interface TryOnDeps {
   ledger: CreditLedgerPort;
@@ -77,7 +77,7 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
 
   const spent = spendOne(state, plan, now);
   if (!spent) throw new OutOfCreditsError();
-  await deps.ledger.write(command.deviceId, spent);
+  await deps.ledger.write(command.deviceId, spent.state);
 
   let rendered: { imageBase64: string };
   try {
@@ -87,10 +87,13 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
       colorPrompt: color.prompt,
     });
   } catch (err) {
-    // The pre-spend row, rolled to this week — not a reconstruction from the
-    // post-spend one. Which pool the credit came from is decided by the state
-    // *before* the take, and is not recoverable from the state after it.
-    await deps.ledger.write(command.deviceId, rollForward(state, now));
+    // Read again, and give back one credit to the pool that paid — never the
+    // pre-spend row. A render takes seconds, and a $0.99 purchase syncing in
+    // that window is written to this same row: restoring the snapshot would
+    // erase a credit the user had already paid for and that `credit_grant`
+    // will never hand out a second time.
+    const current = await deps.ledger.read(command.deviceId);
+    await deps.ledger.write(command.deviceId, refundOne(current, spent.pool, now));
     throw err;
   }
 
@@ -104,7 +107,7 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
 
   return {
     imageBase64: rendered.imageBase64,
-    creditsLeft: available(spent, plan, now),
+    creditsLeft: available(spent.state, plan, now),
     cached: false,
   };
 }

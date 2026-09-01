@@ -54,6 +54,15 @@ export function available(state: CreditState, plan: PlanId, now: Date): number {
   return weekly + free + rolled.extraCredits;
 }
 
+/** Which of the three pools a credit came out of. */
+export type CreditPool = 'weekly' | 'free' | 'extra';
+
+export interface Spend {
+  state: CreditState;
+  /** The pool the credit was taken from, so a refund can put it back in that one. */
+  pool: CreditPool;
+}
+
 /**
  * Take one credit, cheapest pool first.
  *
@@ -63,21 +72,54 @@ export function available(state: CreditState, plan: PlanId, now: Date): number {
  * `FREE_CREDITS` is 0, which is the whole of "nothing is free": a free user
  * reaches the bought pool immediately, and reaches the paywall if it is empty.
  *
+ * The pool comes back with the row because the refund needs it and cannot
+ * recover it later: by the time a render fails, the only thing that says which
+ * pool paid is this answer.
+ *
  * Returns null when there is nothing to take. The caller turns that into a
  * paywall; it is not an exception because a free user with no credits is the
  * ordinary state of a free user, on their first render as much as their tenth.
  */
-export function spendOne(state: CreditState, plan: PlanId, now: Date): CreditState | null {
+export function spendOne(state: CreditState, plan: PlanId, now: Date): Spend | null {
   const rolled = rollForward(state, now);
 
   if (rolled.weekUsed < weeklyAllowance(plan)) {
-    return { ...rolled, weekUsed: rolled.weekUsed + 1 };
+    return { state: { ...rolled, weekUsed: rolled.weekUsed + 1 }, pool: 'weekly' };
   }
   if (rolled.freeUsed < FREE_CREDITS) {
-    return { ...rolled, freeUsed: rolled.freeUsed + 1 };
+    return { state: { ...rolled, freeUsed: rolled.freeUsed + 1 }, pool: 'free' };
   }
   if (rolled.extraCredits > 0) {
-    return { ...rolled, extraCredits: rolled.extraCredits - 1 };
+    return { state: { ...rolled, extraCredits: rolled.extraCredits - 1 }, pool: 'extra' };
   }
   return null;
+}
+
+/**
+ * Put one credit back, into the pool it was taken from.
+ *
+ * A delta rather than a restored snapshot, and that is the whole point. The
+ * refund used to rewrite the row as it was read before the render — which threw
+ * away anything that landed during it. A $0.99 purchase syncing while the model
+ * was working was overwritten back to nothing, and `credit_grant` had already
+ * recorded the transaction id, so no restore could ever grant it again: the
+ * user paid and got neither the render nor the credit.
+ *
+ * So this is called with a *freshly read* row and touches one field.
+ *
+ * `Math.max` because the week can turn between the spend and the failure: the
+ * rollover has already zeroed `weekUsed`, and the credit refunded into an
+ * allowance that has since refilled is one the user got back anyway.
+ */
+export function refundOne(state: CreditState, pool: CreditPool, now: Date): CreditState {
+  const rolled = rollForward(state, now);
+
+  switch (pool) {
+    case 'weekly':
+      return { ...rolled, weekUsed: Math.max(0, rolled.weekUsed - 1) };
+    case 'free':
+      return { ...rolled, freeUsed: Math.max(0, rolled.freeUsed - 1) };
+    case 'extra':
+      return { ...rolled, extraCredits: rolled.extraCredits + 1 };
+  }
 }

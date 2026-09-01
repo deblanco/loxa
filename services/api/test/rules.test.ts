@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   EMPTY_STATE,
   available,
+  refundOne,
   rollForward,
   spendOne,
   weeklyAllowance,
@@ -73,17 +74,22 @@ describe('available', () => {
 describe('spendOne', () => {
   it('takes from the weekly allowance first', () => {
     const spent = spendOne(state({ extraCredits: 1 }), 'weekly', THURSDAY);
-    expect(spent).toEqual(expect.objectContaining({ weekUsed: 1, freeUsed: 0, extraCredits: 1 }));
+    expect(spent?.state).toEqual(
+      expect.objectContaining({ weekUsed: 1, freeUsed: 0, extraCredits: 1 }),
+    );
+    expect(spent?.pool).toBe('weekly');
   });
 
   it('never grants a free credit: a free user spends what they bought', () => {
     const spent = spendOne(state({ extraCredits: 1 }), 'free', THURSDAY);
-    expect(spent).toEqual(expect.objectContaining({ freeUsed: 0, extraCredits: 0 }));
+    expect(spent?.state).toEqual(expect.objectContaining({ freeUsed: 0, extraCredits: 0 }));
+    expect(spent?.pool).toBe('extra');
   });
 
   it('touches a bought credit only when nothing else is left', () => {
     const spent = spendOne(state({ extraCredits: 2 }), 'free', THURSDAY);
-    expect(spent?.extraCredits).toBe(1);
+    expect(spent?.state.extraCredits).toBe(1);
+    expect(spent?.pool).toBe('extra');
   });
 
   it('returns null with nothing to take', () => {
@@ -94,6 +100,36 @@ describe('spendOne', () => {
   it('rolls the week before deciding', () => {
     // Out of credits on Sunday, twenty again on Monday, with no separate reset.
     const spent = spendOne(state({ weekUsed: 20, freeUsed: 1 }), 'weekly', NEXT_MONDAY);
-    expect(spent).toEqual(expect.objectContaining({ week: '2026-W36', weekUsed: 1 }));
+    expect(spent?.state).toEqual(expect.objectContaining({ week: '2026-W36', weekUsed: 1 }));
+  });
+});
+
+describe('refundOne', () => {
+  it('puts a weekly credit back on the weekly counter', () => {
+    expect(refundOne(state({ weekUsed: 6 }), 'weekly', THURSDAY).weekUsed).toBe(5);
+  });
+
+  it('puts a bought credit back on the bought pool', () => {
+    expect(refundOne(state({ extraCredits: 1 }), 'extra', THURSDAY).extraCredits).toBe(2);
+  });
+
+  it('puts a free credit back on the free pool', () => {
+    expect(refundOne(state({ freeUsed: 1 }), 'free', THURSDAY).freeUsed).toBe(0);
+  });
+
+  it('refunds a weekly credit into an allowance that has since refilled', () => {
+    // Spent at 23:59 on Sunday, failed after midnight: the rollover has already
+    // zeroed the counter, and the credit is back either way.
+    const refunded = refundOne(state({ weekUsed: 1 }), 'weekly', NEXT_MONDAY);
+    expect(refunded).toEqual(expect.objectContaining({ week: '2026-W36', weekUsed: 0 }));
+  });
+
+  it('keeps what landed on the other pools', () => {
+    // The point of refunding a delta: a purchase that synced during the render
+    // is in the row this is handed, and has to survive the refund.
+    const refunded = refundOne(state({ weekUsed: 6, extraCredits: 3 }), 'weekly', THURSDAY);
+    expect(refunded).toEqual(
+      expect.objectContaining({ weekUsed: 5, extraCredits: 3, freeUsed: 0 }),
+    );
   });
 });
