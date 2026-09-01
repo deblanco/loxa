@@ -1,4 +1,4 @@
-import { INTRO_PRICE_LABEL } from '@loxa/shared';
+import { INTRO_PRICE_LABEL, SINGLE_PHOTO_PRICE_LABEL } from '@loxa/shared';
 import { describe, expect, it } from 'vitest';
 import { fakePurchases } from '../src/purchases/fake';
 
@@ -19,9 +19,10 @@ describe('the fake store', () => {
   it('quotes the shipped price, intro included', async () => {
     // The simulator has never subscribed to anything, so the offer screen it
     // renders is the eligible one — which is the screen worth being able to see.
-    await expect(fakePurchases().weeklyPricing()).resolves.toEqual({
+    await expect(fakePurchases().pricing()).resolves.toEqual({
       price: '$9.99',
       introPrice: INTRO_PRICE_LABEL,
+      singlePhoto: SINGLE_PHOTO_PRICE_LABEL,
     });
   });
 

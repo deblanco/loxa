@@ -1,6 +1,7 @@
 import { WEEKLY_CREDITS } from '@loxa/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +9,7 @@ import { LegalLinks } from '@/components/LegalLinks';
 import { Pill } from '@/components/Pill';
 import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
-import { purchases, useWeeklyPricing } from '@/purchases';
+import { purchases, restoreAndSync, usePricing } from '@/purchases';
 import { useOnboarding } from '@/store/onboarding';
 import { color, radius, space } from '@/theme';
 
@@ -23,7 +24,12 @@ import { color, radius, space } from '@/theme';
  * The offer is the App Store's introductory price: a first week at $0.99, then
  * $9.99 a week. There is no free trial, and a customer gets one introductory
  * offer per subscription, so anybody who has subscribed before reads the plain
- * weekly price here instead — see `useWeeklyPricing`.
+ * weekly price here instead — see `usePricing`.
+ *
+ * Restore is here rather than only on the profile because this screen is a gate
+ * in front of the app. A subscriber reinstalling meets it before anything else,
+ * and without a restore the only way past their own subscription is to decline
+ * it and go looking through Settings.
  */
 const PERKS = ['offer.perkCredits', 'offer.perkOwnFace', 'offer.perkDaily'] as const;
 
@@ -31,7 +37,9 @@ export default function Offer() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { complete } = useOnboarding();
-  const { price, introPrice } = useWeeklyPricing();
+  const { price, introPrice } = usePricing();
+  const [restoring, setRestoring] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   async function subscribe() {
     // Nothing here asks for the intro price. The App Store applies it to an
@@ -40,6 +48,21 @@ export default function Offer() {
     await purchases().buyWeekly();
     await complete();
     router.replace('/preview');
+  }
+
+  async function restore() {
+    setRestoring(true);
+    const outcome = await restoreAndSync();
+    setRestoring(false);
+
+    // A restore that found a subscription lands in the app; the entitlement is
+    // the Worker's to read, and this screen has nothing left to ask for.
+    if (outcome === 'restored') {
+      await complete();
+      router.replace('/preview');
+      return;
+    }
+    setNotice(t(outcome === 'nothing' ? 'common.restoreNothing' : 'common.restoreFailed'));
   }
 
   async function skip() {
@@ -95,12 +118,29 @@ export default function Offer() {
             label={introPrice ? t('offer.startIntro', { price: introPrice }) : t('offer.start')}
             onPress={subscribe}
           />
-          {/* Both prices before the tap, not after it. */}
+          {/*
+            Every price and the renewal terms before the tap, not after it.
+            App Review asks for the length, the price and the fact that it
+            renews, next to the control that starts it.
+          */}
           <Meta variant="note" tone="ink40" sentence style={styles.terms}>
             {introPrice
-              ? t('offer.termsIntro', { price: introPrice, weekly: price, count: WEEKLY_CREDITS })
-              : t('offer.terms', { weekly: price, count: WEEKLY_CREDITS })}
+              ? t('common.subscriptionTermsIntro', { price: introPrice, weekly: price })
+              : t('common.subscriptionTerms', { weekly: price })}
           </Meta>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={restore}
+            disabled={restoring}
+            hitSlop={space.s2}
+            style={styles.restore}
+          >
+            <Meta variant="note" tone="ink40" sentence>
+              {notice ?? t('common.restore')}
+            </Meta>
+          </Pressable>
+
           <LegalLinks />
         </View>
       </View>
@@ -146,4 +186,5 @@ const styles = StyleSheet.create({
   perkText: { flex: 1 },
   actions: { gap: space.s2 + 2 },
   terms: { textAlign: 'center' },
+  restore: { alignSelf: 'center', paddingVertical: space.s2 },
 });

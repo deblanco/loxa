@@ -1,4 +1,4 @@
-import { INTRO_PRICE_LABEL, WEEKLY_PRICE_LABEL } from '@loxa/shared';
+import { INTRO_PRICE_LABEL, SINGLE_PHOTO_PRICE_LABEL, WEEKLY_PRICE_LABEL } from '@loxa/shared';
 import type { PurchasesPort } from './types';
 
 /**
@@ -18,10 +18,14 @@ export function fakePurchases(): PurchasesPort {
     async buyWeekly() {
       return true;
     },
-    async weeklyPricing() {
+    async pricing() {
       // The shipped labels, so the offer screen reads the way it will on a
       // device. Eligible, because a simulator has never subscribed to anything.
-      return { price: WEEKLY_PRICE_LABEL.split('/')[0]!, introPrice: INTRO_PRICE_LABEL };
+      return {
+        price: WEEKLY_PRICE_LABEL.split('/')[0]!,
+        introPrice: INTRO_PRICE_LABEL,
+        singlePhoto: SINGLE_PHOTO_PRICE_LABEL,
+      };
     },
 
     async buySinglePhoto() {

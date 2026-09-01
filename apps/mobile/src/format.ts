@@ -27,6 +27,22 @@ export function resetLabel(
   return 'profile.resetsMonday';
 }
 
+/**
+ * The out-of-credits sheet's second line.
+ *
+ * The same decision as `resetLabel` in a different sentence, rather than a
+ * second rule: the sheet used to say "until Monday." on a Sunday night, when
+ * the answer was tomorrow.
+ */
+export function paywallResetLabel(
+  resetsAt: string,
+  now: Date,
+): 'paywall.untilTomorrow' | 'paywall.untilMonday' {
+  return resetLabel(resetsAt, now) === 'profile.resetsTomorrow'
+    ? 'paywall.untilTomorrow'
+    : 'paywall.untilMonday';
+}
+
 /** The credit chip: a bare number, because the dot beside it says what it is. */
 export function creditChipLabel(creditsLeft: number): string {
   return String(creditsLeft);
@@ -34,9 +50,8 @@ export function creditChipLabel(creditsLeft: number): string {
 
 /** The plan row's title. */
 export function planLabel(
-  plan: 'free' | 'trial' | 'weekly',
-): 'profile.planWeekly' | 'profile.planTrial' | 'profile.planFree' {
+  plan: 'free' | 'weekly',
+): 'profile.planWeekly' | 'profile.planFree' {
   if (plan === 'weekly') return 'profile.planWeekly';
-  if (plan === 'trial') return 'profile.planTrial';
   return 'profile.planFree';
 }

@@ -24,6 +24,19 @@ const en = {
     back: 'Back',
     cancel: 'Cancel',
     tryAgain: 'Try again',
+    restore: 'Restore purchases',
+    restored: 'Purchases restored',
+    restoreNothing: 'Nothing to restore',
+    restoreFailed: 'Could not reach the store',
+    /**
+     * The auto-renewal disclosure App Review asks for, in the two shapes a
+     * reader can be in. Both paywalls print one of them next to the button, so
+     * they live here rather than twice over in five languages.
+     */
+    subscriptionTermsIntro:
+      '{{price}} for the first week, then {{weekly}} a week. Renews automatically unless cancelled at least 24 hours before the week ends; payment is charged to your Apple ID.',
+    subscriptionTerms:
+      '{{weekly}} a week. Renews automatically unless cancelled at least 24 hours before the week ends; payment is charged to your Apple ID.',
   },
 
   entry: {
@@ -45,9 +58,6 @@ const en = {
     startIntro: 'Start for {{price}}',
     start: 'Subscribe',
     skip: 'Continue without subscribing',
-    termsIntro:
-      '{{price}} for the first week, then {{weekly}} a week · {{count}} photos a week · cancel anytime',
-    terms: '{{weekly}} a week · {{count}} photos a week · cancel anytime',
   },
 
   preview: {
@@ -139,7 +149,8 @@ const en = {
 
   paywall: {
     title: 'Out of credits',
-    titleItalic: 'until Monday.',
+    untilMonday: 'until Monday.',
+    untilTomorrow: 'until tomorrow.',
     single: 'One more photo',
     singleNote: 'Single generation, no subscription',
     weekly: 'Loxa Weekly',
@@ -160,7 +171,6 @@ const en = {
     resetsTomorrow: 'resets tomorrow',
     noRollOver: 'no roll-over',
     planFree: 'Free plan',
-    planTrial: 'Free trial',
     planWeekly: 'Loxa Weekly',
     planFreeNote: 'No weekly credits — {{price}} per photo',
     planWeeklyNote: '{{price}} · {{count}} photos a week',
@@ -168,8 +178,6 @@ const en = {
     subscribe: 'Subscribe',
     notifications: 'Daily style ideas',
     notificationsNote: 'One notification a day, new looks',
-    restore: 'Restore purchases',
-    restored: 'Purchases restored',
     /** Opens the App Store page rather than the rating sheet: Apple's sheet must never be the answer to a button press. */
     rate: 'Rate Loxa',
     privacy: 'Privacy policy',

@@ -1,6 +1,6 @@
-import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS } from '@loxa/shared';
+import { WEEKLY_CREDITS } from '@loxa/shared';
 import { router } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +8,8 @@ import { syncPurchases } from '@/api/client';
 import { LegalLinks } from '@/components/LegalLinks';
 import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
-import { purchases, useWeeklyPricing } from '@/purchases';
+import { paywallResetLabel } from '@/format';
+import { purchases, restoreAndSync, usePricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
 import { color, motion, radius, space } from '@/theme';
 
@@ -19,10 +20,15 @@ import { color, motion, radius, space } from '@/theme';
  * rather than filled: it is the smaller commitment, and burying it under the
  * subscription would make the cheaper choice feel like the hidden one.
  *
- * The weekly's introductory first week is deliberately *not* shown here. Whoever
- * is reading this sheet has run out of credits, so they either already hold the
- * subscription or already declined the offer — and a second $0.99 beside the
- * $0.99 photo would read as one price attached to two different things.
+ * The weekly's introductory first week *is* shown here when the reader is
+ * actually eligible for it. It used to be suppressed, on the reasoning that
+ * whoever reads this sheet has already seen the offer once. But suppressing the
+ * price did not suppress the offer: the App Store still applies it, so an
+ * eligible reader was shown $9.99/wk and then charged $0.99. Under-disclosing a
+ * price is the same problem as over-disclosing one, pointed the other way.
+ *
+ * `usePricing` only reports `introPrice` when RevenueCat says this customer is
+ * definitely eligible, so the ambiguity that motivated hiding it is gone.
  *
  * Nothing here grants a credit. A purchase produces transaction ids, the Worker
  * checks them with the store, and the balance that comes back is the truth.
@@ -30,8 +36,10 @@ import { color, motion, radius, space } from '@/theme';
 export default function Paywall() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { refresh } = useCredits();
-  const { price } = useWeeklyPricing();
+  const { credits, refresh } = useCredits();
+  const { price, introPrice, singlePhoto } = usePricing();
+  const [restoring, setRestoring] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const rise = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -49,6 +57,19 @@ export default function Paywall() {
     await syncPurchases(transactionIds);
     await refresh();
     router.back();
+  }
+
+  async function restore() {
+    setRestoring(true);
+    const outcome = await restoreAndSync();
+    setRestoring(false);
+    await refresh();
+
+    if (outcome === 'restored') {
+      router.back();
+      return;
+    }
+    setNotice(t(outcome === 'nothing' ? 'common.restoreNothing' : 'common.restoreFailed'));
   }
 
   async function buyWeekly() {
@@ -93,7 +114,11 @@ export default function Paywall() {
 
         <Display variant="displayS">{t('paywall.title')}</Display>
         <Display variant="displayS" italic tone="ink60">
-          {t('paywall.titleItalic')}
+          {/*
+            Off the reset the Worker sent, not a fixed "Monday" — on a Sunday
+            night the sheet was naming a day that had already arrived.
+          */}
+          {t(credits ? paywallResetLabel(credits.resetsAt, new Date()) : 'paywall.untilMonday')}
         </Display>
 
         <View style={styles.options}>
@@ -104,7 +129,7 @@ export default function Paywall() {
                 {t('paywall.singleNote')}
               </Body>
             </View>
-            <Display variant="price">{SINGLE_PHOTO_PRICE_LABEL}</Display>
+            <Display variant="price">{singlePhoto}</Display>
           </Pressable>
 
           <Pressable
@@ -134,9 +159,32 @@ export default function Paywall() {
           </Pressable>
         </View>
 
-        <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.dismiss}>
-          <Body tone="ink45">{t('paywall.notNow')}</Body>
-        </Pressable>
+        {/*
+          The renewal terms belong on this sheet too. It is a point of purchase
+          like the onboarding offer, and it carried a price and a period but
+          never said the thing renews.
+        */}
+        <Meta variant="note" tone="ink40" sentence style={styles.terms}>
+          {introPrice
+            ? t('common.subscriptionTermsIntro', { price: introPrice, weekly: price })
+            : t('common.subscriptionTerms', { weekly: price })}
+        </Meta>
+
+        <View style={styles.footer}>
+          <Pressable accessibilityRole="button" onPress={() => router.back()} hitSlop={space.s2}>
+            <Body tone="ink45">{t('paywall.notNow')}</Body>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={restore}
+            disabled={restoring}
+            hitSlop={space.s2}
+          >
+            <Meta variant="note" tone="ink40" sentence>
+              {notice ?? t('common.restore')}
+            </Meta>
+          </Pressable>
+        </View>
 
         <LegalLinks />
       </Animated.View>
@@ -187,5 +235,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(250,248,245,0.18)',
   },
   note: { marginTop: 2 },
-  dismiss: { marginTop: space.s3 + 2, alignItems: 'center', padding: space.s2 + 2 },
+  terms: { marginTop: space.s3 + 2, textAlign: 'center' },
+  footer: {
+    marginTop: space.s3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: space.s2 + 2,
+  },
 });

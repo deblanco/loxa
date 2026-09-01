@@ -6,12 +6,16 @@
  * test and by StoreKit on a device without knowing which it has.
  */
 /**
- * What the weekly costs this reader, in this storefront, today.
+ * What Loxa costs this reader, in this storefront, today.
  *
  * Not a wire shape, so it lives here rather than in `contracts.ts` — the Worker
  * reads entitlements and never a price.
+ *
+ * Both products are in one shape because every screen that prints a price
+ * prints both of them, and two round trips to the store for two numbers that
+ * are always shown together is a second chance to fail.
  */
-export interface WeeklyPricing {
+export interface Pricing {
   /** The recurring price as the store spells it: `$9.99`, `9,99 €`, `¥1,500`. */
   price: string;
   /**
@@ -22,6 +26,15 @@ export interface WeeklyPricing {
    * will charge full price would be a lie told at the moment of payment.
    */
   introPrice: string | null;
+  /**
+   * The one-off photo, as the store spells it.
+   *
+   * Printed beside the weekly on the out-of-credits sheet and on the profile.
+   * It used to be the shipped `$0.99` label on both, which is the right number
+   * only in the United States — a euro-zone reader was shown a dollar price for
+   * a product the sheet then charged them 1,19 € for.
+   */
+  singlePhoto: string;
 }
 
 export interface PurchasesPort {
@@ -30,7 +43,7 @@ export interface PurchasesPort {
   /** Buy the weekly subscription. Resolves false if the user backs out. */
   buyWeekly(): Promise<boolean>;
   /** What to print on a screen that shows a price. Null if the store is mute. */
-  weeklyPricing(): Promise<WeeklyPricing | null>;
+  pricing(): Promise<Pricing | null>;
   /** Buy one $0.99 photo. Resolves with the transaction ids to sync, or null. */
   buySinglePhoto(): Promise<string[] | null>;
   /** Restore, for a reinstall or a new device. Returns ids worth syncing. */

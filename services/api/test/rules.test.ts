@@ -20,7 +20,6 @@ const state = (over: Partial<CreditState> = {}): CreditState => ({
 describe('weeklyAllowance', () => {
   it('gives a subscriber twenty and a free user none', () => {
     expect(weeklyAllowance('weekly')).toBe(20);
-    expect(weeklyAllowance('trial')).toBe(20);
     expect(weeklyAllowance('free')).toBe(0);
   });
 });

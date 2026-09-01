@@ -6,6 +6,14 @@ const fr: typeof en = {
     back: 'Retour',
     cancel: 'Annuler',
     tryAgain: 'Réessayer',
+    restore: 'Restaurer les achats',
+    restored: 'Achats restaurés',
+    restoreNothing: 'Rien à restaurer',
+    restoreFailed: 'Boutique injoignable',
+    subscriptionTermsIntro:
+      '{{price}} la première semaine, puis {{weekly}} par semaine. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine ; le paiement est débité de ton compte Apple.',
+    subscriptionTerms:
+      '{{weekly}} par semaine. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine ; le paiement est débité de ton compte Apple.',
   },
 
   entry: {
@@ -27,9 +35,6 @@ const fr: typeof en = {
     startIntro: 'Commencer pour {{price}}',
     start: 'S’abonner',
     skip: 'Continuer sans abonnement',
-    termsIntro:
-      '{{price}} la première semaine, puis {{weekly}} par semaine · {{count}} photos par semaine · annulable à tout moment',
-    terms: '{{weekly}} par semaine · {{count}} photos par semaine · annulable à tout moment',
   },
 
   preview: {
@@ -113,7 +118,8 @@ const fr: typeof en = {
 
   paywall: {
     title: 'Plus de crédits',
-    titleItalic: 'jusqu’à lundi.',
+    untilMonday: 'jusqu’à lundi.',
+    untilTomorrow: 'jusqu’à demain.',
     single: 'Une photo de plus',
     singleNote: 'Une seule génération, sans abonnement',
     weekly: 'Loxa Hebdo',
@@ -134,7 +140,6 @@ const fr: typeof en = {
     resetsTomorrow: 'renouvelés demain',
     noRollOver: 'non reportables',
     planFree: 'Formule gratuite',
-    planTrial: 'Essai gratuit',
     planWeekly: 'Loxa Hebdo',
     planFreeNote: 'Pas de crédits hebdomadaires — {{price}} par photo',
     planWeeklyNote: '{{price}} · {{count}} photos par semaine',
@@ -142,8 +147,6 @@ const fr: typeof en = {
     subscribe: "S'abonner",
     notifications: 'Idées coiffure du jour',
     notificationsNote: 'Une notification par jour, de nouveaux looks',
-    restore: 'Restaurer les achats',
-    restored: 'Achats restaurés',
     rate: 'Noter Loxa',
     privacy: 'Politique de confidentialité',
     terms: 'Conditions d’utilisation',

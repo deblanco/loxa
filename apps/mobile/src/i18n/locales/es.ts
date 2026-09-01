@@ -6,6 +6,14 @@ const es: typeof en = {
     back: 'Atrás',
     cancel: 'Cancelar',
     tryAgain: 'Reintentar',
+    restore: 'Restaurar compras',
+    restored: 'Compras restauradas',
+    restoreNothing: 'No hay nada que restaurar',
+    restoreFailed: 'No se pudo conectar con la tienda',
+    subscriptionTermsIntro:
+      '{{price}} la primera semana y luego {{weekly}} por semana. Se renueva automáticamente salvo que la canceles al menos 24 horas antes de que termine la semana; el cargo se hace en tu Apple ID.',
+    subscriptionTerms:
+      '{{weekly}} por semana. Se renueva automáticamente salvo que la canceles al menos 24 horas antes de que termine la semana; el cargo se hace en tu Apple ID.',
   },
 
   entry: {
@@ -27,9 +35,6 @@ const es: typeof en = {
     startIntro: 'Empezar por {{price}}',
     start: 'Suscribirse',
     skip: 'Continuar sin suscribirse',
-    termsIntro:
-      '{{price}} la primera semana, luego {{weekly}} por semana · {{count}} fotos por semana · cancela cuando quieras',
-    terms: '{{weekly}} por semana · {{count}} fotos por semana · cancela cuando quieras',
   },
 
   preview: {
@@ -113,7 +118,8 @@ const es: typeof en = {
 
   paywall: {
     title: 'Sin créditos',
-    titleItalic: 'hasta el lunes.',
+    untilMonday: 'hasta el lunes.',
+    untilTomorrow: 'hasta mañana.',
     single: 'Una foto más',
     singleNote: 'Una sola generación, sin suscripción',
     weekly: 'Loxa Semanal',
@@ -134,7 +140,6 @@ const es: typeof en = {
     resetsTomorrow: 'se renuevan mañana',
     noRollOver: 'no se acumulan',
     planFree: 'Plan gratis',
-    planTrial: 'Prueba gratis',
     planWeekly: 'Loxa Semanal',
     planFreeNote: 'Sin créditos semanales — {{price}} por foto',
     planWeeklyNote: '{{price}} · {{count}} fotos por semana',
@@ -142,8 +147,6 @@ const es: typeof en = {
     subscribe: 'Suscribirse',
     notifications: 'Ideas de estilo diarias',
     notificationsNote: 'Una notificación al día, looks nuevos',
-    restore: 'Restaurar compras',
-    restored: 'Compras restauradas',
     rate: 'Valorar Loxa',
     privacy: 'Política de privacidad',
     terms: 'Condiciones de uso',

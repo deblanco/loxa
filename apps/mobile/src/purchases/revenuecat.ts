@@ -32,10 +32,14 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
       }
     },
 
-    async weeklyPricing() {
+    async pricing() {
       try {
-        const [product] = await Purchases.getProducts([WEEKLY_PRODUCT_ID]);
-        if (!product) return null;
+        // Both products in one call: they are printed together, and asking
+        // twice is a second chance for one of them to come back missing.
+        const products = await Purchases.getProducts([WEEKLY_PRODUCT_ID, SINGLE_PHOTO_PRODUCT_ID]);
+        const product = products.find((p) => p.identifier === WEEKLY_PRODUCT_ID);
+        const single = products.find((p) => p.identifier === SINGLE_PHOTO_PRODUCT_ID);
+        if (!product || !single) return null;
 
         // `introPrice` is set whenever the *product* carries an offer, which is
         // always — so it says nothing about whether this customer can have it.
@@ -53,6 +57,7 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
         return {
           price: product.priceString,
           introPrice: eligible ? (product.introPrice?.priceString ?? null) : null,
+          singlePhoto: single.priceString,
         };
       } catch {
         // A price we could not fetch is not an error worth a screen: the caller

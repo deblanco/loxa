@@ -6,6 +6,14 @@ const it: typeof en = {
     back: 'Indietro',
     cancel: 'Annulla',
     tryAgain: 'Riprova',
+    restore: 'Ripristina acquisti',
+    restored: 'Acquisti ripristinati',
+    restoreNothing: 'Niente da ripristinare',
+    restoreFailed: 'Store non raggiungibile',
+    subscriptionTermsIntro:
+      '{{price}} per la prima settimana, poi {{weekly}} a settimana. Si rinnova automaticamente salvo disdetta almeno 24 ore prima della fine della settimana, con addebito sul tuo ID Apple.',
+    subscriptionTerms:
+      '{{weekly}} a settimana. Si rinnova automaticamente salvo disdetta almeno 24 ore prima della fine della settimana, con addebito sul tuo ID Apple.',
   },
 
   entry: {
@@ -27,9 +35,6 @@ const it: typeof en = {
     startIntro: 'Inizia con {{price}}',
     start: 'Abbonati',
     skip: 'Continua senza abbonarti',
-    termsIntro:
-      '{{price}} la prima settimana, poi {{weekly}} a settimana · {{count}} foto a settimana · disdici quando vuoi',
-    terms: '{{weekly}} a settimana · {{count}} foto a settimana · disdici quando vuoi',
   },
 
   preview: {
@@ -113,7 +118,8 @@ const it: typeof en = {
 
   paywall: {
     title: 'Crediti finiti',
-    titleItalic: 'fino a lunedì.',
+    untilMonday: 'fino a lunedì.',
+    untilTomorrow: 'fino a domani.',
     single: 'Un’altra foto',
     singleNote: 'Una sola generazione, senza abbonamento',
     weekly: 'Loxa Settimanale',
@@ -134,7 +140,6 @@ const it: typeof en = {
     resetsTomorrow: 'si rinnovano domani',
     noRollOver: 'non si accumulano',
     planFree: 'Piano gratuito',
-    planTrial: 'Prova gratuita',
     planWeekly: 'Loxa Settimanale',
     planFreeNote: 'Nessun credito settimanale — {{price}} a foto',
     planWeeklyNote: '{{price}} · {{count}} foto a settimana',
@@ -142,8 +147,6 @@ const it: typeof en = {
     subscribe: 'Abbonati',
     notifications: 'Idee di stile ogni giorno',
     notificationsNote: 'Una notifica al giorno, look nuovi',
-    restore: 'Ripristina acquisti',
-    restored: 'Acquisti ripristinati',
     rate: 'Valuta Loxa',
     privacy: 'Informativa sulla privacy',
     terms: 'Condizioni d’uso',

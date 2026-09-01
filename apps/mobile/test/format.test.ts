@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { creditChipLabel, planLabel, resetLabel } from '../src/format';
+import { creditChipLabel, paywallResetLabel, planLabel, resetLabel } from '../src/format';
 
 describe('resetLabel', () => {
   it('names the day when it is further out', () => {
@@ -15,6 +15,19 @@ describe('resetLabel', () => {
   });
 });
 
+describe('paywallResetLabel', () => {
+  it('follows resetLabel, in the sheet\'s own words', () => {
+    // The sheet used to say "until Monday." on the Sunday night when the real
+    // answer was tomorrow, because the second line was a fixed string.
+    expect(paywallResetLabel('2026-08-31T00:00:00.000Z', new Date('2026-08-27T12:00:00Z'))).toBe(
+      'paywall.untilMonday',
+    );
+    expect(paywallResetLabel('2026-08-31T00:00:00.000Z', new Date('2026-08-30T12:00:00Z'))).toBe(
+      'paywall.untilTomorrow',
+    );
+  });
+});
+
 describe('creditChipLabel', () => {
   it('is a bare number, because the dot beside it says what it is', () => {
     expect(creditChipLabel(13)).toBe('13');
@@ -25,7 +38,6 @@ describe('creditChipLabel', () => {
 describe('planLabel', () => {
   it('names each plan', () => {
     expect(planLabel('weekly')).toBe('profile.planWeekly');
-    expect(planLabel('trial')).toBe('profile.planTrial');
     expect(planLabel('free')).toBe('profile.planFree');
   });
 });

@@ -14,7 +14,7 @@
  */
 export const WEEKLY_ENTITLEMENT = 'loxa_pro';
 
-export const PLAN_IDS = ['free', 'trial', 'weekly'] as const;
+export const PLAN_IDS = ['free', 'weekly'] as const;
 export type PlanId = (typeof PLAN_IDS)[number];
 
 /**

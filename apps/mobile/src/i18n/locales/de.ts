@@ -6,6 +6,14 @@ const de: typeof en = {
     back: 'Zurück',
     cancel: 'Abbrechen',
     tryAgain: 'Erneut versuchen',
+    restore: 'Käufe wiederherstellen',
+    restored: 'Käufe wiederhergestellt',
+    restoreNothing: 'Nichts wiederherzustellen',
+    restoreFailed: 'Store nicht erreichbar',
+    subscriptionTermsIntro:
+      '{{price}} für die erste Woche, danach {{weekly}} pro Woche. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ablauf der Woche gekündigt wird; die Abbuchung erfolgt über deine Apple-ID.',
+    subscriptionTerms:
+      '{{weekly}} pro Woche. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ablauf der Woche gekündigt wird; die Abbuchung erfolgt über deine Apple-ID.',
   },
 
   entry: {
@@ -27,9 +35,6 @@ const de: typeof en = {
     startIntro: 'Für {{price}} starten',
     start: 'Abonnieren',
     skip: 'Ohne Abo fortfahren',
-    termsIntro:
-      '{{price}} für die erste Woche, danach {{weekly}} pro Woche · {{count}} Fotos pro Woche · jederzeit kündbar',
-    terms: '{{weekly}} pro Woche · {{count}} Fotos pro Woche · jederzeit kündbar',
   },
 
   preview: {
@@ -113,7 +118,8 @@ const de: typeof en = {
 
   paywall: {
     title: 'Keine Credits mehr',
-    titleItalic: 'bis Montag.',
+    untilMonday: 'bis Montag.',
+    untilTomorrow: 'bis morgen.',
     single: 'Noch ein Foto',
     singleNote: 'Eine Generierung, kein Abo',
     weekly: 'Loxa Wöchentlich',
@@ -134,7 +140,6 @@ const de: typeof en = {
     resetsTomorrow: 'neu morgen',
     noRollOver: 'keine übertragung',
     planFree: 'Gratis-Tarif',
-    planTrial: 'Gratis-Test',
     planWeekly: 'Loxa Wöchentlich',
     planFreeNote: 'Keine wöchentlichen Credits — {{price}} pro Foto',
     planWeeklyNote: '{{price}} · {{count}} Fotos pro Woche',
@@ -142,8 +147,6 @@ const de: typeof en = {
     subscribe: 'Abonnieren',
     notifications: 'Tägliche Style-Ideen',
     notificationsNote: 'Eine Mitteilung am Tag, neue Looks',
-    restore: 'Käufe wiederherstellen',
-    restored: 'Käufe wiederhergestellt',
     rate: 'Loxa bewerten',
     privacy: 'Datenschutzerklärung',
     terms: 'Nutzungsbedingungen',

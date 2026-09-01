@@ -1,10 +1,9 @@
-import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_CREDITS } from '@loxa/shared';
+import { WEEKLY_CREDITS } from '@loxa/shared';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { syncPurchases } from '@/api/client';
 import { Chevron } from '@/components/Chevron';
 import { DevPanel } from '@/components/DevPanel';
 import { PersonMark } from '@/components/PersonMark';
@@ -17,7 +16,7 @@ import { currentLanguage } from '@/i18n';
 import { LANGUAGE_NAMES } from '@/i18n/languages';
 import { openPrivacy, openTerms } from '@/legal';
 import { disableDaily, enableDaily } from '@/notifications';
-import { purchases, useWeeklyPricing } from '@/purchases';
+import { restoreAndSync, usePricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
 import { readProfilePhoto } from '@/store/profile-photo';
 import { openReviewPage, reviewStoreUrl } from '@/store/review';
@@ -39,7 +38,7 @@ export default function Profile() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
-  const { price } = useWeeklyPricing();
+  const { price, singlePhoto } = usePricing();
   const [notify, setNotify] = useState(true);
   const [portrait, setPortrait] = useState<string | null>(null);
 
@@ -70,10 +69,20 @@ export default function Profile() {
   }
 
   async function restore() {
-    const transactionIds = await purchases().restore();
-    if (transactionIds.length) await syncPurchases(transactionIds);
+    // Three outcomes, three sentences. This used to flash "Purchases restored"
+    // whatever came back, including on a device that had never bought anything
+    // and on a store that could not be reached.
+    const outcome = await restoreAndSync();
     await refresh();
-    flash(t('profile.restored'));
+    flash(
+      t(
+        outcome === 'restored'
+          ? 'common.restored'
+          : outcome === 'nothing'
+            ? 'common.restoreNothing'
+            : 'common.restoreFailed',
+      ),
+    );
   }
 
   const left = credits?.creditsLeft ?? 0;
@@ -87,7 +96,7 @@ export default function Profile() {
   // a paid one, so Apple's settings is where it is cancelled. Unknown credits
   // read as free, which sends the button to the paywall — the safe way round,
   // since a free user landing on Apple's list finds nothing of ours in it.
-  const subscribed = credits?.plan === 'weekly' || credits?.plan === 'trial';
+  const subscribed = credits?.plan === 'weekly';
 
   return (
     <View style={styles.screen}>
@@ -161,7 +170,7 @@ export default function Profile() {
               <Body weight="medium">{t(planLabel(credits?.plan ?? 'free'))}</Body>
               <Body variant="caption" tone="ink55" style={styles.rowNote}>
                 {credits?.plan === 'free'
-                  ? t('profile.planFreeNote', { price: SINGLE_PHOTO_PRICE_LABEL })
+                  ? t('profile.planFreeNote', { price: singlePhoto })
                   : t('profile.planWeeklyNote', {
                       // The store's own number, so a subscriber in Berlin reads
                       // what their card was charged. `perWeek` is the paywall's
@@ -219,7 +228,7 @@ export default function Profile() {
             value={LANGUAGE_NAMES[currentLanguage()]}
             onPress={() => router.push('/language')}
           />
-          <Row label={t('profile.restore')} onPress={restore} />
+          <Row label={t('common.restore')} onPress={restore} />
           {/* Absent until the app has an App Store id to point at — a settings
               row that opens a 404 is worse than no row. The automatic prompt on
               the result screen does not depend on this. */}

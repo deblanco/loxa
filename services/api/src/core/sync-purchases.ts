@@ -21,9 +21,10 @@ export interface SyncPurchasesResult {
  * - `verifyPurchase` asks the store whether the transaction happened at all,
  *   because the phone is not a trustworthy narrator of its own purchases.
  * - `recordGrant` is keyed on the transaction id, so replaying a real id grants
- *   nothing the second time. The app re-syncs on every launch and after every
- *   restore, so this path sees the same ids constantly — the idempotency is not
- *   an anti-abuse measure, it is the normal case.
+ *   nothing the second time. The app syncs after a purchase and after a
+ *   restore, and a restore hands back every consumable the Apple ID has ever
+ *   bought — so this path sees the same ids repeatedly and the idempotency is
+ *   not an anti-abuse measure, it is the normal case.
  *
  * Ordered verify-then-record so an unverified id never occupies the primary
  * key: recording first would let a forged id permanently block the real one.
