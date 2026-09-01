@@ -4,6 +4,42 @@ import { reportHandled } from '@/diagnostics';
 import type { PurchasesPort } from './types';
 
 /**
+ * Whether `configure` has run yet.
+ *
+ * `purchases()` builds a fresh object every call, so the instance that gets
+ * configured at launch is never the instance a screen later asks for a price.
+ * Nothing tied the two together, and the SDK throws if it is asked for products
+ * before it has been configured — which reaches the offer screen as `pricing()`
+ * returning null, the shipped US dollar labels, and no intro price. The same
+ * shape as a product that does not exist, which is what made it hard to see.
+ *
+ * `configure` is chained behind `deviceId()`, and that reads the keychain, so
+ * the gap is real rather than theoretical: a screen that mounts while SecureStore
+ * is still answering asks too early.
+ */
+let markConfigured: (() => void) | null = null;
+const configured = new Promise<void>((resolve) => {
+  markConfigured = resolve;
+});
+
+/**
+ * Five seconds, then go anyway.
+ *
+ * An unbounded wait would hang every price forever on a launch where
+ * `configure` never happened at all — and quietly, since the caller already
+ * renders a fallback. Going ahead means the SDK throws, which is caught,
+ * reported, and therefore visible.
+ */
+const CONFIGURE_TIMEOUT_MS = 5_000;
+
+async function awaitConfigured(): Promise<void> {
+  await Promise.race([
+    configured,
+    new Promise<void>((resolve) => setTimeout(resolve, CONFIGURE_TIMEOUT_MS)),
+  ]);
+}
+
+/**
  * RevenueCat on the device.
  *
  * Configured with the anonymous device id as the app user id, which is what
@@ -17,10 +53,12 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
   return {
     async configure(deviceId) {
       Purchases.configure({ apiKey, appUserID: deviceId });
+      markConfigured?.();
     },
 
     async buyWeekly() {
       try {
+        await awaitConfigured();
         const products = await Purchases.getProducts([WEEKLY_PRODUCT_ID]);
         if (!products[0]) return false;
         await Purchases.purchaseStoreProduct(products[0]);
@@ -35,6 +73,10 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
 
     async pricing() {
       try {
+        // Before anything is asked of the SDK. See `awaitConfigured`: this is
+        // the call that was losing the race, and it lost it silently.
+        await awaitConfigured();
+
         // Both products in one call: they are printed together, and asking
         // twice is a second chance for one of them to come back missing.
         const products = await Purchases.getProducts([WEEKLY_PRODUCT_ID, SINGLE_PHOTO_PRODUCT_ID]);
@@ -103,6 +145,7 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
 
     async buySinglePhoto() {
       try {
+        await awaitConfigured();
         const products = await Purchases.getProducts([SINGLE_PHOTO_PRODUCT_ID]);
         if (!products[0]) return null;
 
@@ -115,6 +158,7 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
     },
 
     async restore() {
+      await awaitConfigured();
       const customerInfo = await Purchases.restorePurchases();
       return customerInfo.nonSubscriptionTransactions.map((t) => t.transactionIdentifier);
     },
@@ -129,6 +173,7 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
      */
     async presentCustomerCenter() {
       try {
+        await awaitConfigured();
         const { default: RevenueCatUI } = await import('react-native-purchases-ui');
         await RevenueCatUI.presentCustomerCenter();
         return true;
@@ -143,6 +188,7 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
 
     async managementUrl() {
       try {
+        await awaitConfigured();
         const { managementURL } = await Purchases.getCustomerInfo();
         return managementURL;
       } catch {
