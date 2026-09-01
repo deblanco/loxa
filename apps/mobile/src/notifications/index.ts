@@ -38,6 +38,26 @@ export async function disableDaily(): Promise<void> {
 }
 
 /**
+ * Whether the daily notification is actually on.
+ *
+ * Both halves, because either one alone lies. A queue with the permission
+ * revoked in Settings is a week of notifications iOS will never show; a granted
+ * permission with nothing queued is the ordinary state after `disableDaily`,
+ * and the state of every install that has never touched the toggle.
+ *
+ * `getPermissionsAsync` reads rather than asks, so this is safe on a screen
+ * somebody opened to look at their credit balance — the same reason
+ * `rescheduleDaily` reads the queue instead of requesting permission.
+ */
+export async function isDailyEnabled(): Promise<boolean> {
+  const permission = await Notifications.getPermissionsAsync();
+  if (!permission.granted) return false;
+
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  return scheduled.length > 0;
+}
+
+/**
  * Re-schedule the week in the language the app now speaks.
  *
  * iOS holds finished text, not keys, so switching language would otherwise

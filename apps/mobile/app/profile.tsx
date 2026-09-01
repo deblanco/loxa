@@ -15,7 +15,7 @@ import { planLabel, resetLabel } from '@/format';
 import { currentLanguage } from '@/i18n';
 import { LANGUAGE_NAMES } from '@/i18n/languages';
 import { openPrivacy, openTerms } from '@/legal';
-import { disableDaily, enableDaily } from '@/notifications';
+import { disableDaily, enableDaily, isDailyEnabled } from '@/notifications';
 import { restoreAndSync, usePricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
 import { readProfilePhoto } from '@/store/profile-photo';
@@ -39,15 +39,22 @@ export default function Profile() {
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
   const { price, singlePhoto } = usePricing();
-  const [notify, setNotify] = useState(true);
+  // False until iOS is asked, which is the truthful default: a fresh install
+  // has nothing queued. This used to start at `true`, so the switch read as on
+  // over an empty queue on every first visit, and the first tap "turned off"
+  // something that had never been on.
+  const [notify, setNotify] = useState(false);
   const [portrait, setPortrait] = useState<string | null>(null);
 
   // Re-read on focus rather than once: the camera is pushed from here and
   // writes the portrait on its way back, so the only moment this screen can
-  // learn about a new one is when it comes forward again.
+  // learn about a new one is when it comes forward again. The notification
+  // state is read here for the same reason and a second one — permission can be
+  // revoked in Settings, and coming back from Settings is a focus too.
   useFocusEffect(
     useCallback(() => {
       void readProfilePhoto().then(setPortrait);
+      void isDailyEnabled().then(setNotify);
     }, []),
   );
   const [toast, setToast] = useState<string | null>(null);
@@ -150,14 +157,22 @@ export default function Profile() {
                 </Display>
               </View>
             </View>
-            <View style={styles.resetLines}>
-              <Meta variant="note" tone="paper50" sentence style={styles.right}>
-                {t(credits ? resetLabel(credits.resetsAt, new Date()) : 'profile.resetsMonday')}
-              </Meta>
-              <Meta variant="note" tone="paper50" sentence style={styles.right}>
-                {t('profile.noRollOver')}
-              </Meta>
-            </View>
+            {/*
+              Subscribers only. Both lines are about the weekly allowance, and
+              a free user's balance is bought $0.99 credits — which neither
+              reset on Monday nor expire, so "resets Monday" and "no roll over"
+              were telling them their credits go away when they do not.
+            */}
+            {subscribed && credits ? (
+              <View style={styles.resetLines}>
+                <Meta variant="note" tone="paper50" sentence style={styles.right}>
+                  {t(resetLabel(credits.resetsAt, new Date()))}
+                </Meta>
+                <Meta variant="note" tone="paper50" sentence style={styles.right}>
+                  {t('profile.noRollOver')}
+                </Meta>
+              </View>
+            ) : null}
           </View>
           <View style={styles.meter}>
             <ProgressBar progress={cap === 0 ? 0 : left / cap} onNight />
