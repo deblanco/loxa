@@ -1,4 +1,5 @@
 import { Linking } from 'react-native';
+import { reportHandled } from './diagnostics';
 
 /**
  * The legal pages, in one place.
@@ -20,10 +21,27 @@ export const LEGAL_URLS = {
   terms: `${SITE}/terms`,
 } as const;
 
+/**
+ * Opened, and the rejection caught.
+ *
+ * `Linking.openURL` rejects rather than throwing, and a bare `void` on it made
+ * that an unhandled rejection: eight of them arrived from one device inside two
+ * minutes — both URLs, from the profile and from the paywall — and then never
+ * again. Whatever iOS was refusing at that moment, the app could not say which
+ * link it had been, because an unhandled rejection carries no context of ours.
+ *
+ * Nothing about the working case changes. This is the failing case becoming
+ * legible: these are the links App Review requires at every point of purchase,
+ * so a silent failure to open one is not a small thing.
+ */
+function open(url: string, context: string): void {
+  Linking.openURL(url).catch((err: unknown) => reportHandled(err, context));
+}
+
 export function openPrivacy(): void {
-  void Linking.openURL(LEGAL_URLS.privacy);
+  open(LEGAL_URLS.privacy, 'legal.privacy');
 }
 
 export function openTerms(): void {
-  void Linking.openURL(LEGAL_URLS.terms);
+  open(LEGAL_URLS.terms, 'legal.terms');
 }
