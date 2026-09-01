@@ -16,8 +16,8 @@ export function devEntitlements(): EntitlementsPort {
     async planFor() {
       return 'weekly';
     },
-    async verifyPurchase() {
-      return false;
+    async photoPurchases() {
+      return [];
     },
   };
 }

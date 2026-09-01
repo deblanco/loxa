@@ -20,7 +20,7 @@ interface EntitlementsResponse {
 }
 
 interface PurchasesResponse {
-  items?: { id?: string; store_purchase_identifier?: string; product_id?: string }[];
+  items?: { id?: string; product_id?: string; status?: string }[];
 }
 
 export interface RevenueCatConfig {
@@ -82,26 +82,20 @@ export function revenueCatEntitlements(config: RevenueCatConfig): EntitlementsPo
       return active ? 'weekly' : ('free' satisfies PlanId);
     },
 
-    async verifyPurchase(deviceId, transactionId) {
+    async photoPurchases(deviceId) {
       const body = await get<PurchasesResponse>(
         `/customers/${encodeURIComponent(deviceId)}/purchases`,
       );
-      if (!body?.items) return false;
+      if (!body?.items) return [];
 
-      // Matched on the store's transaction id *and* the product, so a
-      // subscription renewal's id cannot be replayed as a photo purchase.
-      //
-      // The product half is matched against both spellings because v2 answers
-      // with `product_id` as RevenueCat's own `prod...` id, not the store
-      // identifier. Comparing only against the store id meant no photo purchase
-      // ever verified and no credit was ever granted — a paid $0.99 that
-      // returned nothing, and silently, because failing closed here looks
-      // exactly like a purchase that did not happen.
-      return body.items.some(
-        (item) =>
-          (item.id === transactionId || item.store_purchase_identifier === transactionId) &&
-          isSinglePhoto(item.product_id),
-      );
+      // Filtered on the product, so a subscription renewal in the same list
+      // cannot become a photo credit, and on the status, so a refunded photo
+      // does not stay bought. `id` is RevenueCat's own `otp...`: stable, and
+      // what `credit_grant` is keyed on.
+      return body.items
+        .filter((item) => isSinglePhoto(item.product_id) && item.status !== 'refunded')
+        .map((item) => item.id)
+        .filter((id): id is string => typeof id === 'string');
     },
   };
 }

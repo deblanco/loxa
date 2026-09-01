@@ -160,11 +160,11 @@ export function createApp() {
     if (!parsed.success) return fail('bad_request', parsed.error.issues[0]?.message ?? 'invalid body');
 
     try {
-      const result = await syncPurchases(
-        deviceId,
-        parsed.data.transactionIds,
-        buildSyncDeps(c.env, devPremiumFrom(c)),
-      );
+      // `parsed.data.transactionIds` is validated and then deliberately unused:
+      // the store is the one asked what was bought. The field stays in the
+      // contract because apps in the wild send it, and rejecting it would make
+      // this a breaking change for a value we simply no longer trust.
+      const result = await syncPurchases(deviceId, buildSyncDeps(c.env, devPremiumFrom(c)));
       return Response.json(result);
     } catch (err) {
       return translate(err);

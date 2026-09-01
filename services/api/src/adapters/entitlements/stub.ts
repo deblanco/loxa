@@ -14,8 +14,8 @@ export function stubEntitlements(): EntitlementsPort {
     async planFor() {
       return 'free';
     },
-    async verifyPurchase() {
-      return false;
+    async photoPurchases() {
+      return [];
     },
   };
 }

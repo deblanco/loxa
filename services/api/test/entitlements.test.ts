@@ -82,66 +82,72 @@ describe('revenueCatEntitlements.planFor', () => {
   });
 });
 
-describe('revenueCatEntitlements.verifyPurchase', () => {
-  it('confirms a photo purchase by its id', async () => {
-    interceptRevenueCat({
-      purchases: { items: [{ id: 'tx_1', product_id: SINGLE_PHOTO_PRODUCT_ID }] },
-    });
-    await expect(revenueCatEntitlements(config).verifyPurchase(DEVICE, 'tx_1')).resolves.toBe(true);
-  });
+describe('revenueCatEntitlements.photoPurchases', () => {
+  const configured = { ...config, singlePhotoProductId: 'prod4c50338ed7' };
 
-  it('confirms it by the store identifier too', async () => {
+  it('returns the store\'s own id for each photo purchase', async () => {
+    // The shape production actually answers with: `product_id` is RevenueCat's
+    // `prod...`, and `id` is the purchase's `otp...`. The phone's transaction
+    // id appears nowhere in it, which is the whole reason nothing verified.
     interceptRevenueCat({
       purchases: {
-        items: [{ id: 'rc_internal', store_purchase_identifier: 'tx_1', product_id: SINGLE_PHOTO_PRODUCT_ID }],
+        items: [
+          { id: 'otpAap466f', product_id: 'prod4c50338ed7' },
+          { id: 'otpAap4b42', product_id: 'prod4c50338ed7' },
+        ],
       },
     });
-    await expect(revenueCatEntitlements(config).verifyPurchase(DEVICE, 'tx_1')).resolves.toBe(true);
+    await expect(revenueCatEntitlements(configured).photoPurchases(DEVICE)).resolves.toEqual([
+      'otpAap466f',
+      'otpAap4b42',
+    ]);
   });
 
-  it('confirms it when v2 names the product by RevenueCat\'s own id', async () => {
-    // What production actually returns: `product_id` is the `prod...` id, not
-    // the store identifier. Matching only on the store id meant every $0.99
-    // photo was paid for and never granted.
+  it('accepts the store identifier spelling too', async () => {
+    // Which spelling `product_id` carries has moved between API revisions.
     interceptRevenueCat({
-      purchases: { items: [{ store_purchase_identifier: 'tx_1', product_id: 'prod4c50338ed7' }] },
+      purchases: { items: [{ id: 'otp_1', product_id: SINGLE_PHOTO_PRODUCT_ID }] },
     });
-    await expect(
-      revenueCatEntitlements({ ...config, singlePhotoProductId: 'prod4c50338ed7' }).verifyPurchase(
-        DEVICE,
-        'tx_1',
-      ),
-    ).resolves.toBe(true);
+    await expect(revenueCatEntitlements(config).photoPurchases(DEVICE)).resolves.toEqual(['otp_1']);
   });
 
-  it('refuses a RevenueCat product id it was not told about', async () => {
-    // An unknown `prod...` is not a photo. Treating "not the weekly product" as
-    // "the photo" would turn any future consumable into a free credit.
+  it('leaves out a subscription renewal', async () => {
+    // Otherwise every weekly renewal would also hand over a $0.99 photo.
     interceptRevenueCat({
-      purchases: { items: [{ store_purchase_identifier: 'tx_1', product_id: 'prod_something_else' }] },
+      purchases: {
+        items: [
+          { id: 'otp_1', product_id: SINGLE_PHOTO_PRODUCT_ID },
+          { id: 'sub_1', product_id: WEEKLY_PRODUCT_ID },
+        ],
+      },
     });
-    await expect(
-      revenueCatEntitlements({ ...config, singlePhotoProductId: 'prod4c50338ed7' }).verifyPurchase(
-        DEVICE,
-        'tx_1',
-      ),
-    ).resolves.toBe(false);
+    await expect(revenueCatEntitlements(config).photoPurchases(DEVICE)).resolves.toEqual(['otp_1']);
   });
 
-  it('refuses an id that belongs to a subscription renewal', async () => {
-    // Otherwise a renewal could be replayed as a $0.99 photo, over and over.
-    interceptRevenueCat({ purchases: { items: [{ id: 'tx_1', product_id: WEEKLY_PRODUCT_ID }] } });
-    await expect(revenueCatEntitlements(config).verifyPurchase(DEVICE, 'tx_1')).resolves.toBe(false);
+  it('leaves out a product it was not told about', async () => {
+    // An unknown `prod...` is not a photo. Treating "not the weekly one" as the
+    // photo would turn the next consumable this app adds into a free credit.
+    interceptRevenueCat({
+      purchases: { items: [{ id: 'otp_1', product_id: 'prod_something_else' }] },
+    });
+    await expect(revenueCatEntitlements(configured).photoPurchases(DEVICE)).resolves.toEqual([]);
   });
 
-  it('refuses an id the store has never seen', async () => {
-    interceptRevenueCat({ purchases: { items: [] } });
-    await expect(revenueCatEntitlements(config).verifyPurchase(DEVICE, 'forged')).resolves.toBe(false);
+  it('leaves out a refunded photo', async () => {
+    interceptRevenueCat({
+      purchases: {
+        items: [
+          { id: 'otp_1', product_id: SINGLE_PHOTO_PRODUCT_ID, status: 'refunded' },
+          { id: 'otp_2', product_id: SINGLE_PHOTO_PRODUCT_ID, status: 'owned' },
+        ],
+      },
+    });
+    await expect(revenueCatEntitlements(config).photoPurchases(DEVICE)).resolves.toEqual(['otp_2']);
   });
 
   it('fails closed when the store cannot be reached', async () => {
     interceptRevenueCat({ status: 500 });
-    await expect(revenueCatEntitlements(config).verifyPurchase(DEVICE, 'tx_1')).resolves.toBe(false);
+    await expect(revenueCatEntitlements(config).photoPurchases(DEVICE)).resolves.toEqual([]);
   });
 });
 
@@ -149,13 +155,13 @@ describe('the non-store adapters', () => {
   it('stub: nobody is a subscriber and nothing was bought', async () => {
     const port = stubEntitlements();
     await expect(port.planFor(DEVICE)).resolves.toBe('free');
-    await expect(port.verifyPurchase(DEVICE, 'tx_1')).resolves.toBe(false);
+    await expect(port.photoPurchases(DEVICE)).resolves.toEqual([]);
   });
 
   it('dev: a subscriber, but still no free credits from thin air', async () => {
     const port = devEntitlements();
     await expect(port.planFor(DEVICE)).resolves.toBe('weekly');
     // Granting one would write a row to credit_grant that outlives the switch.
-    await expect(port.verifyPurchase(DEVICE, 'tx_1')).resolves.toBe(false);
+    await expect(port.photoPurchases(DEVICE)).resolves.toEqual([]);
   });
 });

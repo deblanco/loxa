@@ -44,13 +44,13 @@ export function fakeLedger(initial: Partial<CreditState> = {}) {
   };
 }
 
-export function fakeEntitlements(plan: PlanId = 'free', verified: readonly string[] = []) {
+export function fakeEntitlements(plan: PlanId = 'free', purchases: readonly string[] = []) {
   const port: EntitlementsPort = {
     async planFor() {
       return plan;
     },
-    async verifyPurchase(_deviceId, transactionId) {
-      return verified.includes(transactionId);
+    async photoPurchases() {
+      return purchases;
     },
   };
   return port;

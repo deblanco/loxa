@@ -16,30 +16,30 @@ export interface SyncPurchasesResult {
 /**
  * Turn $0.99 purchases into credits, once each.
  *
- * Two guards, and they defend against different people:
+ * **The store is asked what was bought; the phone only says when to ask.** The
+ * request still carries the transaction ids the SDK handed the app, and they
+ * are still ignored — they were never a safe thing to key on. RevenueCat's own
+ * `otp...` id for each purchase is, and it is the same id whether this call
+ * follows a purchase or a restore.
  *
- * - `verifyPurchase` asks the store whether the transaction happened at all,
- *   because the phone is not a trustworthy narrator of its own purchases.
- * - `recordGrant` is keyed on the transaction id, so replaying a real id grants
- *   nothing the second time. The app syncs after a purchase and after a
- *   restore, and a restore hands back every consumable the Apple ID has ever
- *   bought — so this path sees the same ids repeatedly and the idempotency is
- *   not an anti-abuse measure, it is the normal case.
+ * `recordGrant` is keyed on that id, so a device that syncs ten times gets one
+ * credit per purchase and no more. The app syncs after every purchase and every
+ * restore, so seeing the same ids repeatedly is the normal case rather than an
+ * attack, and the idempotency is what makes both paths safe to call freely.
  *
- * Ordered verify-then-record so an unverified id never occupies the primary
- * key: recording first would let a forged id permanently block the real one.
+ * Ordered enumerate-then-record so an id the store does not vouch for never
+ * occupies the primary key: recording first would let a forged one permanently
+ * block the real purchase behind it.
  */
 export async function syncPurchases(
   deviceId: string,
-  transactionIds: readonly string[],
   deps: SyncPurchasesDeps,
 ): Promise<SyncPurchasesResult> {
   const now = deps.now();
   let granted = 0;
 
-  for (const transactionId of transactionIds) {
-    if (!(await deps.entitlements.verifyPurchase(deviceId, transactionId))) continue;
-    if (!(await deps.ledger.recordGrant(deviceId, transactionId, now))) continue;
+  for (const purchaseId of await deps.entitlements.photoPurchases(deviceId)) {
+    if (!(await deps.ledger.recordGrant(deviceId, purchaseId, now))) continue;
 
     // Re-read inside the loop: `recordGrant` and this write are two statements,
     // and a second request for the same device may have landed between them.

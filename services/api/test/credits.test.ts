@@ -44,11 +44,11 @@ describe('getCredits', () => {
 });
 
 describe('syncPurchases', () => {
-  it('grants one credit per verified purchase', async () => {
+  it('grants one credit per purchase the store reports', async () => {
     const ledger = fakeLedger();
-    const result = await syncPurchases('device-1', ['tx_1'], {
+    const result = await syncPurchases('device-1', {
       ledger: ledger.port,
-      entitlements: fakeEntitlements('free', ['tx_1']),
+      entitlements: fakeEntitlements('free', ['otp_1']),
       now: fixedClock,
     });
 
@@ -57,9 +57,9 @@ describe('syncPurchases', () => {
     expect(result.creditsLeft).toBe(1); // the bought one, and nothing else
   });
 
-  it('grants nothing for an id the store does not know', async () => {
+  it('grants nothing when the store reports no purchases', async () => {
     const ledger = fakeLedger();
-    const result = await syncPurchases('device-1', ['forged'], {
+    const result = await syncPurchases('device-1', {
       ledger: ledger.port,
       entitlements: fakeEntitlements('free', []),
       now: fixedClock,
@@ -69,44 +69,34 @@ describe('syncPurchases', () => {
     expect(ledger.state.extraCredits).toBe(0);
   });
 
-  it('grants once for an id sent twice in one call', async () => {
-    const ledger = fakeLedger();
-    const result = await syncPurchases('device-1', ['tx_1', 'tx_1'], {
-      ledger: ledger.port,
-      entitlements: fakeEntitlements('free', ['tx_1']),
-      now: fixedClock,
-    });
-
-    expect(result.granted).toBe(1);
-    expect(ledger.state.extraCredits).toBe(1);
-  });
-
   it('grants once across repeated syncs', async () => {
-    // The normal case, not an attack: the app re-syncs on every launch and
-    // after every restore, so the same id arrives constantly.
+    // The normal case, not an attack: the app re-syncs after every purchase and
+    // every restore, so the same purchase ids arrive constantly.
     const ledger = fakeLedger();
     const deps = {
       ledger: ledger.port,
-      entitlements: fakeEntitlements('free', ['tx_1']),
+      entitlements: fakeEntitlements('free', ['otp_1']),
       now: fixedClock,
     };
 
-    await syncPurchases('device-1', ['tx_1'], deps);
-    const second = await syncPurchases('device-1', ['tx_1'], deps);
+    await syncPurchases('device-1', deps);
+    const second = await syncPurchases('device-1', deps);
 
     expect(second.granted).toBe(0);
     expect(ledger.state.extraCredits).toBe(1);
   });
 
-  it('grants the verified ids out of a mixed batch', async () => {
+  it('grants every outstanding purchase in one sync', async () => {
+    // What a restore looks like, and what the devices stranded by the id
+    // mismatch will see the first time they sync against the fix.
     const ledger = fakeLedger();
-    const result = await syncPurchases('device-1', ['tx_1', 'forged', 'tx_2'], {
+    const result = await syncPurchases('device-1', {
       ledger: ledger.port,
-      entitlements: fakeEntitlements('free', ['tx_1', 'tx_2']),
+      entitlements: fakeEntitlements('free', ['otp_1', 'otp_2', 'otp_3']),
       now: fixedClock,
     });
 
-    expect(result.granted).toBe(2);
-    expect(ledger.state.extraCredits).toBe(2);
+    expect(result.granted).toBe(3);
+    expect(ledger.state.extraCredits).toBe(3);
   });
 });
