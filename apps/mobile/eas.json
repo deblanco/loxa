@@ -39,6 +39,11 @@
       }
     },
     "production": {
+      // Same reason as the testflight profile: `appVersionSource: remote` means
+      // EAS owns the build counter, and Apple refuses a build number it has
+      // already seen. Without this a production build reuses the last number
+      // the testflight profile minted and the upload is rejected.
+      "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_API_URL": "https://loxa-api.blankhexadecimal.com",
         "EXPO_PUBLIC_ASSETS_URL": "https://loxa-assets.blankhexadecimal.com",
