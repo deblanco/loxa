@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import * as StoreReview from 'expo-store-review';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { useDevForceIntroToggle } from '../dev/intro';
 import { useDevPremium } from '../dev/premium';
 import { resetAppState } from '../dev/reset';
 import { clearPortraitOffer } from '../store/portrait-offer';
@@ -21,6 +22,7 @@ import { Body, Meta } from './Text';
  */
 export function DevPanel({ onChanged }: { onChanged?: () => void }) {
   const { premium, toggle } = useDevPremium();
+  const { forced: introForced, toggle: toggleIntro } = useDevForceIntroToggle();
 
   if (!__DEV__) return null;
 
@@ -83,6 +85,23 @@ export function DevPanel({ onChanged }: { onChanged?: () => void }) {
           </Meta>
         </View>
         <View style={[styles.toggle, premium ? styles.toggleOn : styles.toggleOff]}>
+          <View style={styles.knob} />
+        </View>
+      </Pressable>
+
+      <Pressable
+        accessibilityRole="switch"
+        accessibilityState={{ checked: introForced }}
+        onPress={() => { toggleIntro(); onChanged?.(); }}
+        style={[styles.row, styles.divided]}
+      >
+        <View style={styles.rowText}>
+          <Body variant="bodySmall">Force intro price</Body>
+          <Meta variant="note" tone="ink45" sentence style={styles.note}>
+            sandbox answers UNKNOWN · this only changes what is printed
+          </Meta>
+        </View>
+        <View style={[styles.toggle, introForced ? styles.toggleOn : styles.toggleOff]}>
           <View style={styles.knob} />
         </View>
       </Pressable>

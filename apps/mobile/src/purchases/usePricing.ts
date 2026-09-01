@@ -1,5 +1,6 @@
-import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_PRICE_LABEL } from '@loxa/shared';
+import { INTRO_PRICE_LABEL, SINGLE_PHOTO_PRICE_LABEL, WEEKLY_PRICE_LABEL } from '@loxa/shared';
 import { useEffect, useState } from 'react';
+import { useDevForceIntro } from '@/dev/intro';
 import { purchases } from './index';
 import type { Pricing } from './types';
 
@@ -33,6 +34,10 @@ const FALLBACK: Pricing = {
  */
 export function usePricing(): Pricing {
   const [pricing, setPricing] = useState<Pricing>(FALLBACK);
+  // Development only, and false in any release build. It exists because a
+  // sandbox account answers UNKNOWN to the eligibility check, which makes the
+  // intro offer unreachable in TestFlight — see `dev/intro.ts`.
+  const forceIntro = useDevForceIntro();
 
   useEffect(() => {
     let live = true;
@@ -45,6 +50,13 @@ export function usePricing(): Pricing {
       live = false;
     };
   }, []);
+
+  if (forceIntro && !pricing.introPrice) {
+    // The shipped label rather than the store's, because the store did not say
+    // this reader could have it. Wrong currency outside the United States, and
+    // that is acceptable for a switch nobody but us can reach.
+    return { ...pricing, introPrice: INTRO_PRICE_LABEL };
+  }
 
   return pricing;
 }

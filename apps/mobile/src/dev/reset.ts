@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import { resetDeviceIdCache } from '@/api/device-id';
 import { clearCatalogueCache } from '@/store/catalogue';
 import { clearPortraitOffer } from '@/store/portrait-offer';
+import { clearDevIntroCache } from '@/dev/intro';
 import { clearDevPremiumCache } from '@/dev/premium';
 import { disableDaily } from '@/notifications';
 
@@ -24,6 +25,7 @@ import { disableDaily } from '@/notifications';
 const KEYS = [
   'loxa.onboarded',
   'loxa.dev.premium.v1',
+  'loxa.dev.intro.v1',
   /**
    * The cached catalogue. An install that "starts fresh" but keeps a day-old
    * manifest is not fresh, and this is the only way to reach the first-launch
@@ -103,6 +105,7 @@ export async function resetAppState(): Promise<void> {
   // keeps sending the identity it just erased.
   resetDeviceIdCache();
   clearDevPremiumCache();
+  clearDevIntroCache();
   clearCatalogueCache();
   // The offered photo is held in a module for the process lifetime too, so
   // without this a reset would leave the previous identity's face armed for the

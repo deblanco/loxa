@@ -34,5 +34,10 @@ export function fakePurchases(): PurchasesPort {
     async restore() {
       return [];
     },
+    async managementUrl() {
+      // Nothing was really bought, so there is nothing to manage. The caller
+      // falls back to Apple's generic page, which is the honest destination.
+      return null;
+    },
   };
 }

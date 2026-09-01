@@ -48,4 +48,14 @@ export interface PurchasesPort {
   buySinglePhoto(): Promise<string[] | null>;
   /** Restore, for a reinstall or a new device. Returns ids worth syncing. */
   restore(): Promise<string[]>;
+  /**
+   * Where this customer's subscription is actually managed, or null.
+   *
+   * The store knows and we do not. A sandbox subscription — every TestFlight
+   * purchase is one — does not appear in the production subscriptions list, so
+   * the hardcoded App Store URL sends a tester to a page their subscription is
+   * not on. Null when there is no active subscription, which is the caller's
+   * cue to fall back.
+   */
+  managementUrl(): Promise<string | null>;
 }

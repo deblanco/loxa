@@ -206,7 +206,7 @@ export default function Profile() {
             */}
             <Pressable
               accessibilityRole="button"
-              onPress={() => (subscribed ? openManageSubscriptions() : router.push('/paywall'))}
+              onPress={() => (subscribed ? void openManageSubscriptions() : router.push('/paywall'))}
               style={styles.manage}
             >
               <Body variant="caption" tone="paper">
