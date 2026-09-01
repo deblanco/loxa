@@ -23,7 +23,11 @@ export const metadata: Metadata = { title: "Privacy policy — Loxa" };
  * the input photo is never written to a store (`core/try-on.ts`), the render is
  * cached for thirty days (`adapters/kv/render-cache.ts`), the device id is the
  * only identifier the Worker sees (`adapters/http/device.ts`), and the style
- * tally carries no device id (`schema.sql`). Keep it that way — a claim here
+ * tally carries no device id (`schema.sql`). Nor does an error report: the
+ * `diagnostic_report` table has no column for one, the id is spent on a rate
+ * limit in KV and never written beside a report, and the base64 of a photo is
+ * scrubbed before a report leaves the phone
+ * (`apps/mobile/src/diagnostics/report.ts`). Keep it that way — a claim here
  * that the code stops honouring is worse than no claim at all.
  */
 export default function PrivacyPolicy() {
@@ -92,6 +96,20 @@ export default function PrivacyPolicy() {
           apps or websites.
         </Section>
 
+        <Section title="When something goes wrong">
+          When the app hits an error &mdash; a screen that fails to draw, a
+          photo that will not open, a restyle that does not come back &mdash; it
+          sends us a short report so we can fix it: what the error was, where in
+          our code it happened, which version of the app and of iOS you are on,
+          and the last few screens you visited. It carries <strong>no
+          identifier</strong> and <strong>never your photo</strong>; anything
+          resembling image data is stripped out on your phone before the report
+          is sent. Reports are deleted after thirty days. We do use your random
+          identifier at the moment a report is sent, to stop a single misbehaving
+          phone flooding us, but it is not saved next to the report and we cannot
+          tell whose report it was.
+        </Section>
+
         <Section title="Purchases">
           Subscriptions and one-off purchases are handled by Apple and by
           RevenueCat, our billing provider. We never see your payment details.
@@ -144,7 +162,10 @@ export default function PrivacyPolicy() {
             {CONTACT_EMAIL}
           </a>
           . Deleting it ends any credits attached to it, including bought ones,
-          because there is nothing else that could identify them as yours.
+          because there is nothing else that could identify them as yours. Error
+          reports cannot be deleted on request, because nothing in them says
+          they are yours &mdash; that is the same reason they are safe to keep
+          at all, and they expire within thirty days regardless.
         </Section>
 
         <Section title="Changes to this policy">

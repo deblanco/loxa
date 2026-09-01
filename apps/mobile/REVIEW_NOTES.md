@@ -53,7 +53,10 @@ up as 2.1.
 >
 > The app requires the camera or the photo library to supply the photograph it
 > restyles. It has no user-generated content, no social features, no accounts
-> and no analytics or advertising SDKs.
+> and no analytics or advertising SDKs. It reports its own errors to our server
+> for diagnosis — no third-party SDK, no identifier attached, no photo, deleted
+> after thirty days. This is the "Diagnostics → Crash Data, not linked to
+> identity" entry on the privacy nutrition label.
 
 ## The rest of the panel
 
