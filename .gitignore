@@ -30,3 +30,7 @@ secrets/
 # Base photography for the generated catalogue — ~82 MB, regenerable.
 # See design-system/models/README.md for the roster and where the originals live.
 design-system/models/*.png
+
+# Cached catalogue art for the store screenshots, refetched by
+# tools/store-screenshots/generate.py. The bucket is the source.
+screenshots/store/.art/
