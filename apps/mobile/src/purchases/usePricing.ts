@@ -1,4 +1,4 @@
-import { INTRO_PRICE_LABEL, SINGLE_PHOTO_PRICE_LABEL, WEEKLY_PRICE_LABEL } from '@loxa/shared';
+import { SINGLE_PHOTO_PRICE_LABEL, WEEKLY_PRICE_LABEL } from '@loxa/shared';
 import { useEffect, useState } from 'react';
 import { purchases } from './index';
 import type { Pricing } from './types';
