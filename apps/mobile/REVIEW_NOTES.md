@@ -37,30 +37,28 @@ that is the question App Review actually asks it under.
 Under 4,000 characters, which is the field's limit and the reason this is
 compressed rather than discursive.
 
-> Loxa restyles a photograph of your own face with a different haircut and hair colour. It has no account, no login and no free tier: every generated photo costs one credit, a new install has none, so the core feature requires an in-app purchase.
+> Loxa restyles a photograph of your own face with a different haircut and colour. No account, no login, no free tier: every generated photo costs one credit and a new install has none, so the core feature requires an in-app purchase.
 >
 > 1. SCREEN RECORDING
-> Attached to this submission, captured on a physical iPhone running iOS 26. It begins at launch and walks the typical flow: entry carousel, the subscription offer, the catalogue, taking a photo, and a generated result. The purchase controls it shows carry the product title, the length (one week), the price, the auto-renewal disclosure and links to the Terms of Use and Privacy Policy.
+> Attached, captured on a physical iPhone on iOS 26. It begins at launch and walks the typical flow: entry carousel, the subscription offer, the catalogue, taking a photo, a purchase, and a generated result. The purchase controls carry the product title, the length (one week), the price, the auto-renewal disclosure and links to the Terms of Use and Privacy Policy.
 >
 > 2. PURPOSE AND AUDIENCE
 > For anyone deciding whether to change their hair. Cutting or colouring is irreversible and expensive, and a salon photo of a stranger does not answer "would this suit me". Loxa answers it on the user's own face in a few seconds, so they can decide, or show a stylist exactly what they mean. The audience is general consumers aged 16 and over.
 >
 > 3. SETUP AND ACCESS
-> No sign-in, no demo account, no sample files. Launch the app, continue past the entry carousel. The onboarding offer can be dismissed with the X in the top corner; the full catalogue of 24 cuts and 10 colours can then be browsed, but Try On returns "out of credits" until something is bought.
-> To exercise the core feature:
-> a. Sign in to a Sandbox Apple ID under Settings > Developer > Sandbox Apple Account.
-> b. Launch Loxa, continue past the carousel.
-> c. Either subscribe on the offer screen, or dismiss it and tap Try On to reach the same two products on the out-of-credits sheet.
-> d. Buy loxa_weekly_999 or loxa_single_photo_099.
-> e. Take a photo or choose one from the library, pick a cut and a colour, tap Try On. The image appears in roughly ten seconds.
+> No sign-in, no demo account, no sample files, and no sandbox setup: purchases in a review build run in the sandbox environment against the account already on the device.
+> a. Launch Loxa and continue past the entry carousel.
+> b. Either subscribe on the offer screen, or dismiss it with the X and tap Try On. The catalogue of 24 cuts and 10 colours can be browsed either way, but Try On returns "out of credits" until something is bought.
+> c. Buy loxa_weekly_999 (20 photos) or loxa_single_photo_099 (one photo).
+> d. Take a photo or choose one from the library, pick a cut and a colour, tap Try On. The image appears in roughly ten seconds.
 > Credits are granted by our server after it confirms the transaction with the store, so the balance updates a moment after the App Store sheet closes. Restore purchases is on both purchase screens and in Profile.
 >
 > 4. EXTERNAL SERVICES
-> - Google Cloud Vertex AI (Gemini image model): generates the restyled photograph. Primary provider.
+> - Google Cloud Vertex AI (Gemini image model): generates the restyled photograph.
 > - OpenRouter: reaches the same Google model when Vertex is rate-limited. Fallback only.
 > - RevenueCat: purchase and subscription verification.
-> - Cloudflare Workers, D1, KV and R2: our own backend, credit ledger and image catalogue.
-> No analytics SDK, no advertising SDK, no advertising identifier, no third-party tracking.
+> - Cloudflare Workers, D1, KV, R2: our backend, credit ledger and image catalogue.
+> No analytics SDK, no advertising SDK, no advertising identifier, no tracking.
 >
 > 5. REGIONAL DIFFERENCES
 > None. Every feature and all content are identical in all regions. Prices are the App Store's own per storefront. The interface is available in English, Spanish, French, German and Italian, selected from the device language.
@@ -72,9 +70,9 @@ compressed rather than discursive.
 > Two products, both reachable without an account:
 > - Loxa Weekly (loxa_weekly_999), auto-renewable, one week, USD 9.99 per week, first week USD 0.99. Grants 20 generated photos each week, reset every Monday, no roll-over.
 > - One more photo (loxa_single_photo_099), consumable, USD 0.99. Grants one generated photo, no subscription.
-> To reach them: the subscription is on the onboarding offer, the screen after the entry carousel. Both appear together on the out-of-credits sheet, reached by dismissing that offer with the X and tapping Try On on the main screen. Profile also links to both, and to Manage Subscription for cancelling.
+> To reach them: the subscription is on the onboarding offer, the screen straight after the entry carousel. Dismissing that offer with the X and tapping Try On on the main screen opens the out-of-credits sheet, which offers both products to anyone who is not already subscribed. A current subscriber who has spent the week's 20 photos is shown only the single photo there, because the App Store cannot sell them a second concurrent subscription and their allowance returns on Monday. Profile links to both, and to Manage Subscription for cancelling.
 >
-> The app has no user-generated content, no social features, no accounts and no advertising. It reports its own errors to our server for diagnosis: no third-party SDK, no identifier attached, no photo, deleted after thirty days. That is the "Diagnostics > Crash Data, not linked to identity" entry on the privacy label.
+> The app has no user-generated content, no social features, no accounts and no advertising. It reports its own errors to our server: no third-party SDK, no identifier, no photo, deleted after thirty days. That is the "Diagnostics > Crash Data, not linked to identity" entry on the privacy label.
 >
 > Contact: apps@blankhexadecimal.com
 
