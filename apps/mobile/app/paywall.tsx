@@ -46,6 +46,22 @@ export default function Paywall() {
   // confirming the transaction, the subscription on the entitlement it reads.
   const [settling, setSettling] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  /**
+   * Somebody who already has the subscription cannot be sold it again.
+   *
+   * The sheet used to offer it to them anyway, which is a dead end that looks
+   * like a way out: the App Store will not sell a second concurrent
+   * subscription, the entitlement is already held so no new allowance is
+   * granted, and the tap changes nothing at all. A subscriber who has spent
+   * the week's twenty has exactly one way to render today — the $0.99 photo —
+   * and the sheet should say so rather than dangling the plan they are already
+   * paying for.
+   *
+   * Null credits means the balance has not arrived yet, and an unknown plan is
+   * treated as not subscribed: showing the option and hiding it a moment later
+   * is worse than the reverse.
+   */
+  const subscribed = credits?.plan === 'weekly';
   const rise = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -171,31 +187,33 @@ export default function Paywall() {
               <Display variant="price">{singlePhoto}</Display>
             </Pressable>
 
-            <Pressable
-              accessibilityRole="button"
-              onPress={buyWeekly}
-              style={[styles.option, styles.optionFilled]}
-            >
-              <View style={styles.optionText}>
-                <View style={styles.titleRow}>
-                  <Body weight="medium" tone="paper">
-                    {t('paywall.weekly')}
-                  </Body>
-                  <View style={styles.tag}>
-                    <Meta variant="metaSmall" tone="paper">
-                      {t('paywall.bestValue')}
-                    </Meta>
+            {!subscribed && (
+              <Pressable
+                accessibilityRole="button"
+                onPress={buyWeekly}
+                style={[styles.option, styles.optionFilled]}
+              >
+                <View style={styles.optionText}>
+                  <View style={styles.titleRow}>
+                    <Body weight="medium" tone="paper">
+                      {t('paywall.weekly')}
+                    </Body>
+                    <View style={styles.tag}>
+                      <Meta variant="metaSmall" tone="paper">
+                        {t('paywall.bestValue')}
+                      </Meta>
+                    </View>
                   </View>
+                  <Body variant="caption" tone="paper60" style={styles.note}>
+                    {t('paywall.weeklyNote', { count: WEEKLY_CREDITS })}
+                  </Body>
                 </View>
-                <Body variant="caption" tone="paper60" style={styles.note}>
-                  {t('paywall.weeklyNote', { count: WEEKLY_CREDITS })}
-                </Body>
-              </View>
-              <Display variant="price" tone="paper">
-                {price}
-                {t('paywall.perWeek')}
-              </Display>
-            </Pressable>
+                <Display variant="price" tone="paper">
+                  {price}
+                  {t('paywall.perWeek')}
+                </Display>
+              </Pressable>
+            )}
           </View>
         )}
 
@@ -204,11 +222,19 @@ export default function Paywall() {
           like the onboarding offer, and it carried a price and a period but
           never said the thing renews.
         */}
-        <Meta variant="note" tone="ink40" sentence style={styles.terms}>
-          {introPrice
-            ? t('common.subscriptionTermsIntro', { price: introPrice, weekly: price })
-            : t('common.subscriptionTerms', { weekly: price })}
-        </Meta>
+        {/*
+          The disclosure belongs to the control that starts a subscription. With
+          that control gone there is nothing on this sheet that renews, and
+          printing renewal terms next to a $0.99 consumable would describe the
+          wrong purchase.
+        */}
+        {!subscribed && (
+          <Meta variant="note" tone="ink40" sentence style={styles.terms}>
+            {introPrice
+              ? t('common.subscriptionTermsIntro', { price: introPrice, weekly: price })
+              : t('common.subscriptionTerms', { weekly: price })}
+          </Meta>
+        )}
 
         <View style={styles.footer}>
           <Pressable
