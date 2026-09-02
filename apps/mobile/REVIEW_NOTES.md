@@ -22,50 +22,74 @@ up as 2.1.
 
 ## Notes — paste as-is
 
-> Loxa has no account, no login and no free tier. Every generated photo costs
-> one credit and a new install has none, so the app's core feature requires an
-> in-app purchase.
+Rewritten 2 September 2026, after the first submission came back under
+**guideline 2.1, "Information Needed — New App Submission"**. That rejection is
+the one a developer account with no review history gets: App Review asked seven
+questions rather than naming a defect, and asked for the answers *both* in the
+Resolution Center reply and in this field, "for reference on future
+submissions". So the field is now the answer sheet, in their order, and the
+reply quotes it rather than the other way round.
+
+The old notes are not deleted so much as absorbed: what was the whole of them —
+no account, no free tier, how to reach a purchase — is now section 3, because
+that is the question App Review actually asks it under.
+
+Under 4,000 characters, which is the field's limit and the reason this is
+compressed rather than discursive.
+
+> Loxa restyles a photograph of your own face with a different haircut and hair colour. It has no account, no login and no free tier: every generated photo costs one credit, a new install has none, so the core feature requires an in-app purchase.
 >
-> The onboarding offer can be dismissed with the ✕ in the top corner. That leads
-> into the app and the full catalogue of cuts and colours can be browsed, but
-> Try On will return "out of credits" until something is bought.
+> 1. SCREEN RECORDING
+> Attached to this submission, captured on a physical iPhone running iOS 26. It begins at launch and walks the typical flow: entry carousel, the subscription offer, the catalogue, taking a photo, and a generated result. The purchase controls it shows carry the product title, the length (one week), the price, the auto-renewal disclosure and links to the Terms of Use and Privacy Policy.
 >
+> 2. PURPOSE AND AUDIENCE
+> For anyone deciding whether to change their hair. Cutting or colouring is irreversible and expensive, and a salon photo of a stranger does not answer "would this suit me". Loxa answers it on the user's own face in a few seconds, so they can decide, or show a stylist exactly what they mean. The audience is general consumers aged 16 and over.
+>
+> 3. SETUP AND ACCESS
+> No sign-in, no demo account, no sample files. Launch the app, continue past the entry carousel. The onboarding offer can be dismissed with the X in the top corner; the full catalogue of 24 cuts and 10 colours can then be browsed, but Try On returns "out of credits" until something is bought.
 > To exercise the core feature:
+> a. Sign in to a Sandbox Apple ID under Settings > Developer > Sandbox Apple Account.
+> b. Launch Loxa, continue past the carousel.
+> c. Either subscribe on the offer screen, or dismiss it and tap Try On to reach the same two products on the out-of-credits sheet.
+> d. Buy loxa_weekly_999 or loxa_single_photo_099.
+> e. Take a photo or choose one from the library, pick a cut and a colour, tap Try On. The image appears in roughly ten seconds.
+> Credits are granted by our server after it confirms the transaction with the store, so the balance updates a moment after the App Store sheet closes. Restore purchases is on both purchase screens and in Profile.
 >
-> 1. Sign in to a Sandbox Apple ID under Settings → Developer → Sandbox Apple
->    Account.
-> 2. Launch Loxa and continue past the entry carousel.
-> 3. Either subscribe on the offer screen, or dismiss it and tap Try On to reach
->    the same two products on the out-of-credits sheet.
-> 4. Buy either loxa_weekly_999 ($9.99/week, first week $0.99) or
->    loxa_single_photo_099 ($0.99, one photo).
-> 5. Take a photo or choose one from the library, pick a cut and a colour, and
->    tap Try On. The generated image appears in roughly ten seconds.
+> 4. EXTERNAL SERVICES
+> - Google Cloud Vertex AI (Gemini image model): generates the restyled photograph. Primary provider.
+> - OpenRouter: reaches the same Google model when Vertex is rate-limited. Fallback only.
+> - RevenueCat: purchase and subscription verification.
+> - Cloudflare Workers, D1, KV and R2: our own backend, credit ledger and image catalogue.
+> No analytics SDK, no advertising SDK, no advertising identifier, no third-party tracking.
 >
-> Credits are granted server-side after our backend confirms the transaction
-> with the store, so the balance updates a moment after the App Store sheet
-> closes. Restore purchases is available on the offer screen, on the
-> out-of-credits sheet and in Profile.
+> 5. REGIONAL DIFFERENCES
+> None. Every feature and all content are identical in all regions. Prices are the App Store's own per storefront. The interface is available in English, Spanish, French, German and Italian, selected from the device language.
 >
-> The subscription renews weekly and is cancelled in Apple's subscription
-> settings, reachable from Profile → Manage. Both the renewal terms and links to
-> the terms of use and privacy policy appear next to every purchase control.
+> 6. REGULATED INDUSTRY OR THIRD-PARTY MATERIAL
+> Neither. Loxa is not in a regulated industry and contains no third-party content. The catalogue photographs are generated by us and owned by us. The only other image is the user's own photo, supplied by them.
 >
-> The app requires the camera or the photo library to supply the photograph it
-> restyles. It has no user-generated content, no social features, no accounts
-> and no analytics or advertising SDKs. It reports its own errors to our server
-> for diagnosis — no third-party SDK, no identifier attached, no photo, deleted
-> after thirty days. This is the "Diagnostics → Crash Data, not linked to
-> identity" entry on the privacy nutrition label.
+> 7. IN-APP PURCHASE
+> Two products, both reachable without an account:
+> - Loxa Weekly (loxa_weekly_999), auto-renewable, one week, USD 9.99 per week, first week USD 0.99. Grants 20 generated photos each week, reset every Monday, no roll-over.
+> - One more photo (loxa_single_photo_099), consumable, USD 0.99. Grants one generated photo, no subscription.
+> To reach them: the subscription is on the onboarding offer, the screen after the entry carousel. Both appear together on the out-of-credits sheet, reached by dismissing that offer with the X and tapping Try On on the main screen. Profile also links to both, and to Manage Subscription for cancelling.
+>
+> The app has no user-generated content, no social features, no accounts and no advertising. It reports its own errors to our server for diagnosis: no third-party SDK, no identifier attached, no photo, deleted after thirty days. That is the "Diagnostics > Crash Data, not linked to identity" entry on the privacy label.
+>
+> Contact: apps@blankhexadecimal.com
 
 ## The rest of the panel
 
 - **Sign-in required:** No. There is no account of any kind, so no demo
   credentials. Say this rather than leaving the field ambiguous.
 - **Contact:** the address on the support page — `apps@blankhexadecimal.com`.
-- **Attachment:** none needed. If a build is ever rejected for a purchase that
-  would not complete, attach a screen recording of the sandbox buy rather than
-  arguing it in text.
+- **Attachment:** a screen recording, and no longer optional. Guideline 2.1 for
+  a new developer account asks for one captured on a physical device on the
+  current OS, starting at launch and showing the typical flow — and, where the
+  app sells anything, the purchase controls with the title, length and price of
+  each subscription and the links to the terms and the privacy policy visible in
+  frame. Ours is `loxa-demo.mp4`, re-encoded down from the original recording
+  because the field will not take 226 MB.
 
 ## Before submitting, verify
 
