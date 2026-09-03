@@ -29,10 +29,10 @@ describe('getCredits', () => {
     expect(view).toEqual(expect.objectContaining({ creditsLeft: 0, cap: 0, plan: 'free' }));
   });
 
-  it('does not write while reading', async () => {
-    // A read that persists the Monday roll races with every other read, and
-    // there is nothing to gain from it: the spend writes the rolled row anyway.
-    const ledger = fakeLedger({ week: '2026-W34', weekUsed: 20 });
+  it('does not persist the Monday roll while reading', async () => {
+    // A read that persists the roll races with every other read, and there is
+    // nothing to gain from it: the spend writes the rolled row anyway.
+    const ledger = fakeLedger({ week: '2026-W34', weekUsed: 20, lastPlan: 'weekly' });
     await getCredits('device-1', {
       ledger: ledger.port,
       entitlements: fakeEntitlements('weekly'),
@@ -40,6 +40,41 @@ describe('getCredits', () => {
     });
 
     expect(ledger.writes).toHaveLength(0);
+  });
+
+  it('records a plan it has not seen before', async () => {
+    // The only thing a read does persist. `lastPlan` used to be written by
+    // `spendOne` alone, and a lapsed subscriber with an exhausted week has
+    // nothing to spend — so the free interval left no trace and the next
+    // subscription was compared against a stale "weekly" and refused its
+    // allowance. Observing the change is what records it.
+    const ledger = fakeLedger({ week: '2026-W35', weekUsed: 20, lastPlan: 'weekly' });
+    const view = await getCredits('device-1', {
+      ledger: ledger.port,
+      entitlements: fakeEntitlements('free'),
+      now: fixedClock,
+    });
+
+    expect(view.creditsLeft).toBe(0);
+    expect(ledger.writes).toHaveLength(1);
+    expect(ledger.state.lastPlan).toBe('free');
+    // The week it spent as a subscriber is not given back on the way out.
+    expect(ledger.state.weekUsed).toBe(20);
+  });
+
+  it('starts the allowance over for a subscription bought after a lapse', async () => {
+    // The whole point: read as free, then read as weekly, and the twenty they
+    // just paid for are there.
+    const ledger = fakeLedger({ week: '2026-W35', weekUsed: 20, lastPlan: 'free' });
+    const view = await getCredits('device-1', {
+      ledger: ledger.port,
+      entitlements: fakeEntitlements('weekly'),
+      now: fixedClock,
+    });
+
+    expect(view.creditsLeft).toBe(20);
+    expect(ledger.state.weekUsed).toBe(0);
+    expect(ledger.state.lastPlan).toBe('weekly');
   });
 });
 
