@@ -39,3 +39,6 @@ screenshots/store/.art/
 # checked, rewritten by every `bun run typecheck` — it dirties the tree on a
 # command that changes nothing.
 *.tsbuildinfo
+
+# full-resolution UGC persona renders; the committed .jpg mirrors are what the slides use
+design-system/ugc-model/_fullres/
