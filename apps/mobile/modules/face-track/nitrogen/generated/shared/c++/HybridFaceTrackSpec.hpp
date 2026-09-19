@@ -15,10 +15,14 @@
 
 // Forward declaration of `DetectedFace` to properly resolve imports.
 namespace margelo::nitro::facetrack { struct DetectedFace; }
+// Forward declaration of `FaceMeasure` to properly resolve imports.
+namespace margelo::nitro::facetrack { struct FaceMeasure; }
 
 #include "DetectedFace.hpp"
 #include <optional>
 #include <string>
+#include "FaceMeasure.hpp"
+#include <NitroModules/Promise.hpp>
 
 namespace margelo::nitro::facetrack {
 
@@ -52,6 +56,7 @@ namespace margelo::nitro::facetrack {
     public:
       // Methods
       virtual std::optional<DetectedFace> detect(uint64_t buffer, const std::string& orientation, bool mirrored) = 0;
+      virtual std::shared_ptr<Promise<std::optional<FaceMeasure>>> measureImage(const std::string& uri) = 0;
 
     protected:
       // Hybrid Setup

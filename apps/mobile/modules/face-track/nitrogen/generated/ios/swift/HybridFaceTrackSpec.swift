@@ -14,6 +14,7 @@ public protocol HybridFaceTrackSpec_protocol: HybridObject {
 
   // Methods
   func detect(buffer: UInt64, orientation: String, mirrored: Bool) throws -> DetectedFace?
+  func measureImage(uri: String) throws -> Promise<FaceMeasure?>
 }
 
 public extension HybridFaceTrackSpec_protocol {

@@ -10,6 +10,8 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `DetectedFace` to properly resolve imports.
 namespace margelo::nitro::facetrack { struct DetectedFace; }
+// Forward declaration of `FaceMeasure` to properly resolve imports.
+namespace margelo::nitro::facetrack { struct FaceMeasure; }
 // Forward declaration of `FacePoint` to properly resolve imports.
 namespace margelo::nitro::facetrack { struct FacePoint; }
 // Forward declaration of `HybridFaceTrackSpec` to properly resolve imports.
@@ -21,10 +23,14 @@ namespace FaceTrack { class HybridFaceTrackSpec_cxx; }
 
 // Include C++ defined types
 #include "DetectedFace.hpp"
+#include "FaceMeasure.hpp"
 #include "FacePoint.hpp"
 #include "HybridFaceTrackSpec.hpp"
+#include <NitroModules/Promise.hpp>
+#include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -64,6 +70,92 @@ namespace margelo::nitro::facetrack::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::optional<double>
+  /**
+   * Specialized version of `std::optional<double>`.
+   */
+  using std__optional_double_ = std::optional<double>;
+  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
+    return std::optional<double>(value);
+  }
+  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<FaceMeasure>
+  /**
+   * Specialized version of `std::optional<FaceMeasure>`.
+   */
+  using std__optional_FaceMeasure_ = std::optional<FaceMeasure>;
+  inline std::optional<FaceMeasure> create_std__optional_FaceMeasure_(const FaceMeasure& value) noexcept {
+    return std::optional<FaceMeasure>(value);
+  }
+  inline bool has_value_std__optional_FaceMeasure_(const std::optional<FaceMeasure>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline FaceMeasure get_std__optional_FaceMeasure_(const std::optional<FaceMeasure>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::optional<FaceMeasure>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::optional<FaceMeasure>>>`.
+   */
+  using std__shared_ptr_Promise_std__optional_FaceMeasure___ = std::shared_ptr<Promise<std::optional<FaceMeasure>>>;
+  inline std::shared_ptr<Promise<std::optional<FaceMeasure>>> create_std__shared_ptr_Promise_std__optional_FaceMeasure___() noexcept {
+    return Promise<std::optional<FaceMeasure>>::create();
+  }
+  inline PromiseHolder<std::optional<FaceMeasure>> wrap_std__shared_ptr_Promise_std__optional_FaceMeasure___(std::shared_ptr<Promise<std::optional<FaceMeasure>>> promise) noexcept {
+    return PromiseHolder<std::optional<FaceMeasure>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::optional<FaceMeasure>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::optional<FaceMeasure>&)>`.
+   */
+  using Func_void_std__optional_FaceMeasure_ = std::function<void(const std::optional<FaceMeasure>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::optional<FaceMeasure>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__optional_FaceMeasure__Wrapper final {
+  public:
+    explicit Func_void_std__optional_FaceMeasure__Wrapper(std::function<void(const std::optional<FaceMeasure>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::optional<FaceMeasure>& /* result */)>>(std::move(func))) {}
+    inline void call(std::optional<FaceMeasure> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::optional<FaceMeasure>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__optional_FaceMeasure_ create_Func_void_std__optional_FaceMeasure_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__optional_FaceMeasure__Wrapper wrap_Func_void_std__optional_FaceMeasure_(Func_void_std__optional_FaceMeasure_ value) noexcept {
+    return Func_void_std__optional_FaceMeasure__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
+  /**
+   * Specialized version of `std::function<void(const std::exception_ptr&)>`.
+   */
+  using Func_void_std__exception_ptr = std::function<void(const std::exception_ptr& /* error */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::exception_ptr& / * error * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__exception_ptr_Wrapper final {
+  public:
+    explicit Func_void_std__exception_ptr_Wrapper(std::function<void(const std::exception_ptr& /* error */)>&& func): _function(std::make_unique<std::function<void(const std::exception_ptr& /* error */)>>(std::move(func))) {}
+    inline void call(std::exception_ptr error) const noexcept {
+      _function->operator()(error);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::exception_ptr& /* error */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__exception_ptr_Wrapper wrap_Func_void_std__exception_ptr(Func_void_std__exception_ptr value) noexcept {
+    return Func_void_std__exception_ptr_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::shared_ptr<HybridFaceTrackSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridFaceTrackSpec>`.
@@ -83,6 +175,15 @@ namespace margelo::nitro::facetrack::bridge::swift {
   }
   inline Result_std__optional_DetectedFace__ create_Result_std__optional_DetectedFace__(const std::exception_ptr& error) noexcept {
     return Result<std::optional<DetectedFace>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::optional<FaceMeasure>>>>
+  using Result_std__shared_ptr_Promise_std__optional_FaceMeasure____ = Result<std::shared_ptr<Promise<std::optional<FaceMeasure>>>>;
+  inline Result_std__shared_ptr_Promise_std__optional_FaceMeasure____ create_Result_std__shared_ptr_Promise_std__optional_FaceMeasure____(const std::shared_ptr<Promise<std::optional<FaceMeasure>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::optional<FaceMeasure>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__optional_FaceMeasure____ create_Result_std__shared_ptr_Promise_std__optional_FaceMeasure____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::optional<FaceMeasure>>>>::withError(error);
   }
 
 } // namespace margelo::nitro::facetrack::bridge::swift

@@ -21,6 +21,7 @@ export default defineConfig({
         'src/face/geometry.ts',
         'src/i18n/languages.ts',
         'src/face/verdict.ts',
+        'src/face/shape.ts',
         'src/format.ts',
         'src/notifications/copy.ts',
         'src/notifications/schedule.ts',

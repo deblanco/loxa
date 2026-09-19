@@ -2,6 +2,7 @@ import { checkFace, type FaceCheckStatus } from 'expo-face-check';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import type { FaceVerdict } from '@/face/verdict';
+import { measureFaceShape } from '@/store/face-shape';
 
 /**
  * Getting a photo ready to send.
@@ -90,6 +91,12 @@ export async function prepare(uri: string, options: PrepareOptions = {}): Promis
   if (!face) return { ok: true, photo };
 
   if (face.status !== 'READY') return { ok: false, reason: VERDICTS[face.status] };
+
+  // Exactly one face, so this is a photo of the user and worth measuring for
+  // the "suits you" suggestions. Awaited because it is tens of milliseconds
+  // and the preview reads the shape on its way back into focus; it cannot
+  // throw, and it never decides whether the photo is accepted.
+  await measureFaceShape(result.uri);
 
   return { ok: true, photo };
 }

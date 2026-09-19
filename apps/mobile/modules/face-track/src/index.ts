@@ -1,7 +1,7 @@
 import { NitroModules } from 'react-native-nitro-modules'
 import type { FaceTrack } from './FaceTrack.nitro'
 
-export type { FaceTrack, DetectedFace, FacePoint } from './FaceTrack.nitro'
+export type { FaceTrack, DetectedFace, FaceMeasure, FacePoint } from './FaceTrack.nitro'
 
 /**
  * The detector, created once.

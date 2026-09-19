@@ -36,6 +36,31 @@ export interface DetectedFace {
 }
 
 /**
+ * The proportions of one face in a still photograph, in pixels.
+ *
+ * Distances rather than points, and rather than a verdict. Distances, because
+ * an array of structs is the one shape this bridge has never carried and a
+ * handful of numbers is all the classifier reads. Not a verdict, because the
+ * rule that turns them into a face shape is a product decision, and it lives
+ * in `src/face/shape.ts` where it can be tested in Node.
+ *
+ * Measured on the photo only, on the phone, and never sent anywhere.
+ */
+export interface FaceMeasure {
+  /** The face at its widest — Vision's contour has no cheek region, so this is it. */
+  cheekWidth: number
+  /** The contour's width at the height of the mouth: where the jaw is read. */
+  jawWidth: number
+  /** Outer end of one eyebrow to the outer end of the other. */
+  browWidth: number
+  /** Top of the eyebrows to the bottom of the chin. Vision cannot see a hairline. */
+  browToChin: number
+  /** Head tilt and turn, in radians, when Vision reports them. */
+  roll?: number
+  yaw?: number
+}
+
+/**
  * Face landmarks from one camera frame, on the frame's own thread.
  *
  * It takes a raw buffer pointer rather than VisionCamera's `Frame`, which is
@@ -59,4 +84,13 @@ export interface FaceTrack extends HybridObject<{ ios: 'swift' }> {
     orientation: string,
     mirrored: boolean,
   ): DetectedFace | undefined
+
+  /**
+   * Measure the largest face in a saved photo, off the JS thread.
+   *
+   * `uri` is a local `file://` JPEG — what `photo.ts` hands back. Resolves
+   * `undefined` when there is no face or Vision has no contour for it; a
+   * measurement that could not be made is not an error.
+   */
+  measureImage(uri: string): Promise<FaceMeasure | undefined>
 }

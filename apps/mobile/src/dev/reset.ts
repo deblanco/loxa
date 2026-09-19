@@ -70,6 +70,11 @@ const KEYS = [
    */
   'loxa.firstOffer.v1',
   /**
+   * The face shape last measured from the user's own photo. A fresh install
+   * has not measured anybody, and the strip should open unsorted.
+   */
+  'loxa.faceShape.v1',
+  /**
    * Error reports written but not yet sent. A reset is meant to hand back a
    * fresh install, and a queue full of the previous one's crashes would be
    * flushed on the next launch and attributed to this one.

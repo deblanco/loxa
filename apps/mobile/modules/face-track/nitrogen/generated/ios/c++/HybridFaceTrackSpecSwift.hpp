@@ -16,11 +16,15 @@ namespace FaceTrack { class HybridFaceTrackSpec_cxx; }
 namespace margelo::nitro::facetrack { struct DetectedFace; }
 // Forward declaration of `FacePoint` to properly resolve imports.
 namespace margelo::nitro::facetrack { struct FacePoint; }
+// Forward declaration of `FaceMeasure` to properly resolve imports.
+namespace margelo::nitro::facetrack { struct FaceMeasure; }
 
 #include "DetectedFace.hpp"
 #include <optional>
 #include "FacePoint.hpp"
 #include <string>
+#include "FaceMeasure.hpp"
+#include <NitroModules/Promise.hpp>
 
 #include "FaceTrack-Swift-Cxx-Umbrella.hpp"
 
@@ -74,6 +78,14 @@ namespace margelo::nitro::facetrack {
     // Methods
     inline std::optional<DetectedFace> detect(uint64_t buffer, const std::string& orientation, bool mirrored) override {
       auto __result = _swiftPart.detect(std::forward<decltype(buffer)>(buffer), orientation, std::forward<decltype(mirrored)>(mirrored));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::optional<FaceMeasure>>> measureImage(const std::string& uri) override {
+      auto __result = _swiftPart.measureImage(uri);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

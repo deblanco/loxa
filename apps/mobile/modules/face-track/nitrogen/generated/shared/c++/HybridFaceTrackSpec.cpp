@@ -15,6 +15,7 @@ namespace margelo::nitro::facetrack {
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridMethod("detect", &HybridFaceTrackSpec::detect);
+      prototype.registerHybridMethod("measureImage", &HybridFaceTrackSpec::measureImage);
     });
   }
 

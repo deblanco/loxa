@@ -14,6 +14,22 @@
 
 namespace margelo::nitro::facetrack::bridge::swift {
 
+  // pragma MARK: std::function<void(const std::optional<FaceMeasure>& /* result */)>
+  Func_void_std__optional_FaceMeasure_ create_Func_void_std__optional_FaceMeasure_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = FaceTrack::Func_void_std__optional_FaceMeasure_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::optional<FaceMeasure>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
+  Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = FaceTrack::Func_void_std__exception_ptr::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::exception_ptr& error) mutable -> void {
+      swiftClosure.call(error);
+    };
+  }
+  
   // pragma MARK: std::shared_ptr<HybridFaceTrackSpec>
   std::shared_ptr<HybridFaceTrackSpec> create_std__shared_ptr_HybridFaceTrackSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     FaceTrack::HybridFaceTrackSpec_cxx swiftPart = FaceTrack::HybridFaceTrackSpec_cxx::fromUnsafe(swiftUnsafePointer);

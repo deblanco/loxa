@@ -10,6 +10,8 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `DetectedFace` to properly resolve imports.
 namespace margelo::nitro::facetrack { struct DetectedFace; }
+// Forward declaration of `FaceMeasure` to properly resolve imports.
+namespace margelo::nitro::facetrack { struct FaceMeasure; }
 // Forward declaration of `FacePoint` to properly resolve imports.
 namespace margelo::nitro::facetrack { struct FacePoint; }
 // Forward declaration of `HybridFaceTrackSpec` to properly resolve imports.
@@ -17,8 +19,10 @@ namespace margelo::nitro::facetrack { class HybridFaceTrackSpec; }
 
 // Include C++ defined types
 #include "DetectedFace.hpp"
+#include "FaceMeasure.hpp"
 #include "FacePoint.hpp"
 #include "HybridFaceTrackSpec.hpp"
+#include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <memory>
