@@ -62,6 +62,8 @@ const es: typeof en = {
     styles: 'Cortes de pelo',
     colours: 'Colores de pelo',
     all: 'Los {{count}}',
+    suitedFirst: '{{shape}} · primero lo que te va',
+    suitsYou: 'te va',
   },
 
   camera: {
@@ -166,6 +168,18 @@ const es: typeof en = {
     language: 'Idioma',
     looks: 'Tus looks',
     seeAll: 'Ver todos',
+    faceShape: 'Forma de la cara',
+    faceShapeNote: 'Se mide en este teléfono a partir de tu última foto y nunca se envía a ningún sitio. Los cortes que suelen favorecerla aparecen primero.',
+    faceShapeForget: 'Olvidarla',
+    faceShapeKeep: 'OK',
+  },
+
+  faceShape: {
+    oval: 'Cara ovalada',
+    round: 'Cara redonda',
+    square: 'Cara cuadrada',
+    heart: 'Cara de corazón',
+    long: 'Cara alargada',
   },
 
   looks: {

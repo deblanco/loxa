@@ -149,7 +149,7 @@
             <div style="flex:none;padding:18px 0 0">
               <div style="display:flex;align-items:baseline;justify-content:space-between;padding:0 18px 9px">
                 <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,12,11,.45)">Hair styles</div>
-                <div style="font-size:12px;color:rgba(13,12,11,.4)">All 24</div>
+                <div style="font-size:12px;color:rgba(13,12,11,.4)">{{ stripNote }}</div>
               </div>
               <div style="display:flex;gap:10px;overflow-x:auto;padding:2px 16px 0;scrollbar-width:none;-ms-overflow-style:none">
                 <sc-for list="{{ styles }}" as="st" hint-placeholder-count="6">
@@ -158,6 +158,11 @@
                     <div style="margin-top:6px;font-size:11px;line-height:1.25;color:{{ st.txt }};text-align:center">{{ st.name }}</div>
                     <sc-if value="{{ st.on }}" hint-placeholder-val="{{ false }}">
                       <div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:9px">✓</div>
+                    </sc-if>
+                    <!-- "Suits you": cuts usually suggested for the face shape measured on the phone
+                         from the user's own photo. In the app they are also moved to the front. -->
+                    <sc-if value="{{ st.suits }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:absolute;top:65px;left:5px;height:14px;padding:0 5px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;font:500 9.5px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase">suits you</div>
                     </sc-if>
                   </div>
                 </sc-for>
@@ -443,6 +448,7 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;entry&quot;,&quot;offer&quot;,&quot;preview&quot;,&quot;gen&quot;,&quot;result&quot;,&quot;profile&quot;,&quot;camera&quot;],&quot;default&quot;:&quot;entry&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;startCredits&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:13,&quot;min&quot;:0,&quot;max&quot;:20,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;creditCap&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:60,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;weeklyPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$9.99/week&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;introPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$0.99&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;}}">
+const ROUND_SUITS = new Set(['Long layers','Sleek straight','Long bob','Bixie','Waist length','Locs','High ponytail','Half-up knot']);
 const STYLES = ['Blunt bob','Long layers','Curtain bang','Pixie','Wolf cut','Beach waves','Sleek straight','Braids','Curly shag','Buzz','Long bob','French bob','Bixie','Blunt fringe','Waist length','Blowout','Seventies flick','Mullet','Afro','Locs','Bantu knots','High ponytail','Chignon','Half-up knot'];
 const COLORS = [
   ['Jet black','#14110f'],['Espresso','#3a2418'],['Chestnut','#6b4226'],['Caramel','#a46c3c'],
@@ -543,8 +549,10 @@ class Component extends DCLogic {
       })),
       perks: ['20 photos a week, any style or colour', 'Your own face — not a stock model'],
       looks: ['Blunt bob · Platinum', 'Curtain bang · Copper', 'Pixie · Espresso', 'Long layers · Honey', 'Wolf cut · Ash', 'French bob · Cherry'].map(caption => ({ caption })),
+      // The prototype shows a user measured as a round face.
+      stripNote: 'Round face · suited first',
       styles: STYLES.map((name, i) => ({
-        name, on: s.style === i,
+        name, on: s.style === i, suits: ROUND_SUITS.has(name),
         ring: s.style === i ? '#0d0c0b' : 'rgba(13,12,11,.12)',
         txt: s.style === i ? '#0d0c0b' : 'rgba(13,12,11,.5)',
         go: () => this.setState({ style: i })

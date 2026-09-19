@@ -1,6 +1,6 @@
-import type { CatalogueResponse } from '@loxa/shared';
+import type { CatalogueResponse, FaceShape } from '@loxa/shared';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,10 +14,19 @@ import { SegmentedControl } from '@/components/SegmentedControl';
 import { StyleStrip } from '@/components/StyleStrip';
 import { Body, Display, Meta } from '@/components/Text';
 import { Wordmark } from '@/components/Wordmark';
-import { adjacentStyle, clampSelection, colorsFor, findColor, findStyle, heroKeys } from '@/catalogue';
+import {
+  adjacentStyle,
+  clampSelection,
+  colorsFor,
+  findColor,
+  findStyle,
+  heroKeys,
+  suitedFirst,
+} from '@/catalogue';
 import { initialSelection, primaryAction, primaryActionLabel, withSource } from '@/selection';
 import { useCatalogue } from '@/store/catalogue';
 import { useCredits } from '@/store/credits';
+import { readFaceShape } from '@/store/face-shape';
 import { readProfilePhoto } from '@/store/profile-photo';
 import { color, radius, space } from '@/theme';
 
@@ -105,8 +114,15 @@ function PreviewPlaceholder({ offline, onRetry }: { offline: boolean; onRetry: (
   );
 }
 
-function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
+function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
   const { t } = useTranslation();
+  // The user's face shape, measured on the phone from their last photo, and
+  // the catalogue re-ordered so the cuts that usually suit it come first.
+  // Everything below reads this one `catalogue` — the strip and the plate's
+  // swipe into the next cut included — so the two can never walk different
+  // orders. Read on focus, because the camera is where it is measured.
+  const [shape, setShape] = useState<FaceShape | null>(null);
+  const catalogue = useMemo(() => suitedFirst(served, shape), [served, shape]);
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
   const [selection, setSelection] = useState(() => initialSelection(catalogue.defaults));
@@ -205,6 +221,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
     useCallback(() => {
       void refresh();
       void readProfilePhoto().then(setPortrait);
+      void readFaceShape().then(setShape);
     }, [refresh]),
   );
 
@@ -339,6 +356,7 @@ function PreviewReady({ catalogue }: { catalogue: CatalogueResponse }) {
       >
         <StyleStrip
           catalogue={catalogue}
+          shape={shape}
           selectedId={selection.styleId}
           onSelect={(styleId) => setSelection((current) => ({ ...current, styleId }))}
         />

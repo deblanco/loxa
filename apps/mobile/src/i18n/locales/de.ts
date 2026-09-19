@@ -62,6 +62,8 @@ const de: typeof en = {
     styles: 'Haarschnitte',
     colours: 'Haarfarben',
     all: 'Alle {{count}}',
+    suitedFirst: '{{shape}} · Passendes zuerst',
+    suitsYou: 'passt dir',
   },
 
   camera: {
@@ -166,6 +168,18 @@ const de: typeof en = {
     language: 'Sprache',
     looks: 'Deine Looks',
     seeAll: 'Alle ansehen',
+    faceShape: 'Gesichtsform',
+    faceShapeNote: 'Auf diesem Telefon aus deinem letzten Foto gemessen und nirgendwohin gesendet. Schnitte, die oft dazu passen, stehen vorne.',
+    faceShapeForget: 'Vergessen',
+    faceShapeKeep: 'OK',
+  },
+
+  faceShape: {
+    oval: 'Ovales Gesicht',
+    round: 'Rundes Gesicht',
+    square: 'Eckiges Gesicht',
+    heart: 'Herzförmiges Gesicht',
+    long: 'Langes Gesicht',
   },
 
   looks: {

@@ -62,8 +62,11 @@ export default function PrivacyPolicy() {
         <Section title="Your photos">
           Before anything is sent, your photo is checked on the device itself,
           using Apple&rsquo;s own face detection, to see whether there is a face
-          in it. That check happens on your phone and its answer is not sent
-          anywhere. Your photo is then made smaller, sent to our server, passed
+          in it. The same check estimates the rough shape of the face — oval,
+          round and so on — so the cuts that often suit it can be shown first.
+          Both happen on your phone, and neither answer is sent anywhere; you
+          can clear the face shape from your profile. Your photo is then made
+          smaller, sent to our server, passed
           to an image model to be restyled, and returned to you.
         </Section>
 

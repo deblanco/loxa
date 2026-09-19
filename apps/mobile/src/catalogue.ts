@@ -1,4 +1,4 @@
-import type { CatalogueColor, CatalogueResponse, CatalogueStyle } from '@loxa/shared';
+import type { CatalogueColor, CatalogueResponse, CatalogueStyle, FaceShape } from '@loxa/shared';
 import type { Selection } from './selection';
 
 /**
@@ -126,6 +126,28 @@ export function clampSelection(
 
   if (styleId === selection.styleId && colorId === selection.colorId) return selection;
   return { ...selection, styleId, colorId };
+}
+
+/** Whether a cut is one usually suggested for this face shape. */
+export function suitsShape(style: CatalogueStyle, shape: FaceShape | null): boolean {
+  return shape !== null && (style.suits ?? []).includes(shape);
+}
+
+/**
+ * The catalogue with the cuts that suit this face shape moved to the front.
+ *
+ * Stable within each half, so the manifest's own order still decides among
+ * the suggestions and among the rest. Returned as a whole catalogue rather
+ * than a list of styles, because the strip and the plate's swipe-to-the-next-
+ * cut must walk the same order: handing both this one object is what stops
+ * them disagreeing. With no shape, or a manifest that carries no `suits`, it
+ * is the catalogue it was given.
+ */
+export function suitedFirst(catalogue: CatalogueResponse, shape: FaceShape | null): CatalogueResponse {
+  if (!shape || !catalogue.styles.some((style) => suitsShape(style, shape))) return catalogue;
+  const suited = catalogue.styles.filter((style) => suitsShape(style, shape));
+  const rest = catalogue.styles.filter((style) => !suitsShape(style, shape));
+  return { ...catalogue, styles: [...suited, ...rest] };
 }
 
 /**

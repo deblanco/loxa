@@ -1,8 +1,8 @@
-import { WEEKLY_CREDITS } from '@loxa/shared';
+import { WEEKLY_CREDITS, type FaceShape } from '@loxa/shared';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chevron } from '@/components/Chevron';
 import { DevPanel } from '@/components/DevPanel';
@@ -12,6 +12,7 @@ import { PhotoPlate } from '@/components/PhotoPlate';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Body, Display, Meta } from '@/components/Text';
 import { Toast } from '@/components/Toast';
+import { faceShapeKey } from '@/face/shape';
 import { planLabel, resetLabel } from '@/format';
 import { currentLanguage } from '@/i18n';
 import { LANGUAGE_NAMES } from '@/i18n/languages';
@@ -19,6 +20,7 @@ import { openPrivacy, openTerms } from '@/legal';
 import { disableDaily, enableDaily, isDailyEnabled } from '@/notifications';
 import { restoreAndSync, usePricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
+import { clearFaceShape, readFaceShape } from '@/store/face-shape';
 import { readProfilePhoto } from '@/store/profile-photo';
 import { listLooks, type Look } from '@/store/results';
 import { openReviewPage, reviewStoreUrl } from '@/store/review';
@@ -51,6 +53,7 @@ export default function Profile() {
   const [notify, setNotify] = useState(false);
   const [portrait, setPortrait] = useState<string | null>(null);
   const [looks, setLooks] = useState<Look[]>([]);
+  const [shape, setShape] = useState<FaceShape | null>(null);
 
   // Re-read on focus rather than once: the camera is pushed from here and
   // writes the portrait on its way back, so the only moment this screen can
@@ -64,6 +67,7 @@ export default function Profile() {
       void listLooks()
         .then(setLooks)
         .catch(() => setLooks([]));
+      void readFaceShape().then(setShape);
     }, []),
   );
   const [toast, setToast] = useState<string | null>(null);
@@ -82,6 +86,20 @@ export default function Profile() {
     // Permission may be declined, in which case the toggle must not claim to
     // have turned anything on.
     setNotify(await enableDaily());
+  }
+
+  function explainFaceShape(current: FaceShape) {
+    Alert.alert(t(faceShapeKey(current)), t('profile.faceShapeNote'), [
+      {
+        text: t('profile.faceShapeForget'),
+        style: 'destructive',
+        onPress: () => {
+          setShape(null);
+          void clearFaceShape();
+        },
+      },
+      { text: t('profile.faceShapeKeep'), style: 'cancel' },
+    ]);
   }
 
   async function restore() {
@@ -266,6 +284,16 @@ export default function Profile() {
               ones, because it is the row somebody hunts for when the rest of
               the screen is in a language they cannot read — and a value beside
               the label is what makes it findable without reading it. */}
+          {/* Only once there is one: a row reading "not measured" is a
+              question the user cannot answer from here. Tapping it says what
+              it is, where it lives, and lets them take it back. */}
+          {shape ? (
+            <Row
+              label={t('profile.faceShape')}
+              value={t(faceShapeKey(shape))}
+              onPress={() => explainFaceShape(shape)}
+            />
+          ) : null}
           <Row
             label={t('profile.language')}
             value={LANGUAGE_NAMES[currentLanguage()]}

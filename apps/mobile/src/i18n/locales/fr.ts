@@ -62,6 +62,8 @@ const fr: typeof en = {
     styles: 'Coupes de cheveux',
     colours: 'Couleurs de cheveux',
     all: 'Les {{count}}',
+    suitedFirst: '{{shape}} · ce qui te va d’abord',
+    suitsYou: 'te va',
   },
 
   camera: {
@@ -166,6 +168,18 @@ const fr: typeof en = {
     language: 'Langue',
     looks: 'Tes looks',
     seeAll: 'Tout voir',
+    faceShape: 'Forme du visage',
+    faceShapeNote: 'Mesurée sur ce téléphone à partir de ta dernière photo, et jamais envoyée nulle part. Les coupes qui lui vont souvent passent en premier.',
+    faceShapeForget: 'L’oublier',
+    faceShapeKeep: 'OK',
+  },
+
+  faceShape: {
+    oval: 'Visage ovale',
+    round: 'Visage rond',
+    square: 'Visage carré',
+    heart: 'Visage en cœur',
+    long: 'Visage long',
   },
 
   looks: {

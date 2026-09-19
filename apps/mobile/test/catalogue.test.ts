@@ -7,6 +7,8 @@ import {
   colorsFor,
   findStyle,
   heroKeys,
+  suitedFirst,
+  suitsShape,
   tileFor,
 } from '../src/catalogue';
 import { initialSelection } from '../src/selection';
@@ -189,5 +191,46 @@ describe('adjacentStyle', () => {
 
   it('has no neighbour for a cut the manifest no longer lists', () => {
     expect(adjacentStyle(CATALOGUE, 'no-such-style', 1)).toBeUndefined();
+  });
+});
+
+describe('suitedFirst', () => {
+  // The fixture with `suits` on the second cut only, so moving it is visible.
+  const TAGGED: CatalogueResponse = {
+    ...CATALOGUE,
+    styles: [
+      { ...CATALOGUE.styles[0]!, suits: ['oval'] },
+      { ...CATALOGUE.styles[1]!, suits: ['oval', 'long'] },
+    ],
+  };
+
+  it('moves the cuts that suit the shape to the front', () => {
+    expect(suitedFirst(TAGGED, 'long').styles.map((s) => s.id)).toEqual(['wolf-cut', 'blunt-bob']);
+  });
+
+  it('keeps the manifest order among the suggestions', () => {
+    expect(suitedFirst(TAGGED, 'oval').styles.map((s) => s.id)).toEqual(['blunt-bob', 'wolf-cut']);
+  });
+
+  it('is the same catalogue when there is nothing to reorder by', () => {
+    // No shape, a shape no cut lists, and a manifest built before `suits`.
+    expect(suitedFirst(TAGGED, null)).toBe(TAGGED);
+    expect(suitedFirst(TAGGED, 'square')).toBe(TAGGED);
+    expect(suitedFirst(CATALOGUE, 'oval')).toBe(CATALOGUE);
+  });
+
+  it('is the order the swipe walks, not only the strip', () => {
+    // The plate's pager and the strip must agree, which is why the screen
+    // hands both the same re-ordered catalogue.
+    const ordered = suitedFirst(TAGGED, 'long');
+    expect(adjacentStyle(ordered, 'wolf-cut', 1)?.id).toBe('blunt-bob');
+  });
+});
+
+describe('suitsShape', () => {
+  it('says no without a shape or without tags', () => {
+    expect(suitsShape({ ...CATALOGUE.styles[0]!, suits: ['oval'] }, 'oval')).toBe(true);
+    expect(suitsShape({ ...CATALOGUE.styles[0]!, suits: ['oval'] }, null)).toBe(false);
+    expect(suitsShape(CATALOGUE.styles[0]!, 'oval')).toBe(false);
   });
 });

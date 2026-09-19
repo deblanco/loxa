@@ -1,9 +1,10 @@
-import type { CatalogueResponse } from '@loxa/shared';
+import type { CatalogueResponse, FaceShape } from '@loxa/shared';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { assetUrl } from '../api/assets';
-import { tileFor } from '../catalogue';
+import { suitsShape, tileFor } from '../catalogue';
+import { faceShapeKey } from '../face/shape';
 import { color, radius, space } from '../theme';
 import { PhotoPlate } from './PhotoPlate';
 import { Body, Meta } from './Text';
@@ -29,14 +30,19 @@ import { Body, Meta } from './Text';
  * shows the cuts that have actually been rendered and grows by an upload rather
  * than by a release. `tileFor` falls back to a hero where no crop exists, which
  * is most of them.
+ *
+ * When the user's face shape is known, the cuts that usually suit it arrive
+ * first (the screen orders them — see `suitedFirst`) and carry a small "suits
+ * you" mark. A suggestion, not a filter: every cut is still here.
  */
 interface Props {
   catalogue: CatalogueResponse;
+  shape: FaceShape | null;
   selectedId: string;
   onSelect: (id: string) => void;
 }
 
-export function StyleStrip({ catalogue, selectedId, onSelect }: Props) {
+export function StyleStrip({ catalogue, shape, selectedId, onSelect }: Props) {
   const { t } = useTranslation();
   const [seed] = useState(() => Math.floor(Math.random() * 1000));
 
@@ -45,7 +51,9 @@ export function StyleStrip({ catalogue, selectedId, onSelect }: Props) {
       <View style={styles.header}>
         <Meta>{t('strips.styles')}</Meta>
         <Body variant="caption" tone="ink40">
-          {t('strips.all', { count: catalogue.styles.length })}
+          {shape && catalogue.styles.some((style) => suitsShape(style, shape))
+            ? t('strips.suitedFirst', { shape: t(faceShapeKey(shape)) })
+            : t('strips.all', { count: catalogue.styles.length })}
         </Body>
       </View>
 
@@ -56,11 +64,13 @@ export function StyleStrip({ catalogue, selectedId, onSelect }: Props) {
       >
         {catalogue.styles.map((style) => {
           const selected = style.id === selectedId;
+          const suits = suitsShape(style, shape);
           return (
             <Pressable
               key={style.id}
               accessibilityRole="button"
               accessibilityState={{ selected }}
+              accessibilityHint={suits ? t('strips.suitsYou') : undefined}
               onPress={() => onSelect(style.id)}
               style={styles.tile}
             >
@@ -73,6 +83,13 @@ export function StyleStrip({ catalogue, selectedId, onSelect }: Props) {
                   <Body variant="tile" tone="paper">
                     ✓
                   </Body>
+                </View>
+              ) : null}
+              {suits ? (
+                <View style={styles.suits} pointerEvents="none">
+                  <Meta variant="metaSmall" tone="paper">
+                    {t('strips.suitsYou')}
+                  </Meta>
                 </View>
               ) : null}
               <Body variant="tile" tone={selected ? 'ink' : 'ink55'} style={styles.name}>
@@ -109,4 +126,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   name: { marginTop: space.s1 + 2, textAlign: 'center' },
+  // On the photograph, bottom-left, in the tick's ink: the same mark language
+  // as selection, smaller, so the two never read as the same thing.
+  suits: {
+    position: 'absolute',
+    left: 5,
+    top: 84 - 5 - 14,
+    height: 14,
+    paddingHorizontal: 5,
+    borderRadius: radius.pill,
+    backgroundColor: color.ink,
+    justifyContent: 'center',
+  },
 });

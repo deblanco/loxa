@@ -93,6 +93,8 @@ const en = {
     styles: 'Hair styles',
     colours: 'Hair colours',
     all: 'All {{count}}',
+    suitedFirst: '{{shape}} · suited first',
+    suitsYou: 'suits you',
   },
 
   camera: {
@@ -219,6 +221,22 @@ const en = {
     language: 'Language',
     looks: 'Your looks',
     seeAll: 'See all',
+    faceShape: 'Face shape',
+    faceShapeNote: 'Measured on this phone from your last photo, and never sent anywhere. Cuts that often suit it come first in the strip.',
+    faceShapeForget: 'Forget it',
+    faceShapeKeep: 'OK',
+  },
+
+  faceShape: {
+    /**
+     * The face shape estimated on the phone. A styling suggestion, never a verdict,
+     * and never sent anywhere.
+     */
+    oval: 'Oval face',
+    round: 'Round face',
+    square: 'Square face',
+    heart: 'Heart-shaped face',
+    long: 'Long face',
   },
 
   looks: {

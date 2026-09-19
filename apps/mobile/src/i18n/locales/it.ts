@@ -62,6 +62,8 @@ const it: typeof en = {
     styles: 'Tagli di capelli',
     colours: 'Colori di capelli',
     all: 'Tutti e {{count}}',
+    suitedFirst: '{{shape}} · prima quelli adatti',
+    suitsYou: 'ti dona',
   },
 
   camera: {
@@ -166,6 +168,18 @@ const it: typeof en = {
     language: 'Lingua',
     looks: 'I tuoi look',
     seeAll: 'Vedi tutti',
+    faceShape: 'Forma del viso',
+    faceShapeNote: 'Misurata su questo telefono dalla tua ultima foto e mai inviata altrove. I tagli che di solito le donano vengono prima.',
+    faceShapeForget: 'Dimenticala',
+    faceShapeKeep: 'OK',
+  },
+
+  faceShape: {
+    oval: 'Viso ovale',
+    round: 'Viso tondo',
+    square: 'Viso squadrato',
+    heart: 'Viso a cuore',
+    long: 'Viso lungo',
   },
 
   looks: {
