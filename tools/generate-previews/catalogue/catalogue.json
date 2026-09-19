@@ -8,6 +8,11 @@
         "styles/blunt-bob/tile-0-r2.jpg",
         "styles/blunt-bob/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "heart",
+        "long"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -87,6 +92,12 @@
       "tiles": [
         "styles/long-layers/tile-0-r2.jpg",
         "styles/long-layers/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "round",
+        "square",
+        "heart"
       ],
       "colors": [
         {
@@ -168,6 +179,12 @@
         "styles/curtain-bang/tile-0-r2.jpg",
         "styles/curtain-bang/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "square",
+        "heart",
+        "long"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -247,6 +264,10 @@
       "tiles": [
         "styles/pixie/tile-0-r2.jpg",
         "styles/pixie/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "heart"
       ],
       "colors": [
         {
@@ -328,6 +349,11 @@
         "styles/wolf-cut/tile-0-r2.jpg",
         "styles/wolf-cut/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "square",
+        "long"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -407,6 +433,12 @@
       "tiles": [
         "styles/beach-waves/tile-0-r2.jpg",
         "styles/beach-waves/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "square",
+        "heart",
+        "long"
       ],
       "colors": [
         {
@@ -488,6 +520,11 @@
         "styles/sleek-straight/tile-0-r2.jpg",
         "styles/sleek-straight/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "round",
+        "heart"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -567,6 +604,10 @@
       "tiles": [
         "styles/braids/tile-0-r2.jpg",
         "styles/braids/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "heart"
       ],
       "colors": [
         {
@@ -648,6 +689,12 @@
         "styles/curly-shag/tile-0-r2.jpg",
         "styles/curly-shag/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "square",
+        "heart",
+        "long"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -727,6 +774,9 @@
       "tiles": [
         "styles/buzz/tile-0-r2.jpg",
         "styles/buzz/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval"
       ],
       "colors": [
         {
@@ -808,6 +858,12 @@
         "styles/lob/tile-0-r2.jpg",
         "styles/lob/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "round",
+        "square",
+        "heart"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -887,6 +943,11 @@
       "tiles": [
         "styles/french-bob/tile-0-r2.jpg",
         "styles/french-bob/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "heart",
+        "long"
       ],
       "colors": [
         {
@@ -968,6 +1029,11 @@
         "styles/bixie/tile-0-r2.jpg",
         "styles/bixie/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "round",
+        "heart"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1047,6 +1113,11 @@
       "tiles": [
         "styles/blunt-fringe/tile-0-r2.jpg",
         "styles/blunt-fringe/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "heart",
+        "long"
       ],
       "colors": [
         {
@@ -1128,6 +1199,11 @@
         "styles/waist-length/tile-0-r2.jpg",
         "styles/waist-length/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "round",
+        "square"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1207,6 +1283,11 @@
       "tiles": [
         "styles/blowout/tile-0-r2.jpg",
         "styles/blowout/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "square",
+        "long"
       ],
       "colors": [
         {
@@ -1288,6 +1369,12 @@
         "styles/seventies-flick/tile-0-r2.jpg",
         "styles/seventies-flick/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "square",
+        "heart",
+        "long"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1367,6 +1454,10 @@
       "tiles": [
         "styles/mullet/tile-0-r2.jpg",
         "styles/mullet/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "square"
       ],
       "colors": [
         {
@@ -1448,6 +1539,11 @@
         "styles/afro/tile-0-r2.jpg",
         "styles/afro/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "heart",
+        "long"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1527,6 +1623,11 @@
       "tiles": [
         "styles/locs/tile-0-r2.jpg",
         "styles/locs/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "round",
+        "square"
       ],
       "colors": [
         {
@@ -1608,6 +1709,10 @@
         "styles/bantu-knots/tile-0-r2.jpg",
         "styles/bantu-knots/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "heart"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1687,6 +1792,11 @@
       "tiles": [
         "styles/high-ponytail/tile-0-r2.jpg",
         "styles/high-ponytail/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "round",
+        "heart"
       ],
       "colors": [
         {
@@ -1768,6 +1878,11 @@
         "styles/chignon/tile-0-r2.jpg",
         "styles/chignon/tile-1-r2.jpg"
       ],
+      "suits": [
+        "oval",
+        "square",
+        "heart"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1847,6 +1962,11 @@
       "tiles": [
         "styles/half-up-knot/tile-0-r2.jpg",
         "styles/half-up-knot/tile-1-r2.jpg"
+      ],
+      "suits": [
+        "oval",
+        "round",
+        "heart"
       ],
       "colors": [
         {
