@@ -10,15 +10,26 @@ plain text, and a reviewer reads it in about twenty seconds.
 
 ## Why this app needs notes at all
 
-Loxa has no account and **no free tier**. `FREE_CREDITS` is 0, so a fresh
-install can browse the catalogue and nothing else: every render spends a credit,
-and the only ways to hold one are the weekly subscription or a $0.99 photo.
+Loxa has no account. A fresh install gets **one free photo** (`FREE_CREDITS` is
+1, lifetime, per device id), and every photo after that is the weekly
+subscription or a $0.99 single. The offer appears once, after that first
+result, and the out-of-credits sheet whenever the balance is zero.
 
-That makes the core feature unreachable without a purchase, which is fine —
-2.1(b) asks that in-app purchases be reviewable, not that anything be free — but
-only if the notes say so. A reviewer who dismisses the offer, taps Try On, gets
-a paywall and stops there has seen an app that does nothing, and will write it
-up as 2.1.
+A reviewer can therefore reach the core feature without buying anything, and
+must still be told how to reach both purchases — 2.1(b) asks that in-app
+purchases be reviewable, and the second one only appears after the free photo
+has been spent.
+
+## History
+
+- **2.1, Information Needed** (first submission). Seven questions; answered in
+  `f65d2bb`, and the numbered sections below are still those answers.
+- **4.3(b), Design — Spam** (September 2026). No defect named: the app's
+  "design, content and overall concept" read as one more AI hair try-on. What
+  the reviewer met was a paywall on the second screen, no way to see the product
+  without paying, a single loop with nothing kept, and a listing that described
+  the category rather than the app. The resubmission changes all four, and the
+  notes open with that list rather than making the reviewer find it.
 
 ## Notes — paste as-is
 
@@ -34,24 +45,36 @@ The old notes are not deleted so much as absorbed: what was the whole of them �
 no account, no free tier, how to reach a purchase — is now section 3, because
 that is the question App Review actually asks it under.
 
+Rewritten again for the resubmission after 4.3(b): a "what changed" paragraph
+first, and sections 1, 3 and 7 updated for the new flow.
+
 Under 4,000 characters, which is the field's limit and the reason this is
 compressed rather than discursive.
 
-> Loxa restyles a photograph of your own face with a different haircut and colour. No account, no login, no free tier: every generated photo costs one credit and a new install has none, so the core feature requires an in-app purchase.
+> Loxa restyles a photograph of your own face with a different haircut and colour, and suggests the cuts that suit your face shape. No account, no login. The first photo is free; after that it is a weekly subscription or a single photo.
+>
+> WHAT CHANGED SINCE THE 4.3(b) REVIEW
+> - The first photo is free: a new install sees its own face restyled without buying anything.
+> - The subscription offer no longer sits in front of the app; it appears once, after that first result.
+> - Face-shape suggestions: Apple Vision estimates the face shape on the device, and the cuts that usually suit it come first, marked "suits you". The shape never leaves the phone.
+> - A gallery of every look (Profile > Your looks), kept with its original photo to compare, share or delete later.
+> - A listing that describes these rather than the category.
 >
 > 1. SCREEN RECORDING
-> Attached, captured on a physical iPhone on iOS 26. It begins at launch and walks the typical flow: entry carousel, the subscription offer, the catalogue, taking a photo, a purchase, and a generated result. The purchase controls carry the product title, the length (one week), the price, the auto-renewal disclosure and links to the Terms of Use and Privacy Policy.
+> Attached, on a physical iPhone on iOS 26, from launch: carousel, catalogue with suggestions, a photo, the free render, the one-time offer, the gallery, and the out-of-credits sheet. Purchase controls show title, length, price, auto-renewal terms and links to the Terms and Privacy Policy.
 >
 > 2. PURPOSE AND AUDIENCE
-> For anyone deciding whether to change their hair. Cutting or colouring is irreversible and expensive, and a salon photo of a stranger does not answer "would this suit me". Loxa answers it on the user's own face in a few seconds, so they can decide, or show a stylist exactly what they mean. The audience is general consumers aged 16 and over.
+> For anyone deciding whether to change their hair. A cut is irreversible, and a photo of a stranger does not answer "would this suit me". Loxa answers it on the user's own face, so they can decide or show a stylist what they mean. General consumers aged 16 and over.
 >
 > 3. SETUP AND ACCESS
-> No sign-in, no demo account, no sample files, and no sandbox setup: purchases in a review build run in the sandbox environment against the account already on the device.
-> a. Launch Loxa and continue past the entry carousel.
-> b. Either subscribe on the offer screen, or dismiss it with the X and tap Try On. The catalogue of 24 cuts and 10 colours can be browsed either way, but Try On returns "out of credits" until something is bought.
-> c. Buy loxa_weekly_999 (20 photos) or loxa_single_photo_099 (one photo).
-> d. Take a photo or choose one from the library, pick a cut and a colour, tap Try On. The image appears in roughly ten seconds.
-> Credits are granted by our server after it confirms the transaction with the store, so the balance updates a moment after the App Store sheet closes. Restore purchases is on both purchase screens and in Profile.
+> No sign-in, demo account, sample files or sandbox setup; review purchases use the sandbox account already on the device.
+> a. Launch Loxa and tap Get started.
+> b. Take a photo or choose one from the library. Cuts that suit the measured face shape move to the front and are marked "suits you".
+> c. Pick a cut and a colour, tap Try On. The free photo appears in roughly ten seconds.
+> d. Leave the result: the subscription offer appears once. Subscribe, or dismiss it with the X.
+> e. Tap Try On again: with the free photo spent, the out-of-credits sheet offers loxa_single_photo_099 and loxa_weekly_999.
+> f. Profile > Your looks shows every result; open one to compare, share or delete it.
+> Credits are granted by our server once the store confirms, a moment after the App Store sheet closes. Restore purchases is on both purchase screens and in Profile.
 >
 > 4. EXTERNAL SERVICES
 > - Google Cloud Vertex AI (Gemini image model): generates the restyled photograph.
@@ -61,18 +84,18 @@ compressed rather than discursive.
 > No analytics SDK, no advertising SDK, no advertising identifier, no tracking.
 >
 > 5. REGIONAL DIFFERENCES
-> None. Every feature and all content are identical in all regions. Prices are the App Store's own per storefront. The interface is available in English, Spanish, French, German and Italian, selected from the device language.
+> None. Prices are the App Store's per storefront. English, Spanish, French, German and Italian, from the device language.
 >
 > 6. REGULATED INDUSTRY OR THIRD-PARTY MATERIAL
-> Neither. Loxa is not in a regulated industry and contains no third-party content. The catalogue photographs are generated by us and owned by us. The only other image is the user's own photo, supplied by them.
+> Neither. The catalogue photographs are generated and owned by us; the only other image is the user's own photo.
 >
 > 7. IN-APP PURCHASE
 > Two products, both reachable without an account:
 > - Loxa Weekly (loxa_weekly_999), auto-renewable, one week, USD 9.99 per week, first week USD 0.99. Grants 20 generated photos each week, reset every Monday, no roll-over.
 > - One more photo (loxa_single_photo_099), consumable, USD 0.99. Grants one generated photo, no subscription.
-> To reach them: the subscription is on the onboarding offer, the screen straight after the entry carousel. Dismissing that offer with the X and tapping Try On on the main screen opens the out-of-credits sheet, which offers both products to anyone who is not already subscribed. A current subscriber who has spent the week's 20 photos is shown only the single photo there, because the App Store cannot sell them a second concurrent subscription and their allowance returns on Monday. Profile links to both, and to Manage Subscription for cancelling.
+> To reach them: the subscription is on the offer shown once after the free result. After that, Try On with no credits opens the out-of-credits sheet with both products; a subscriber who has spent the week sees only the single photo. Profile links to both, and to Manage Subscription.
 >
-> The app has no user-generated content, no social features, no accounts and no advertising. It reports its own errors to our server: no third-party SDK, no identifier, no photo, deleted after thirty days. That is the "Diagnostics > Crash Data, not linked to identity" entry on the privacy label.
+> No user-generated content, social features, accounts or advertising. Errors are reported to our own server with no identifier and no photo, deleted after thirty days: the "Crash Data, not linked to identity" entry on the privacy label.
 >
 > Contact: apps@blankhexadecimal.com
 
@@ -108,5 +131,10 @@ these has failed in a way that looks, to a reviewer, exactly like a broken app:
   id are right in production secrets.
 - **`DEV_PREMIUM` is unset in the production Worker.** Set, it hands the reviewer
   a subscription nobody bought and puts the paywall out of reach of review.
-- **The description and screenshots say the app is paid** (2.3.2). Nothing may
-  imply a free render.
+- **The description says the first photo is free, once, and what everything
+  after it costs** (2.3.2). Nothing may imply more than one free render.
+- **The new catalogue manifest is uploaded**, after the Worker deploy, so
+  `GET /v1/catalogue` carries `suits`. Without it the "suits you" feature the
+  notes describe is invisible.
+- **The screen recording is re-shot** on the new flow. The old one opens on the
+  offer screen that no longer exists there.

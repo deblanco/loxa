@@ -7,8 +7,14 @@ submission otherwise starts from whatever somebody remembers.
 Every factual claim is checkable against the code — 24 cuts and 10 colours are
 what `GET /v1/catalogue` actually serves, the prices are
 `packages/shared/src/credits.ts`, and the privacy paragraphs are the privacy
-policy in shorter words. **Nothing here may imply a free render** (2.3.2):
-`FREE_CREDITS` is 0 and the listing has to say so.
+policy in shorter words. **The first photo is free, once per device, and
+nothing here may imply more than that** (2.3.2): `FREE_CREDITS` is 1, and
+everything after it is paid.
+
+Rewritten after the 4.3(b) rejection of September 2026. The listing used to
+describe the category — "AI hairstyle try-on", "changer", "simulator" — and it
+now describes what is particular to this app: your own face, the cuts that
+suit its shape, and a gallery of every look you have tried.
 
 Full description in English only. The other four locales carry a short one —
 enough to be legible in the reader's own language, not a second thing to keep
@@ -24,22 +30,22 @@ in step with the code.
 
 ## English (U.S.)
 
-**Subtitle** (28/30)
+**Subtitle** (30/30)
 
 ```
-AI hairstyle & colour try-on
+Your face, before the scissors
 ```
 
 **Keywords** (93/100)
 
 ```
-haircut,color,changer,simulator,virtual,salon,makeover,bangs,blonde,balayage,bob,pixie,selfie
+haircut,hairstyle,color,try on,face shape,salon,bangs,blonde,balayage,bob,pixie,layers,selfie
 ```
 
 **Promotional text** (135/170)
 
 ```
-24 cuts and 10 colours on your own face, in seconds. Take a photo, pick a look, and see the change before anyone picks up the scissors.
+Your first photo is free. 24 cuts and 10 colours on your own face, with the ones that suit your face shape first — before the scissors.
 ```
 
 **Description**
@@ -49,8 +55,11 @@ Loxa puts a different haircut and a different colour on your own face. Your phot
 
 HOW IT WORKS
 1. Take a photo, or choose one from your library.
-2. Pick a cut and a colour.
-3. See yourself wearing it, usually in a few seconds. Save it, share it, or try another.
+2. Pick a cut and a colour — the ones that suit your face shape come first.
+3. See yourself wearing it, usually in a few seconds. Your first photo is free.
+
+CUTS THAT SUIT YOUR FACE
+Loxa estimates the shape of your face — oval, round, square, heart or long — from your own photo, on your phone, and puts the cuts that often suit it at the front. It is a suggestion, not a rule: every cut is still there. The shape is never sent anywhere, and you can clear it from your profile.
 
 24 CUTS
 Blunt bob, long layers, curtain bang, pixie, wolf cut, beach waves, sleek straight, braids, curly shag, buzz, long bob, French bob, bixie, blunt fringe, waist length, blowout, seventies flick, mullet, afro, locs, bantu knots, high ponytail, chignon, half-up knot.
@@ -66,8 +75,11 @@ Every image is generated from your own photograph. Loxa does not hand back a mod
 HOLD TO COMPARE
 Press and hold a result to see the photo you started from underneath it. That is the whole point: the difference, on you.
 
+EVERY LOOK, KEPT
+Every look you make is kept in a gallery on your phone, with the photo it was made from. Open one weeks later, compare it again, share it, or show it to your hairdresser.
+
 WHAT IT COSTS
-Loxa is a paid app. There is no free render and no advertising.
+Your first photo is free, once. After that, and with no advertising:
 • Loxa Weekly — 20 photos every week, $9.99 per week. First week $0.99.
 • One photo — $0.99, no subscription.
 Weekly credits reset every Monday and do not roll over.
@@ -78,7 +90,7 @@ NO ACCOUNT
 No sign-up, no login, no email address, no social feed. The app makes an anonymous identifier on your device and uses it for two things: counting the photos you have left, and telling our billing provider which subscription is yours.
 
 YOUR PHOTOS
-The photo you send is not stored on our servers. Generated images are saved on your phone, and a copy is held for up to thirty days so that repeating the same request does not cost a second credit. We use no analytics or advertising SDKs, we do not use the advertising identifier, and we do not use your photos to train anything.
+The photo you send is not stored on our servers. Generated images, and the photos they were made from, are saved on your phone; a copy of each generated image is held for up to thirty days so that repeating the same request does not cost a second credit. We use no analytics or advertising SDKs, we do not use the advertising identifier, and we do not use your photos to train anything.
 
 IN FIVE LANGUAGES
 English, Spanish, French, German and Italian.
@@ -93,19 +105,19 @@ Apple's standard licence agreement (EULA): https://www.apple.com/legal/internet-
 **Subtitle**
 
 ```
-Corte y color con IA sobre ti
+Tu cara, antes de las tijeras
 ```
 
 **Keywords**
 
 ```
-peinado,cabello,pelo,corte,color,cambiar,simulador,virtual,peluqueria,rubio,flequillo,melena,selfie
+peinado,cabello,pelo,corte,color,forma de cara,probar,peluqueria,rubio,flequillo,melena,selfie
 ```
 
 **Promotional text**
 
 ```
-24 cortes y 10 colores sobre tu propia cara, en segundos. Haz una foto, elige un look y mira el cambio antes de cortar.
+Tu primera foto es gratis. 24 cortes y 10 colores sobre tu propia cara, con los que favorecen a tu tipo de cara primero.
 ```
 
 **Description**
@@ -115,9 +127,9 @@ Loxa pone un corte distinto y un color distinto sobre tu propia cara. Entra tu f
 
 Haz una foto o elige una de tu galería, escoge un corte y un color, y en unos segundos te ves con él. Mantén pulsado el resultado para ver debajo la foto de la que saliste.
 
-24 cortes y 10 colores: 240 looks, todos sobre ti y no sobre una modelo.
+24 cortes y 10 colores: 240 looks, todos sobre ti y no sobre una modelo. Loxa calcula la forma de tu cara en el propio teléfono, a partir de tu foto, y te enseña primero los cortes que suelen favorecerla; ese dato nunca sale del teléfono. Cada look que hagas se guarda en una galería, con la foto original, para volver a compararlo o enseñárselo a tu peluquero.
 
-Loxa es una app de pago. No hay generaciones gratis ni publicidad.
+Tu primera foto es gratis, una vez. Después, y sin publicidad:
 • Loxa Weekly: 20 fotos por semana, 9,99 € a la semana. Primera semana 0,99 €.
 • Una foto suelta: 0,99 €, sin suscripción.
 Los créditos se renuevan cada lunes y no se acumulan. El pago se carga a tu cuenta de Apple al confirmar la compra y la suscripción se renueva sola salvo que la canceles al menos 24 horas antes del final de la semana, desde los ajustes de tu cuenta de Apple.
@@ -138,19 +150,19 @@ listing a reader in Mexico actually sees.
 **Subtitle**
 
 ```
-Corte y color con IA sobre ti
+Tu cara, antes de las tijeras
 ```
 
 **Keywords**
 
 ```
-peinado,cabello,pelo,corte,color,cambiar,simulador,virtual,peluqueria,rubio,flequillo,melena,selfie
+peinado,cabello,pelo,corte,color,forma de cara,probar,peluqueria,rubio,flequillo,melena,selfie
 ```
 
 **Promotional text**
 
 ```
-24 cortes y 10 colores sobre tu propia cara, en segundos. Haz una foto, elige un look y mira el cambio antes de cortar.
+Tu primera foto es gratis. 24 cortes y 10 colores sobre tu propia cara, con los que favorecen a tu tipo de cara primero.
 ```
 
 **Description**
@@ -160,9 +172,9 @@ Loxa pone un corte distinto y un color distinto sobre tu propia cara. Entra tu f
 
 Haz una foto o elige una de tu galería, escoge un corte y un color, y en unos segundos te ves con él. Mantén pulsado el resultado para ver debajo la foto de la que saliste.
 
-24 cortes y 10 colores: 240 looks, todos sobre ti y no sobre una modelo.
+24 cortes y 10 colores: 240 looks, todos sobre ti y no sobre una modelo. Loxa calcula la forma de tu cara en el propio teléfono, a partir de tu foto, y te enseña primero los cortes que suelen favorecerla; ese dato nunca sale del teléfono. Cada look que hagas se guarda en una galería, con la foto original, para volver a compararlo o enseñárselo a tu peluquero.
 
-Loxa es una app de pago. No hay generaciones gratis ni publicidad.
+Tu primera foto es gratis, una vez. Después, y sin publicidad:
 • Loxa Weekly: 20 fotos por semana, 199 $ MXN a la semana. Primera semana 19 $ MXN.
 • Una foto suelta: 19 $ MXN, sin suscripción.
 Los créditos se renuevan cada lunes y no se acumulan. El pago se carga a tu cuenta de Apple al confirmar la compra y la suscripción se renueva sola salvo que la canceles al menos 24 horas antes del final de la semana, desde los ajustes de tu cuenta de Apple.
@@ -179,19 +191,19 @@ Contrato de licencia estándar de Apple (EULA): https://www.apple.com/legal/inte
 **Subtitle**
 
 ```
-Coupe et couleur par IA
+Vous, avant les ciseaux
 ```
 
 **Keywords**
 
 ```
-coiffure,cheveux,coupe,couleur,coloration,simulateur,salon,blond,frange,carre,relooking,selfie
+coiffure,cheveux,coupe,couleur,coloration,forme du visage,essayer,salon,blond,frange,carre,selfie
 ```
 
 **Promotional text**
 
 ```
-24 coupes et 10 couleurs sur votre propre visage, en quelques secondes. Une photo, un look, et vous voyez le changement avant les ciseaux.
+Votre première photo est offerte. 24 coupes et 10 couleurs sur votre visage, celles qui vont à sa forme en premier.
 ```
 
 **Description**
@@ -201,9 +213,9 @@ Loxa pose une autre coupe et une autre couleur sur votre propre visage. Votre ph
 
 Prenez une photo ou choisissez-en une dans votre galerie, choisissez une coupe et une couleur, et vous vous voyez avec en quelques secondes. Maintenez le résultat appuyé pour revoir la photo de départ en dessous.
 
-24 coupes et 10 couleurs : 240 looks, sur vous et non sur un mannequin.
+24 coupes et 10 couleurs : 240 looks, sur vous et non sur un mannequin. Loxa estime la forme de votre visage sur le téléphone, à partir de votre photo, et vous montre d'abord les coupes qui lui vont souvent ; cette information ne quitte jamais le téléphone. Chaque look est gardé dans une galerie, avec la photo d'origine, pour le comparer à nouveau ou le montrer à votre coiffeur.
 
-Loxa est une application payante. Aucune génération gratuite, aucune publicité.
+Votre première photo est offerte, une fois. Ensuite, sans publicité :
 • Loxa Weekly : 20 photos par semaine, 9,99 € par semaine. Première semaine 0,99 €.
 • Une photo : 0,99 €, sans abonnement.
 Les crédits repartent chaque lundi et ne se cumulent pas. Le paiement est débité de votre compte Apple à la confirmation de l'achat et l'abonnement se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine, depuis les réglages de votre compte Apple.
@@ -220,19 +232,19 @@ Contrat de licence standard d'Apple (CLUF) : https://www.apple.com/legal/interne
 **Subtitle**
 
 ```
-Frisur & Haarfarbe mit KI
+Dein Gesicht, vor der Schere
 ```
 
 **Keywords**
 
 ```
-frisuren,haare,haarschnitt,farbe,haarfarbe,simulator,virtuell,friseur,blond,pony,bob,styling,selfie
+frisuren,haare,haarschnitt,farbe,haarfarbe,gesichtsform,ausprobieren,friseur,blond,pony,bob,selfie
 ```
 
 **Promotional text**
 
 ```
-24 Schnitte und 10 Farben auf deinem eigenen Gesicht, in Sekunden. Foto machen, Look wählen, die Veränderung vor der Schere sehen.
+Dein erstes Foto ist gratis. 24 Schnitte und 10 Farben auf deinem eigenen Gesicht, die zu deiner Gesichtsform passenden zuerst.
 ```
 
 **Description**
@@ -242,9 +254,9 @@ Loxa setzt einen anderen Haarschnitt und eine andere Farbe auf dein eigenes Gesi
 
 Mach ein Foto oder wähle eines aus deiner Mediathek, such dir Schnitt und Farbe aus, und nach ein paar Sekunden siehst du dich damit. Halte das Ergebnis gedrückt, um das Ausgangsfoto darunter zu sehen.
 
-24 Schnitte und 10 Farben: 240 Looks, auf dir und nicht auf einem Model.
+24 Schnitte und 10 Farben: 240 Looks, auf dir und nicht auf einem Model. Loxa schätzt deine Gesichtsform auf dem Telefon aus deinem Foto und zeigt dir zuerst die Schnitte, die oft dazu passen; diese Angabe verlässt das Telefon nie. Jeder Look bleibt in einer Galerie, mit dem Originalfoto, zum erneuten Vergleichen oder um ihn deinem Friseur zu zeigen.
 
-Loxa ist eine kostenpflichtige App. Es gibt kein kostenloses Bild und keine Werbung.
+Dein erstes Foto ist gratis, einmal. Danach, ohne Werbung:
 • Loxa Weekly: 20 Fotos pro Woche für 9,99 € pro Woche. Erste Woche 0,99 €.
 • Einzelnes Foto: 0,99 €, ohne Abo.
 Das Guthaben wird jeden Montag zurückgesetzt und wird nicht übertragen. Die Zahlung wird bei Kaufbestätigung deinem Apple-Account belastet; das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der Woche in den Einstellungen deines Apple-Accounts gekündigt wird.
@@ -261,19 +273,19 @@ Apples Standard-Lizenzvereinbarung (EULA): https://www.apple.com/legal/internet-
 **Subtitle**
 
 ```
-Taglio e colore con l'IA
+Il tuo viso, prima del taglio
 ```
 
 **Keywords**
 
 ```
-capelli,acconciatura,taglio,colore,tinta,simulatore,parrucchiere,biondo,frangia,caschetto,selfie
+capelli,acconciatura,taglio,colore,tinta,forma del viso,provare,parrucchiere,biondo,frangia,selfie
 ```
 
 **Promotional text**
 
 ```
-24 tagli e 10 colori sul tuo viso, in pochi secondi. Scatta una foto, scegli un look e guarda il cambiamento prima delle forbici.
+La prima foto è gratis. 24 tagli e 10 colori sul tuo viso, con quelli adatti alla sua forma per primi.
 ```
 
 **Description**
@@ -283,9 +295,9 @@ Loxa mette un taglio diverso e un colore diverso sul tuo viso. Entra la tua foto
 
 Scatta una foto o scegline una dalla galleria, scegli taglio e colore, e in pochi secondi ti vedi con quel look. Tieni premuto il risultato per rivedere sotto la foto di partenza.
 
-24 tagli e 10 colori: 240 look, sul tuo viso e non su una modella.
+24 tagli e 10 colori: 240 look, sul tuo viso e non su una modella. Loxa stima la forma del tuo viso sul telefono, dalla tua foto, e ti mostra prima i tagli che di solito le donano; questo dato non lascia mai il telefono. Ogni look resta in una galleria, con la foto originale, per confrontarlo di nuovo o mostrarlo al tuo parrucchiere.
 
-Loxa è un'app a pagamento. Nessuna generazione gratuita e nessuna pubblicità.
+La prima foto è gratis, una volta. Poi, senza pubblicità:
 • Loxa Weekly: 20 foto a settimana, 9,99 € a settimana. Prima settimana 0,99 €.
 • Foto singola: 0,99 €, senza abbonamento.
 I crediti si azzerano ogni lunedì e non si accumulano. Il pagamento viene addebitato sull'account Apple alla conferma dell'acquisto e l'abbonamento si rinnova da solo salvo disdetta almeno 24 ore prima della fine della settimana, dalle impostazioni dell'account Apple.
@@ -318,10 +330,17 @@ serves, one cut per cell with the colour rotating through all ten, built from
 does not ship, and a withdrawn style disappears from it on the next run.
 
 **Nothing in the screenshots states the price** (2.3.2 is carried by the
-description's "Loxa is a paid app" section and by the App Store's own in-app
-purchase list). If review ever reads the gallery as promising free renders, the
-paywall frame — `08-paywall-out-of-credits`, which shows both products and the
-renewal terms — is the panel to put back.
+description's "What it costs" section and by the App Store's own in-app
+purchase list). The first photo is free and the description says "once"; if
+review ever reads the gallery as promising more than that, the paywall frame —
+`08-paywall-out-of-credits`, which shows both products and the renewal terms —
+is the panel to put back.
+
+**To re-shoot before resubmitting.** The frames above predate the 4.3(b)
+changes. Two panels should show what is new, in place of 04 and 05:
+the style strip with "suits you" marks and "Round face · suited first", and the
+looks gallery. Panel 05's catalogue grid is the most category-generic image in
+the set.
 
 ## The two products
 
