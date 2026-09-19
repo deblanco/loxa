@@ -123,6 +123,18 @@ export type PurchaseSyncResponse = z.infer<typeof purchaseSyncResponseSchema>;
  * a compiled catalogue has no way to say so.
  */
 
+/**
+ * The face shapes the catalogue is tagged against.
+ *
+ * Conventional stylist vocabulary rather than a measurement: the app estimates
+ * one on the phone from the user's own photo (`apps/mobile/src/face/shape.ts`),
+ * and the shape never leaves the phone. Only the catalogue's side of the match
+ * — which cuts are usually suggested for which shape — crosses the wire.
+ */
+export const FACE_SHAPES = ['oval', 'round', 'square', 'heart', 'long'] as const;
+export const faceShapeSchema = z.enum(FACE_SHAPES);
+export type FaceShape = z.infer<typeof faceShapeSchema>;
+
 /** Preview keys, relative to the assets bucket. Never absolute URLs — see below. */
 const previewKeySchema = z.string().min(1).max(256);
 
@@ -137,6 +149,13 @@ export const catalogueStyleSchema = z.object({
    * tile costs a crop, not a cut.
    */
   tiles: z.array(previewKeySchema),
+  /**
+   * The face shapes this cut is usually suggested for.
+   *
+   * Optional, and absent means "no suggestion" — a manifest built before this
+   * existed still validates, and the strip simply shows no "suits you" marks.
+   */
+  suits: z.array(faceShapeSchema).optional(),
   /** The colours rendered for this style, in catalogue order. Never empty. */
   colors: z
     .array(

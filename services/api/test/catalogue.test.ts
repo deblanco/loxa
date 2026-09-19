@@ -38,6 +38,12 @@ describe('shippedCatalogue', () => {
     expect(catalogue.styles[0]!.tiles).toHaveLength(2);
   });
 
+  it('publishes which face shapes each cut suits', () => {
+    // Not a prompt, so it may cross the wire — and the fallback has to carry
+    // it too, or "suits you" vanishes whenever the bucket's manifest does.
+    for (const style of shippedCatalogue().styles) expect(style.suits).toContain('oval');
+  });
+
   it('opens on a style it actually contains', () => {
     const catalogue = shippedCatalogue();
     expect(catalogue.styles.some((s) => s.id === catalogue.defaults.styleId)).toBe(true);

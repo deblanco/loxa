@@ -107,6 +107,7 @@ export async function buildManifest(): Promise<CatalogueResponse> {
       // Usually empty, and that is fine: 45 of the 48 tiles have never been
       // rendered. The strip falls back to a hero rather than dropping the cut.
       tiles: PREVIEW_SLOTS.map((slot) => tileKey(style.id, slot)).filter(exists),
+      suits: [...style.suits],
       colors,
     });
   }

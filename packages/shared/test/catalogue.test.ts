@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_COLOR_ID,
   DEFAULT_STYLE_ID,
+  FACE_SHAPES,
   HAIR_COLORS,
   HAIR_STYLES,
   findColor,
@@ -29,6 +30,16 @@ describe('the catalogue', () => {
     for (const color of HAIR_COLORS) {
       expect(color.prompt.length).toBeGreaterThan(10);
       expect(color.hex).toMatch(/^#[0-9a-f]{6}$/);
+    }
+  });
+
+  it('suggests every cut for at least an oval face, and every shape at least one cut', () => {
+    // Oval is the balanced shape in this vocabulary, so a cut that does not
+    // list it is a typo. A shape no cut lists is a "suits you" row that is
+    // always empty.
+    for (const style of HAIR_STYLES) expect(style.suits).toContain('oval');
+    for (const shape of FACE_SHAPES) {
+      expect(HAIR_STYLES.some((style) => style.suits.includes(shape))).toBe(true);
     }
   });
 

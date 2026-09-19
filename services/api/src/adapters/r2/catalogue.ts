@@ -45,6 +45,7 @@ export function shippedCatalogue(): CatalogueResponse {
       id: style.id,
       name: style.name,
       tiles: PREVIEW_SLOTS.map((slot) => tileKey(style.id, slot)),
+      suits: [...style.suits],
       colors: HAIR_COLORS.map((color) => ({
         id: color.id,
         heroes: PREVIEW_SLOTS.map((slot) => heroKey(style.id, color.id, slot)),

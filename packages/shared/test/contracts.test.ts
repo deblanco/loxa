@@ -145,6 +145,21 @@ describe('catalogueResponseSchema', () => {
     expect(catalogueResponseSchema.safeParse({ ...MANIFEST, version: 2 }).success).toBe(false);
   });
 
+  it('carries the face shapes a cut suits, and still reads a manifest without them', () => {
+    const tagged = { ...MANIFEST, styles: [{ ...MANIFEST.styles[0]!, suits: ['oval', 'heart'] }] };
+    const parsed = catalogueResponseSchema.parse(tagged);
+    expect(parsed.styles[0]!.suits).toEqual(['oval', 'heart']);
+    expect(catalogueResponseSchema.parse(MANIFEST).styles[0]!.suits).toBeUndefined();
+  });
+
+  it('rejects a face shape outside the vocabulary', () => {
+    const parsed = catalogueResponseSchema.safeParse({
+      ...MANIFEST,
+      styles: [{ ...MANIFEST.styles[0]!, suits: ['triangle'] }],
+    });
+    expect(parsed.success).toBe(false);
+  });
+
   it('rejects a swatch that is not a lowercase six-digit hex', () => {
     const parsed = catalogueResponseSchema.safeParse({
       ...MANIFEST,
