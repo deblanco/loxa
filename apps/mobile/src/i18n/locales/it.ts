@@ -32,7 +32,6 @@ const it: typeof en = {
     headlineSecond: 'venti volte a settimana.',
     perkCredits: '{{count}} foto a settimana, taglio e colore a scelta',
     perkOwnFace: 'Il tuo viso, non una modella di repertorio',
-    perkDaily: 'Look nuovi ogni giorno',
     startIntro: 'Inizia con {{price}}',
     start: 'Abbonati',
     skip: 'Continua senza abbonarti',

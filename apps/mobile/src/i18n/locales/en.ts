@@ -63,7 +63,6 @@ const en = {
     headlineSecond: 'twenty times a week.',
     perkCredits: '{{count}} photos a week, any style or colour',
     perkOwnFace: 'Your own face — not a stock model',
-    perkDaily: 'New looks dropped daily',
     startIntro: 'Start for {{price}}',
     start: 'Subscribe',
     skip: 'Continue without subscribing',

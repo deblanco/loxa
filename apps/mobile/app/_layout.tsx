@@ -33,8 +33,8 @@ installDiagnostics();
  *
  * The app is a single loop — preview, generate, result, back to preview — and a
  * tab bar would be four permanent buttons under a screen that is mostly a
- * photograph. The profile is a push from the header, the paywall is a modal,
- * and that is the entire structure.
+ * photograph. The profile is a push from the header, the paywall and the
+ * one-time offer are modals, and that is the entire structure.
  *
  * The splash is held until the fonts and the language are in. The design
  * system is a serif for statements and a sans for everything else, and a first
@@ -122,6 +122,9 @@ export default function RootLayout() {
           name="paywall"
           options={{ presentation: 'transparentModal', animation: 'none' }}
         />
+        {/* Full-screen rather than a sheet: the wall of results is drawn edge
+            to edge, and its ✕ is placed off the top inset. */}
+        <Stack.Screen name="offer" options={{ presentation: 'fullScreenModal' }} />
       </Stack>
       </ErrorBoundary>
     </SafeAreaProvider>

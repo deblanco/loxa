@@ -2,12 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState } from 'react';
 
 /**
- * Whether the entry and offer screens have been seen.
+ * Whether the entry carousel has been seen.
  *
- * One flag, not a step counter: the two screens before the app are a sales
- * pitch, and somebody who has heard it does not need to hear it again. It is
- * set when they leave the offer screen by either door — subscribing and
- * continuing free are both "seen".
+ * Set by "Get started". The carousel is the one screen before the app, and
+ * somebody who has been through it does not need to see it again. The offer
+ * that used to follow it now comes after the first render, under its own flag
+ * — see `first-offer.ts`.
  */
 const KEY = 'loxa.onboarded';
 

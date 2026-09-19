@@ -65,6 +65,11 @@ const KEYS = [
    */
   'loxa.portraitAsk.v1',
   /**
+   * Whether the subscription offer has had its one showing after the first
+   * render. A fresh install that remembers it never sees the offer at all.
+   */
+  'loxa.firstOffer.v1',
+  /**
    * Error reports written but not yet sent. A reset is meant to hand back a
    * fresh install, and a queue full of the previous one's crashes would be
    * flushed on the next launch and attributed to this one.

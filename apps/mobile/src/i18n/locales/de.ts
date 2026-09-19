@@ -32,7 +32,6 @@ const de: typeof en = {
     headlineSecond: 'zwanzigmal pro Woche.',
     perkCredits: '{{count}} Fotos pro Woche, jeder Schnitt und jede Farbe',
     perkOwnFace: 'Dein eigenes Gesicht, kein Stockmodel',
-    perkDaily: 'Jeden Tag neue Looks',
     startIntro: 'Für {{price}} starten',
     start: 'Abonnieren',
     skip: 'Ohne Abo fortfahren',

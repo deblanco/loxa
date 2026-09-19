@@ -32,7 +32,6 @@ const fr: typeof en = {
     headlineSecond: 'vingt fois par semaine.',
     perkCredits: '{{count}} photos par semaine, coupe et couleur au choix',
     perkOwnFace: 'Ton propre visage, pas un mannequin de banque d’images',
-    perkDaily: 'De nouveaux looks chaque jour',
     startIntro: 'Commencer pour {{price}}',
     start: 'S’abonner',
     skip: 'Continuer sans abonnement',

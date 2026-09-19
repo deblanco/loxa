@@ -13,15 +13,21 @@ import { Body, Display, Meta } from '@/components/Text';
 import { reportHandled } from '@/diagnostics';
 import { purchases, restoreAndSync, usePricing } from '@/purchases';
 import { refreshCredits } from '@/store/credits';
-import { useOnboarding } from '@/store/onboarding';
+import { settleFirstOffer } from '@/store/first-offer';
 import { color, radius, space } from '@/theme';
 
 /**
- * The paywall you meet before the app.
+ * The offer, after the first photo.
  *
- * A tilted, drifting wall of other people's results behind a hard offer. Both
- * doors lead to the same next screen — the point of the corner ✕ is that
- * somebody who says no still gets to look around, which is what makes this an
+ * It used to be the second screen of the app, in front of everything. It now
+ * opens once, when somebody leaves the result of their free render — they have
+ * seen their own face with a different cut, and this is the moment to say what
+ * twenty a week would cost. `store/first-offer.ts` decides when; the result
+ * screen opens it.
+ *
+ * A tilted, drifting wall of other people's results behind the offer. Both
+ * doors lead back to the preview — the point of the corner ✕ is that somebody
+ * who says no carries on exactly where they were, which is what makes this an
  * offer rather than a toll.
  *
  * The offer is the App Store's introductory price: a first week at $0.99, then
@@ -29,17 +35,15 @@ import { color, radius, space } from '@/theme';
  * offer per subscription, so anybody who has subscribed before reads the plain
  * weekly price here instead — see `usePricing`.
  *
- * Restore is here rather than only on the profile because this screen is a gate
- * in front of the app. A subscriber reinstalling meets it before anything else,
- * and without a restore the only way past their own subscription is to decline
- * it and go looking through Settings.
+ * Restore is here as well as on the profile and the out-of-credits sheet, so a
+ * subscriber who reinstalled does not have to decline their own subscription
+ * to go looking for it.
  */
-const PERKS = ['offer.perkCredits', 'offer.perkOwnFace', 'offer.perkDaily'] as const;
+const PERKS = ['offer.perkCredits', 'offer.perkOwnFace'] as const;
 
 export default function Offer() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { complete } = useOnboarding();
   const { price, introPrice } = usePricing();
   const [restoring, setRestoring] = useState(false);
   // The subscription is bought here but granted by the Worker reading the
@@ -50,20 +54,15 @@ export default function Offer() {
   /**
    * Leave the offer, whatever happened on the way out.
    *
-   * Every exit routes through here, and it navigates even when `complete()`
-   * throws. That is the whole point: `complete()` writes to AsyncStorage, the
-   * ✕ is the only way off this screen, and a write that failed used to reject
-   * into nothing — leaving a new user pinned to the gate with no route into
-   * the app at all. Seeing onboarding once more is the cheaper failure by a
-   * wide margin.
+   * Every exit routes through here. It settles the flag so the offer is not
+   * shown again, and pops back to the preview that is already underneath —
+   * past the result this was opened from — so the cut and colour the user
+   * chose are still selected. `settleFirstOffer` cannot throw: an offer that
+   * might come back once is a cheaper failure than a ✕ that does nothing.
    */
   async function leave() {
-    try {
-      await complete();
-    } catch (err) {
-      reportHandled(err, 'onboarding.complete');
-    }
-    router.replace('/preview');
+    await settleFirstOffer();
+    router.dismissTo('/preview');
   }
 
   async function subscribe() {
@@ -73,8 +72,8 @@ export default function Offer() {
       // is the same one either way — an intro week is a paid week.
       //
       // The result is deliberately not branched on: a cancelled sheet and a
-      // completed purchase both lead to preview, which is what makes this an
-      // offer rather than a toll. The paywall is reachable from inside.
+      // completed purchase both lead back to preview, which is what makes this
+      // an offer rather than a toll.
       if (await purchases().buyWeekly()) {
         setSettling(true);
         // The allowance is the Worker's to report, and preview reads the
@@ -83,7 +82,7 @@ export default function Offer() {
         await refreshCredits();
       }
     } catch (err) {
-      // A store that threw is not a reason to hold somebody on the gate.
+      // A store that threw is not a reason to hold somebody on the offer.
       reportHandled(err, 'offer.buyWeekly');
     } finally {
       setSettling(false);

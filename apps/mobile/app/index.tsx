@@ -8,6 +8,7 @@ import { VideoPlate } from '@/components/VideoPlate';
 import { Body, Display } from '@/components/Text';
 import { Wordmark } from '@/components/Wordmark';
 import { footageUrls } from '@/api/assets';
+import { reportHandled } from '@/diagnostics';
 import { useOnboarding } from '@/store/onboarding';
 import { color, motion, radius, space } from '@/theme';
 
@@ -55,7 +56,7 @@ const SLIDES = [
 
 export default function Entry() {
   const { t } = useTranslation();
-  const { onboarded } = useOnboarding();
+  const { onboarded, complete } = useOnboarding();
   const [slide, setSlide] = useState(0);
 
   // Somebody who has already heard the pitch goes straight to the app. Checked
@@ -72,6 +73,23 @@ export default function Entry() {
     );
     return () => clearInterval(timer);
   }, []);
+
+  /**
+   * Into the app, with nothing to buy on the way.
+   *
+   * The redirect above does the navigating once the flag is written. If the
+   * write fails the flag never flips, so this navigates itself: seeing the
+   * carousel once more next launch is a far cheaper failure than a "Get
+   * started" that does nothing.
+   */
+  async function begin() {
+    try {
+      await complete();
+    } catch (err) {
+      reportHandled(err, 'onboarding.complete');
+      router.replace('/preview');
+    }
+  }
 
   if (onboarded !== false) return <View style={styles.screen} />;
 
@@ -113,7 +131,7 @@ export default function Entry() {
         <Pill
           label={t('entry.cta')}
           tone="light"
-          onPress={() => router.push('/(onboarding)/offer')}
+          onPress={() => void begin()}
         />
 
         <View style={styles.dots}>

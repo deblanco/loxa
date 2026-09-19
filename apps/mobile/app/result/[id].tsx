@@ -10,6 +10,8 @@ import { PhotoPlate } from '@/components/PhotoPlate';
 import { Pill } from '@/components/Pill';
 import { Body, Display, Meta } from '@/components/Text';
 import { Toast } from '@/components/Toast';
+import { useCredits } from '@/store/credits';
+import { firstOfferDue } from '@/store/first-offer';
 import { humaniseId } from '@/store/look-record';
 import {
   acceptPortrait,
@@ -53,10 +55,16 @@ export default function Result() {
   // The same measurement one row further up, for the inset that has to clear
   // the caption whether the cut's name takes one line or two.
   const [captionHeight, setCaptionHeight] = useState(0);
+  // Whether leaving this result should open the subscription offer first —
+  // its one showing, after the first render. Null until the flag is read.
+  const [offerDue, setOfferDue] = useState<boolean | null>(null);
+  const { credits } = useCredits();
+  const opensOffer = offerDue === true && credits?.plan !== 'weekly';
 
   useEffect(() => {
     void readLook(id).then(setLook);
     void pendingPortrait().then(setOffer);
+    void firstOfferDue().then(setOfferDue);
   }, [id]);
 
   // The rating prompt, once the picture is on screen and settled.
@@ -72,11 +80,16 @@ export default function Result() {
   // it. The portrait is asked at most once per install and the rating prompt
   // has a sixty-day cooldown, so skipping this one result screen costs it
   // nothing.
+  //
+  // It yields to the subscription offer for the same reason: that opens when
+  // the user leaves this screen, and a rating sheet followed by an offer is two
+  // asks in a row about a product they have used once. So the order on a first
+  // render is portrait card, then offer, and the rating waits for a later one.
   useEffect(() => {
-    if (!look || offer) return;
+    if (!look || offer || offerDue !== false) return;
     const timer = setTimeout(() => void maybeAskForReview(), 1500);
     return () => clearTimeout(timer);
-  }, [look, offer]);
+  }, [look, offer, offerDue]);
 
   function flash(message: string) {
     setToast(message);
@@ -110,8 +123,16 @@ export default function Result() {
    * `dismissTo` pops to it instead, so both the cut and the colour survive.
    * Where there is no preview to pop to — a result opened directly — it falls
    * back to replacing this route, which is what this used to do everywhere.
+   *
+   * The first time anybody leaves a result, the offer opens on the way. It is
+   * a modal over this screen, and it does the `dismissTo` itself when it
+   * closes, so the preview underneath is still the one they chose from.
    */
   function backToPreview() {
+    if (opensOffer) {
+      router.push('/offer');
+      return;
+    }
     router.dismissTo('/preview');
   }
 

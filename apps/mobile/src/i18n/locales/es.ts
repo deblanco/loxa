@@ -32,7 +32,6 @@ const es: typeof en = {
     headlineSecond: 'veinte veces por semana.',
     perkCredits: '{{count}} fotos por semana, el corte y el color que quieras',
     perkOwnFace: 'Tu propia cara, no una modelo de banco de imágenes',
-    perkDaily: 'Looks nuevos cada día',
     startIntro: 'Empezar por {{price}}',
     start: 'Suscribirse',
     skip: 'Continuar sin suscribirse',
