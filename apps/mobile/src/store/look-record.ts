@@ -38,6 +38,12 @@ export interface StoredLook {
 /** A look with its location resolved against the current container. */
 export interface Look extends StoredLook {
   uri: string;
+  /**
+   * The photograph it was made from, when that was kept. Resolved the same
+   * way as `uri` and never stored either; absent on looks written before the
+   * original was kept alongside, which the result screen already tolerates.
+   */
+  sourceUri?: string;
 }
 
 export function lookImageName(id: string): string {
@@ -46,6 +52,18 @@ export function lookImageName(id: string): string {
 
 export function lookMetaName(id: string): string {
   return `${id}.json`;
+}
+
+/**
+ * The original photograph, next to the render made from it.
+ *
+ * Kept so that "hold to compare" still has something to compare against when
+ * a look is reopened from the gallery, days later. On the device only, like
+ * the render: it is the same photo the user handed the app, and it is deleted
+ * with the look.
+ */
+export function lookSourceName(id: string): string {
+  return `${id}.src.jpg`;
 }
 
 export function newLookRecord(input: {
@@ -126,7 +144,21 @@ export function humaniseId(id: string): string {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
-/** Newest first — the order the profile's gallery will want them in. */
-export function newestFirst(looks: readonly StoredLook[]): StoredLook[] {
+/**
+ * What to call a look, from the look alone.
+ *
+ * Read off the record, never off the catalogue: a saved picture must caption
+ * itself with no network and no manifest, including for a cut the catalogue
+ * has since stopped publishing.
+ */
+export function lookCaption(look: StoredLook): { style: string; color: string } {
+  return {
+    style: look.styleName ?? humaniseId(look.styleId),
+    color: look.colorName ?? humaniseId(look.colorId),
+  };
+}
+
+/** Newest first — the order the gallery shows them in. */
+export function newestFirst<T extends StoredLook>(looks: readonly T[]): T[] {
   return [...looks].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

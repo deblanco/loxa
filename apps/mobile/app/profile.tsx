@@ -6,6 +6,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chevron } from '@/components/Chevron';
 import { DevPanel } from '@/components/DevPanel';
+import { LookTile } from '@/components/LookTile';
 import { PersonMark } from '@/components/PersonMark';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -19,9 +20,13 @@ import { disableDaily, enableDaily, isDailyEnabled } from '@/notifications';
 import { restoreAndSync, usePricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
 import { readProfilePhoto } from '@/store/profile-photo';
+import { listLooks, type Look } from '@/store/results';
 import { openReviewPage, reviewStoreUrl } from '@/store/review';
 import { openManageSubscriptions } from '@/store/subscription';
 import { color, radius, space } from '@/theme';
+
+/** How many recent looks the profile shows before "See all". */
+const RECENT_LOOKS = 6;
 
 /** Fixed for the life of the process — it comes from the bundled app config. */
 const storeUrl = reviewStoreUrl();
@@ -45,6 +50,7 @@ export default function Profile() {
   // something that had never been on.
   const [notify, setNotify] = useState(false);
   const [portrait, setPortrait] = useState<string | null>(null);
+  const [looks, setLooks] = useState<Look[]>([]);
 
   // Re-read on focus rather than once: the camera is pushed from here and
   // writes the portrait on its way back, so the only moment this screen can
@@ -55,6 +61,9 @@ export default function Profile() {
     useCallback(() => {
       void readProfilePhoto().then(setPortrait);
       void isDailyEnabled().then(setNotify);
+      void listLooks()
+        .then(setLooks)
+        .catch(() => setLooks([]));
     }, []),
   );
   const [toast, setToast] = useState<string | null>(null);
@@ -142,6 +151,25 @@ export default function Profile() {
             {t(portrait ? 'profile.tapToChangePhoto' : 'profile.tapToAddPhoto')}
           </Meta>
         </View>
+
+        {/* The most recent looks, and the way into all of them. Absent rather
+            than empty for somebody who has not made one: an empty shelf under
+            their own face is a worse first impression than no shelf. */}
+        {looks.length > 0 ? (
+          <View style={styles.looks}>
+            <View style={styles.looksHead}>
+              <Meta>{t('profile.looks')}</Meta>
+              <Pressable accessibilityRole="button" onPress={() => router.push('/looks')} hitSlop={space.s2}>
+                <Meta tone="ink">{t('profile.seeAll')}</Meta>
+              </Pressable>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.looksStrip}>
+              {looks.slice(0, RECENT_LOOKS).map((look) => (
+                <LookTile key={look.id} look={look} style={styles.looksTile} />
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
 
         <View style={styles.creditCard}>
           <View style={styles.creditTop}>
@@ -316,6 +344,15 @@ const styles = StyleSheet.create({
   },
   identity: { alignItems: 'center', gap: space.s3, paddingTop: space.s6 },
   avatar: { width: 104, height: 104, borderRadius: radius.pill },
+  looks: { marginTop: space.s6, gap: space.s3 },
+  looksHead: {
+    paddingHorizontal: space.gutterTextWide,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  looksStrip: { paddingHorizontal: space.gutterScreen, gap: space.s3 },
+  looksTile: { width: 104 },
   avatarBadge: {
     position: 'absolute',
     bottom: -2,

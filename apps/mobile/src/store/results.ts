@@ -3,6 +3,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import {
   lookImageName,
   lookMetaName,
+  lookSourceName,
   newLookRecord,
   newestFirst,
   parseLookRecord,
@@ -38,13 +39,10 @@ function looksDir(): Directory {
 
 export type { Look, StoredLook };
 
-/** Where a look's image lives *right now*. Cheap; call it, don't store it. */
-export function lookUri(id: string): string {
-  return new File(looksDir(), lookImageName(id)).uri;
-}
-
 export async function saveLook(input: {
   imageBase64: string;
+  /** The photograph the render was made from, kept for comparing later. */
+  sourceBase64?: string;
   styleId: string;
   colorId: string;
   styleName?: string;
@@ -65,9 +63,24 @@ export async function saveLook(input: {
     createdAt: new Date().toISOString(),
   });
 
+  // Before the record: the record is what makes a look exist, so a write that
+  // fails half way leaves an orphaned original that `deleteLook` never sees,
+  // rather than a look whose comparison is missing. Optional, and a failure
+  // costs the comparison and nothing else.
+  let sourceUri: string | undefined;
+  if (input.sourceBase64) {
+    try {
+      const source = new File(dir, lookSourceName(id));
+      source.write(input.sourceBase64, { encoding: 'base64' });
+      sourceUri = source.uri;
+    } catch {
+      sourceUri = undefined;
+    }
+  }
+
   new File(dir, lookMetaName(id)).write(JSON.stringify(record));
 
-  return { ...record, uri: image.uri };
+  return { ...record, uri: image.uri, ...(sourceUri ? { sourceUri } : {}) };
 }
 
 export async function readLook(id: string): Promise<Look | null> {
@@ -84,10 +97,11 @@ export async function readLook(id: string): Promise<Look | null> {
   // behind. A missing picture is not a look.
   if (!image.exists) return null;
 
-  return { ...record, uri: image.uri };
+  const source = new File(dir, lookSourceName(record.id));
+  return { ...record, uri: image.uri, ...(source.exists ? { sourceUri: source.uri } : {}) };
 }
 
-/** Newest first, which is the order the profile's gallery will want them in. */
+/** Newest first, which is the order the gallery shows them in. */
 export async function listLooks(): Promise<Look[]> {
   const dir = looksDir();
 
@@ -99,5 +113,20 @@ export async function listLooks(): Promise<Look[]> {
   const looks = await Promise.all(ids.map((id) => readLook(id)));
   const found = looks.filter((look): look is Look => look !== null);
 
-  return newestFirst(found).map((record) => ({ ...record, uri: lookUri(record.id) }));
+  return newestFirst(found);
+}
+
+/**
+ * Forget a look: the render, its record and the original it was made from.
+ *
+ * The record goes first, because the record is what makes a look exist — if
+ * a later delete fails, what is left behind is an orphaned image nothing lists,
+ * never a look in the gallery whose picture has gone.
+ */
+export async function deleteLook(id: string): Promise<void> {
+  const dir = looksDir();
+  for (const name of [lookMetaName(id), lookImageName(id), lookSourceName(id)]) {
+    const file = new File(dir, name);
+    if (file.exists) file.delete();
+  }
 }

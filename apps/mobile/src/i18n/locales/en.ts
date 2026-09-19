@@ -175,6 +175,10 @@ const en = {
     usePortraitYes: 'Use photo',
     usePortraitNo: 'Not now',
     portraitSaved: 'Saved as your profile photo',
+    delete: 'Delete',
+    deleteTitle: 'Delete this look?',
+    deleteBody: 'The photo and the original it was made from are removed from this phone.',
+    deleteCancel: 'Cancel',
   },
 
   paywall: {
@@ -213,6 +217,17 @@ const en = {
     privacy: 'Privacy policy',
     terms: 'Terms of use',
     language: 'Language',
+    looks: 'Your looks',
+    seeAll: 'See all',
+  },
+
+  looks: {
+    /** The gallery of every look made on this phone, newest first. */
+    title: 'Your looks',
+    emptyHeadline: 'Nothing here',
+    emptyHeadlineItalic: 'just yet.',
+    emptyNote: 'Every photo you make is kept here, on this phone.',
+    start: 'Try on a cut',
   },
 
   language: {

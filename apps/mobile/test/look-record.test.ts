@@ -6,6 +6,8 @@ import {
   newestFirst,
   parseLookRecord,
   humaniseId,
+  lookCaption,
+  lookSourceName,
 } from '../src/store/look-record';
 
 const INPUT = {
@@ -160,5 +162,26 @@ describe('humaniseId', () => {
     // 'lob' is "Long bob" in the catalogue. This is the one place the fallback
     // disagrees, asserted so it is documented rather than discovered.
     expect(humaniseId('lob')).toBe('Lob');
+  });
+});
+
+describe('lookSourceName', () => {
+  it('sits beside the render without being mistaken for it or for a record', () => {
+    // `listLooks` finds looks by their `.json`; the original must not end in
+    // `.json`, nor collide with the render's own name.
+    expect(lookSourceName('abc')).toBe('abc.src.jpg');
+    expect(lookSourceName('abc')).not.toBe(lookImageName('abc'));
+    expect(lookSourceName('abc').endsWith('.json')).toBe(false);
+  });
+});
+
+describe('lookCaption', () => {
+  it('uses the names written down when the look was made', () => {
+    const look = newLookRecord({ ...INPUT, styleName: 'Long bob', colorName: 'Copper' });
+    expect(lookCaption(look)).toEqual({ style: 'Long bob', color: 'Copper' });
+  });
+
+  it('falls back to the ids on a look written before the names were stored', () => {
+    expect(lookCaption(newLookRecord(INPUT))).toEqual({ style: 'Pixie', color: 'Copper' });
   });
 });

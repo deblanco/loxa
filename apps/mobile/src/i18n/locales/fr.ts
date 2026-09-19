@@ -123,6 +123,10 @@ const fr: typeof en = {
     usePortraitYes: 'Utiliser la photo',
     usePortraitNo: 'Pas maintenant',
     portraitSaved: 'Enregistrée comme photo de profil',
+    delete: 'Supprimer',
+    deleteTitle: 'Supprimer ce look ?',
+    deleteBody: 'La photo et l’originale dont elle est tirée sont effacées de ce téléphone.',
+    deleteCancel: 'Annuler',
   },
 
   paywall: {
@@ -160,6 +164,16 @@ const fr: typeof en = {
     privacy: 'Politique de confidentialité',
     terms: 'Conditions d’utilisation',
     language: 'Langue',
+    looks: 'Tes looks',
+    seeAll: 'Tout voir',
+  },
+
+  looks: {
+    title: 'Tes looks',
+    emptyHeadline: 'Rien ici',
+    emptyHeadlineItalic: 'pour l’instant.',
+    emptyNote: 'Chaque photo que tu crées est gardée ici, sur ce téléphone.',
+    start: 'Essayer une coupe',
   },
 
   language: {

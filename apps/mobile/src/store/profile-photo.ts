@@ -6,7 +6,8 @@ import { Directory, File, Paths } from 'expo-file-system';
  * The user's own portrait, as their profile picture.
  *
  * It is not the photo a render is made from — that one travels through the
- * router, is used once, and is never written down. This is the picture the app
+ * router and is kept only beside the look it made (`results.ts`), deleted with
+ * it. This is the picture the app
  * wears: the header avatar and the identity block on the profile. Until there
  * is one, both of those are an invitation rather than a face.
  *

@@ -12,7 +12,8 @@ import { readProfilePhoto, saveProfilePhoto } from '@/store/profile-photo';
  *
  * **Held in memory, never written down until the answer is yes.** That is
  * `profile-photo.ts`'s rule kept intact: the photo a render is made from
- * travels through the router and is used once. Writing 700KB to disk for a user
+ * travels through the router and is written only beside the look it made, never
+ * as a portrait nobody chose. Writing 700KB to disk for a user
  * who then declines is work that would have to be undone, and threading the
  * base64 through a second `router.replace` would double the largest string the
  * router already carries. A module variable costs nothing and loses at most one

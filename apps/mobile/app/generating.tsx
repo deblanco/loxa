@@ -87,6 +87,7 @@ export default function Generating() {
         const result = await tryOn({ imageBase64: base64, styleId, colorId });
         const look = await saveLook({
           imageBase64: result.imageBase64,
+          sourceBase64: base64,
           styleId,
           colorId,
           styleName,

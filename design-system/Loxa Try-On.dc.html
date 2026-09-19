@@ -242,6 +242,21 @@
               </div>
             </div>
 
+            <div style="margin-top:24px;display:flex;flex-direction:column;gap:12px">
+              <div style="padding:0 22px;display:flex;align-items:center;justify-content:space-between">
+                <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,12,11,.45)">Your looks</div>
+                <div onClick="{{ goLooks }}" style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:#0d0c0b;cursor:pointer">See all</div>
+              </div>
+              <div style="display:flex;gap:12px;padding:0 16px;overflow-x:auto">
+                <sc-for list="{{ looks }}" as="l" hint-placeholder-count="3">
+                  <div onClick="{{ goResult }}" style="flex:none;width:104px;display:flex;flex-direction:column;gap:8px;cursor:pointer">
+                    <div style="aspect-ratio:3/4;border-radius:10px;background:#e7e1d8;background-image:repeating-linear-gradient(102deg,rgba(13,12,11,.07) 0 8px,transparent 8px 18px)"></div>
+                    <div style="font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.caption }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
             <div style="margin:24px 16px 0;padding:18px;border-radius:18px;background:#0d0c0b;color:#faf8f5">
               <div style="display:flex;align-items:flex-end;justify-content:space-between">
                 <div>
@@ -278,6 +293,26 @@
               <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
                 <div style="padding:15px 18px;display:flex;align-items:center;justify-content:space-between;font-size:14.5px;border-bottom:1px solid rgba(13,12,11,.07);cursor:pointer;color:{{ r.color }}" style-hover="background:#f2ede6">
                   {{ r.label }}<span style="color:rgba(13,12,11,.3);font-size:13px">{{ r.right }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ sLooks }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;inset:0;background:#faf8f5;overflow:auto;padding-top:60px">
+            <div style="padding:0 22px 16px;display:flex;align-items:center;justify-content:space-between">
+              <div onClick="{{ goProfile }}" style="width:34px;height:34px;border-radius:999px;border:1px solid rgba(13,12,11,.12);display:flex;align-items:center;justify-content:center;cursor:pointer">‹</div>
+              <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,12,11,.45)">Your looks</div>
+              <div style="width:34px;height:34px"></div>
+            </div>
+            <!-- Every look made on this phone, newest first. Tapping one reopens it on the
+                 result screen, where it can be compared, shared or deleted. -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;padding:0 16px 40px">
+              <sc-for list="{{ looks }}" as="l" hint-placeholder-count="6">
+                <div onClick="{{ goResult }}" style="display:flex;flex-direction:column;gap:8px;cursor:pointer">
+                  <div style="aspect-ratio:3/4;border-radius:10px;background:#e7e1d8;background-image:repeating-linear-gradient(102deg,rgba(13,12,11,.07) 0 8px,transparent 8px 18px)"></div>
+                  <div style="font-size:12px;line-height:1.3">{{ l.caption }}</div>
                 </div>
               </sc-for>
             </div>
@@ -401,7 +436,7 @@
       </div>
       <div style="padding:16px 18px;background:#f6f3ee;border:1px solid rgba(13,12,11,.1);border-radius:12px">
         <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(13,12,11,.4);margin-bottom:9px">Next steps</div>
-        <div style="font-size:13px;line-height:1.65;color:rgba(13,12,11,.7)">Real footage for the entry carousel · a style taxonomy (length / texture / bang) so the strip can filter · gallery of past generations on the profile · onboarding photo-quality check before the first paid render.</div>
+        <div style="font-size:13px;line-height:1.65;color:rgba(13,12,11,.7)">Real footage for the entry carousel · a style taxonomy (length / texture / bang) so the strip can filter · onboarding photo-quality check before the first paid render.</div>
       </div>
     </div>
   </div>
@@ -415,7 +450,7 @@ const COLORS = [
   ['Cherry','#7d2230'],['Lilac','#b7a3c8']
 ];
 const MODELS = ['your photo · 2 days ago','model · warm skin','model · deep skin','model · fair skin'];
-const SCREENS = [['entry','Entry'],['preview','Preview'],['gen','Generating'],['result','Result'],['offer','Offer'],['profile','Profile'],['camera','Camera']];
+const SCREENS = [['entry','Entry'],['preview','Preview'],['gen','Generating'],['result','Result'],['offer','Offer'],['profile','Profile'],['looks','Looks'],['camera','Camera']];
 const STEPS = ['reading your photo','mapping hairline','painting colour','matching light'];
 
 class Component extends DCLogic {
@@ -463,7 +498,7 @@ class Component extends DCLogic {
     const [colorName] = COLORS[s.color];
     return {
       sEntry: s.screen === 'entry', sOffer: s.screen === 'offer', sPreview: s.screen === 'preview',
-      sGen: s.screen === 'gen', sResult: s.screen === 'result', sProfile: s.screen === 'profile', sCamera: s.screen === 'camera',
+      sGen: s.screen === 'gen', sResult: s.screen === 'result', sProfile: s.screen === 'profile', sLooks: s.screen === 'looks', sCamera: s.screen === 'camera',
       showPaywall: s.paywall, toast: s.toast,
       isDark: s.screen === 'entry' || s.screen === 'result' || s.screen === 'camera',
       credits: s.credits, creditCap: cap, creditW: Math.round((s.credits / cap) * 100) + '%',
@@ -507,6 +542,7 @@ class Component extends DCLogic {
         }))
       })),
       perks: ['20 photos a week, any style or colour', 'Your own face — not a stock model'],
+      looks: ['Blunt bob · Platinum', 'Curtain bang · Copper', 'Pixie · Espresso', 'Long layers · Honey', 'Wolf cut · Ash', 'French bob · Cherry'].map(caption => ({ caption })),
       styles: STYLES.map((name, i) => ({
         name, on: s.style === i,
         ring: s.style === i ? '#0d0c0b' : 'rgba(13,12,11,.12)',
@@ -540,7 +576,7 @@ class Component extends DCLogic {
         go: this.go(key)
       })),
 
-      goOffer: this.go('offer'), goPreview: this.go('preview'), goProfile: this.go('profile'),
+      goOffer: this.go('offer'), goPreview: this.go('preview'), goProfile: this.go('profile'), goLooks: this.go('looks'), goResult: this.go('result'),
       goCamera: () => this.setState({ screen: 'camera', camFrom: 'profile', camShot: false }),
       // Entry goes straight into the app on the one free photo. The offer comes
       // once, when the first result is left, and both of its doors return to preview.

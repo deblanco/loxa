@@ -80,7 +80,8 @@ export default function PrivacyPolicy() {
 
         <Section title="What happens to them afterwards">
           The photo you sent is not stored on our server. The generated image is
-          saved on your device, and a copy of it is held by us for up to thirty
+          saved on your device, together with the photo it was made from so
+          that you can compare the two later, and a copy of it is held by us for up to thirty
           days so that repeating the same request does not cost you a second
           credit — after that it is deleted automatically. If you set a profile
           picture, it stays on your device and is never uploaded. We do not use
@@ -153,8 +154,9 @@ export default function PrivacyPolicy() {
         </Section>
 
         <Section title="Deleting your data">
-          Deleting the app removes every generated photo and your profile
-          picture from the device, but keeps the identifier so a reinstall does
+          Deleting a look in the app removes it and the photo it was made from.
+          Deleting the app removes every generated photo, every original and
+          your profile picture from the device, but keeps the identifier so a reinstall does
           not cost you what you paid for. Erasing the device removes that too.
           Cached results expire on their own within thirty days. To have us
           delete the identifier and everything attached to it, write to{" "}

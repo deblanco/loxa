@@ -123,6 +123,10 @@ const es: typeof en = {
     usePortraitYes: 'Usar foto',
     usePortraitNo: 'Ahora no',
     portraitSaved: 'Guardada como tu foto de perfil',
+    delete: 'Eliminar',
+    deleteTitle: '¿Eliminar este look?',
+    deleteBody: 'La foto y la original con la que se hizo se borran de este teléfono.',
+    deleteCancel: 'Cancelar',
   },
 
   paywall: {
@@ -160,6 +164,16 @@ const es: typeof en = {
     privacy: 'Política de privacidad',
     terms: 'Condiciones de uso',
     language: 'Idioma',
+    looks: 'Tus looks',
+    seeAll: 'Ver todos',
+  },
+
+  looks: {
+    title: 'Tus looks',
+    emptyHeadline: 'Nada por aquí',
+    emptyHeadlineItalic: 'todavía.',
+    emptyNote: 'Cada foto que hagas se guarda aquí, en este teléfono.',
+    start: 'Probar un corte',
   },
 
   language: {

@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chevron } from '@/components/Chevron';
 import { PhotoPlate } from '@/components/PhotoPlate';
@@ -12,14 +12,14 @@ import { Body, Display, Meta } from '@/components/Text';
 import { Toast } from '@/components/Toast';
 import { useCredits } from '@/store/credits';
 import { firstOfferDue } from '@/store/first-offer';
-import { humaniseId } from '@/store/look-record';
+import { lookCaption } from '@/store/look-record';
 import {
   acceptPortrait,
   declinePortrait,
   pendingPortrait,
   type OfferedPhoto,
 } from '@/store/portrait-offer';
-import { readLook, type Look } from '@/store/results';
+import { deleteLook, readLook, type Look } from '@/store/results';
 import { maybeAskForReview } from '@/store/review';
 import { color, radius, space } from '@/theme';
 
@@ -38,9 +38,16 @@ export default function Result() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   // `sourceUri` is the photograph this render was made from, handed over by the
-  // generating screen. Absent on a look arrived at any other way, which is why
-  // everything below it is conditional rather than assumed.
-  const { id, sourceUri } = useLocalSearchParams<{ id: string; sourceUri?: string }>();
+  // generating screen. A look reopened from the gallery reads its own kept copy
+  // instead, and a look saved before originals were kept has neither — which is
+  // why everything below it is conditional rather than assumed.
+  //
+  // `from=looks` is a look reopened from the gallery rather than one just made.
+  // It goes back where it came from, can be deleted, and asks nothing: the
+  // portrait card, the offer and the rating prompt all belong to a new render.
+  const params = useLocalSearchParams<{ id: string; sourceUri?: string; from?: string }>();
+  const { id } = params;
+  const reopened = params.from === 'looks';
 
   const [look, setLook] = useState<Look | null>(null);
   const [comparing, setComparing] = useState(false);
@@ -59,13 +66,15 @@ export default function Result() {
   // its one showing, after the first render. Null until the flag is read.
   const [offerDue, setOfferDue] = useState<boolean | null>(null);
   const { credits } = useCredits();
-  const opensOffer = offerDue === true && credits?.plan !== 'weekly';
+  const opensOffer = !reopened && offerDue === true && credits?.plan !== 'weekly';
+  const sourceUri = params.sourceUri ?? look?.sourceUri;
 
   useEffect(() => {
     void readLook(id).then(setLook);
+    if (reopened) return;
     void pendingPortrait().then(setOffer);
     void firstOfferDue().then(setOfferDue);
-  }, [id]);
+  }, [id, reopened]);
 
   // The rating prompt, once the picture is on screen and settled.
   //
@@ -86,10 +95,10 @@ export default function Result() {
   // asks in a row about a product they have used once. So the order on a first
   // render is portrait card, then offer, and the rating waits for a later one.
   useEffect(() => {
-    if (!look || offer || offerDue !== false) return;
+    if (reopened || !look || offer || offerDue !== false) return;
     const timer = setTimeout(() => void maybeAskForReview(), 1500);
     return () => clearTimeout(timer);
-  }, [look, offer, offerDue]);
+  }, [reopened, look, offer, offerDue]);
 
   function flash(message: string) {
     setToast(message);
@@ -129,6 +138,10 @@ export default function Result() {
    * closes, so the preview underneath is still the one they chose from.
    */
   function backToPreview() {
+    if (reopened) {
+      router.back();
+      return;
+    }
     if (opensOffer) {
       router.push('/offer');
       return;
@@ -156,16 +169,29 @@ export default function Result() {
     flash(t('result.saved'));
   }
 
+  function confirmDelete() {
+    if (!look) return;
+    Alert.alert(t('result.deleteTitle'), t('result.deleteBody'), [
+      { text: t('result.deleteCancel'), style: 'cancel' },
+      {
+        text: t('result.delete'),
+        style: 'destructive',
+        onPress: () => {
+          void deleteLook(look.id).then(() => router.back());
+        },
+      },
+    ]);
+  }
+
   async function share() {
     if (!look || !(await Sharing.isAvailableAsync())) return;
     await Sharing.shareAsync(look.uri, { mimeType: 'image/jpeg' });
   }
 
-  // Read off the record, never off the catalogue. This screen shows a picture
-  // that already exists, and it must render with no network and no manifest —
-  // including for a cut the catalogue has since stopped publishing.
-  const styleName = look ? (look.styleName ?? humaniseId(look.styleId)) : '';
-  const colorName = look ? (look.colorName ?? humaniseId(look.colorId)) : '';
+  // Read off the record, never off the catalogue — see `lookCaption`.
+  const caption = look ? lookCaption(look) : null;
+  const styleName = caption?.style ?? '';
+  const colorName = caption?.color ?? '';
 
   // The caption gets out of the card's way rather than the card squeezing in
   // under it. Everything on this screen is anchored to the bottom, so the only
@@ -289,11 +315,15 @@ export default function Result() {
 
       <View style={[styles.actions, { bottom: insets.bottom + space.s5 }]}>
         <Pill label={t('result.share')} tone="light" onPress={share} />
-        <Pill
-          label={t('result.again')}
-          tone="quietOnNight"
-          onPress={backToPreview}
-        />
+        {reopened ? (
+          <Pill label={t('result.delete')} tone="quietOnNight" onPress={confirmDelete} />
+        ) : (
+          <Pill
+            label={t('result.again')}
+            tone="quietOnNight"
+            onPress={backToPreview}
+          />
+        )}
       </View>
 
       <Toast message={toast} />

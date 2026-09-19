@@ -120,4 +120,3 @@ there is no photo, and on the badge's plate over one there is.
 - A style taxonomy (length / texture / bang) so the strip can filter. The
   catalogue is 24 cuts now, which is what the header always claimed, but there
   is still nothing to filter it by.
-- A gallery of past generations on the profile. Local-only in v1.
