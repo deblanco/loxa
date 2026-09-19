@@ -56,7 +56,8 @@ export default function Terms() {
         </Section>
 
         <Section title="Credits">
-          A credit is one generated photo. The weekly subscription includes{" "}
+          A credit is one generated photo. The first photo on a new device is
+          free. The weekly subscription includes{" "}
           {WEEKLY_CREDITS} photos each week. New subscribers pay{" "}
           {INTRO_PRICE_LABEL} for the first week, then {WEEKLY_PRICE_LABEL}{" "}
           until cancelled; the introductory price is offered once per Apple ID,

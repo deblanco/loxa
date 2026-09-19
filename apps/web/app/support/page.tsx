@@ -59,7 +59,8 @@ export default function Support() {
         </Section>
 
         <Section title="How credits work">
-          One credit is one generated photo. The weekly subscription includes{" "}
+          One credit is one generated photo, and the first one on a new device
+          is free. The weekly subscription includes{" "}
           {WEEKLY_CREDITS} a week; they reset every Monday and do not carry
           over. If you run out before Monday you can buy a single photo for{" "}
           {SINGLE_PHOTO_PRICE_LABEL} without subscribing.

@@ -2,8 +2,8 @@
  * Credits: how many, and when they go away.
  *
  * A credit is one generated photo. Subscribers get an allowance that refills
- * every Monday and does not roll over; everyone else pays per photo, from the
- * first one.
+ * every Monday and does not roll over; everyone else gets one on the house and
+ * then pays per photo.
  *
  * The Worker and the app both need the same answer to "which week is it" — one
  * to reset the counter, the other to print "resets Monday" — so the week
@@ -14,18 +14,20 @@
 export const WEEKLY_CREDITS = 20;
 
 /**
- * What "Continue free" is worth: nothing.
+ * What a new device is worth: one photo, ever.
  *
- * There is no photo on the house. Continuing free buys a look at the catalogue
- * and the models wearing it; the first render is $0.99 or the subscription. The
- * model call is the most expensive thing this product does, and a giveaway on
- * an install-scoped identity is a giveaway somebody farms by reinstalling.
+ * Nothing in this app is worth paying for until somebody has seen their own
+ * face come back with a different cut, and the catalogue of models wearing it
+ * is not that. So the first render is on the house, and the offer comes after
+ * it rather than before.
  *
- * Kept as a named zero rather than deleted because `free_used` is a column with
- * rows in it: devices that spent the credit while it existed still carry a 1,
- * and the pool has to keep reading as spent rather than as absent.
+ * Not a weekly free credit. A free tier that refills is a free tier somebody
+ * farms, and the model call is the most expensive thing this product does. It
+ * is lifetime per device id, and the device id lives in the keychain, so
+ * deleting and reinstalling hands back the same identity and the same spent
+ * credit.
  */
-export const FREE_CREDITS = 0;
+export const FREE_CREDITS = 1;
 
 /**
  * The prices, as fallback strings.

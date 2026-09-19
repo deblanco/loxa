@@ -31,7 +31,7 @@ describe('settle', () => {
     // The bug this exists for: five credits spent earlier in the week under a
     // subscription that has since lapsed, then a new one bought on Thursday.
     // Without this the buyer is shown 15 of the 20 they just paid for.
-    const s = state({ weekUsed: 5, lastPlan: 'free' });
+    const s = state({ weekUsed: 5, freeUsed: 1, lastPlan: 'free' });
     expect(settle(s, 'weekly', THURSDAY)).toEqual(
       expect.objectContaining({ weekUsed: 0, lastPlan: 'weekly' }),
     );
@@ -41,7 +41,7 @@ describe('settle', () => {
   it('leaves an existing subscriber alone', () => {
     // Otherwise every read would refill the allowance and the week would never
     // be spent at all.
-    const s = state({ weekUsed: 5, lastPlan: 'weekly' });
+    const s = state({ weekUsed: 5, freeUsed: 1, lastPlan: 'weekly' });
     expect(settle(s, 'weekly', THURSDAY).weekUsed).toBe(5);
     expect(available(s, 'weekly', THURSDAY)).toBe(15);
   });
@@ -94,12 +94,12 @@ describe('rollForward', () => {
 });
 
 describe('available', () => {
-  it('gives a new free device nothing at all', () => {
-    expect(available(EMPTY_STATE, 'free', THURSDAY)).toBe(0);
+  it('gives a new free device exactly one', () => {
+    expect(available(EMPTY_STATE, 'free', THURSDAY)).toBe(1);
   });
 
-  it('gives a new subscriber the allowance and nothing on top', () => {
-    expect(available(EMPTY_STATE, 'weekly', THURSDAY)).toBe(20);
+  it('gives a new subscriber twenty plus the free one', () => {
+    expect(available(EMPTY_STATE, 'weekly', THURSDAY)).toBe(21);
   });
 
   it('adds bought credits to whatever is left', () => {
@@ -125,20 +125,20 @@ describe('spendOne', () => {
     expect(spent?.pool).toBe('weekly');
   });
 
-  it('never grants a free credit: a free user spends what they bought', () => {
+  it('falls to the free credit when there is no allowance', () => {
     const spent = spendOne(state({ extraCredits: 1 }), 'free', THURSDAY);
-    expect(spent?.state).toEqual(expect.objectContaining({ freeUsed: 0, extraCredits: 0 }));
-    expect(spent?.pool).toBe('extra');
+    expect(spent?.state).toEqual(expect.objectContaining({ freeUsed: 1, extraCredits: 1 }));
+    expect(spent?.pool).toBe('free');
   });
 
   it('touches a bought credit only when nothing else is left', () => {
-    const spent = spendOne(state({ extraCredits: 2 }), 'free', THURSDAY);
+    const spent = spendOne(state({ freeUsed: 1, extraCredits: 2 }), 'free', THURSDAY);
     expect(spent?.state.extraCredits).toBe(1);
     expect(spent?.pool).toBe('extra');
   });
 
   it('returns null with nothing to take', () => {
-    expect(spendOne(state(), 'free', THURSDAY)).toBeNull();
+    expect(spendOne(state({ freeUsed: 1 }), 'free', THURSDAY)).toBeNull();
     // `lastPlan` matters now: an exhausted subscriber is one who was already
     // subscribed. Arriving as a subscriber for the first time is a purchase,
     // and a purchase refills the allowance.

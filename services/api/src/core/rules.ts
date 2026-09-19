@@ -13,7 +13,7 @@ export interface CreditState {
   /** The ISO week `weekUsed` was last written in. Null for a device seen for the first time. */
   week: string | null;
   weekUsed: number;
-  /** The lifetime free credit, spent or not. Withdrawn: `FREE_CREDITS` is 0. */
+  /** The lifetime free credit, spent or not. */
   freeUsed: number;
   /** Credits from $0.99 purchases. Survive the weekly reset. */
   extraCredits: number;
@@ -109,17 +109,15 @@ export interface Spend {
  *
  * Weekly allowance, then the free lifetime credit, then the ones somebody paid
  * $0.99 for — a bought credit is always the last thing to go, because it is the
- * only one the user would be annoyed to lose. The middle pool is empty while
- * `FREE_CREDITS` is 0, which is the whole of "nothing is free": a free user
- * reaches the bought pool immediately, and reaches the paywall if it is empty.
+ * only one the user would be annoyed to lose.
  *
  * The pool comes back with the row because the refund needs it and cannot
  * recover it later: by the time a render fails, the only thing that says which
  * pool paid is this answer.
  *
  * Returns null when there is nothing to take. The caller turns that into a
- * paywall; it is not an exception because a free user with no credits is the
- * ordinary state of a free user, on their first render as much as their tenth.
+ * paywall; it is not an exception because running out is an ordinary thing that
+ * happens to every free user exactly once.
  */
 export function spendOne(state: CreditState, plan: PlanId, now: Date): Spend | null {
   // `settle`, not `rollForward`: a spend is the first thing that persists the

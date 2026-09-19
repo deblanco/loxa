@@ -52,8 +52,8 @@ describe('tryOn', () => {
 
     expect(result.imageBase64).toBe('RENDERED');
     expect(result.cached).toBe(false);
-    // The weekly 20, minus the one just spent.
-    expect(result.creditsLeft).toBe(19);
+    // 20 weekly + 1 free, minus the one just spent.
+    expect(result.creditsLeft).toBe(20);
     expect(renderer.calls).toHaveLength(1);
   });
 
@@ -102,7 +102,7 @@ describe('tryOn', () => {
     // The pool a credit came from cannot be read back off the state after the
     // take, which is why `spendOne` names it and the refund is handed that name
     // rather than inferring one.
-    const ledger = fakeLedger({ week: '2026-W35', extraCredits: 1 });
+    const ledger = fakeLedger({ week: '2026-W35', freeUsed: 1, extraCredits: 1 });
     const d = {
       ledger: ledger.port,
       cache: fakeCache().port,
@@ -113,7 +113,9 @@ describe('tryOn', () => {
     };
 
     await expect(tryOn(COMMAND, d)).rejects.toThrow();
-    expect(ledger.state).toEqual(expect.objectContaining({ weekUsed: 0, extraCredits: 1 }));
+    expect(ledger.state).toEqual(
+      expect.objectContaining({ weekUsed: 0, freeUsed: 1, extraCredits: 1 }),
+    );
   });
 
   it('keeps a purchase that landed while the model was working', async () => {
@@ -146,7 +148,7 @@ describe('tryOn', () => {
   });
 
   it('refuses when there is nothing to spend', async () => {
-    const ledger = fakeLedger({ week: '2026-W35' });
+    const ledger = fakeLedger({ week: '2026-W35', freeUsed: 1 });
     const renderer = fakeRenderer();
     const d = {
       ledger: ledger.port,
@@ -176,7 +178,7 @@ describe('tryOn', () => {
     };
 
     const result = await tryOn(COMMAND, d);
-    expect(result).toEqual({ imageBase64: 'CACHED', creditsLeft: 20, cached: true });
+    expect(result).toEqual({ imageBase64: 'CACHED', creditsLeft: 21, cached: true });
     expect(renderer.calls).toHaveLength(0);
     expect(ledger.writes).toHaveLength(0);
   });
@@ -186,7 +188,7 @@ describe('tryOn', () => {
     // to pay again because their balance has since run out.
     const key = await renderCacheKey(COMMAND.imageBase64, COMMAND.styleId, COMMAND.colorId);
     const d = {
-      ledger: fakeLedger({ week: '2026-W35' }).port,
+      ledger: fakeLedger({ week: '2026-W35', freeUsed: 1 }).port,
       cache: fakeCache({ [key]: 'CACHED' }).port,
       renderer: fakeRenderer().port,
       stats: fakeUsageStats().port,
@@ -289,7 +291,7 @@ describe('tryOn', () => {
   it('does not count a request that was refused for credits', async () => {
     const stats = fakeUsageStats();
     const d = {
-      ledger: fakeLedger({ week: '2026-W35' }).port,
+      ledger: fakeLedger({ week: '2026-W35', freeUsed: 1 }).port,
       cache: fakeCache().port,
       renderer: fakeRenderer().port,
       stats: stats.port,
@@ -315,7 +317,7 @@ describe('tryOn', () => {
     };
 
     await expect(tryOn(COMMAND, d)).resolves.toEqual(
-      expect.objectContaining({ imageBase64: 'RENDERED', creditsLeft: 19 }),
+      expect.objectContaining({ imageBase64: 'RENDERED', creditsLeft: 20 }),
     );
     // And the credit stays spent: the swallow must not look like a failure.
     expect(ledger.state.weekUsed).toBe(1);

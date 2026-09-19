@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isoWeek, nextWeeklyReset } from '../src/credits';
+import { FREE_CREDITS, isoWeek, nextWeeklyReset } from '../src/credits';
 
 describe('isoWeek', () => {
   it('numbers a mid-year week', () => {
@@ -59,5 +59,11 @@ describe('nextWeeklyReset', () => {
     expect(nextWeeklyReset(new Date('2026-09-30T12:00:00Z')).toISOString()).toBe(
       '2026-10-05T00:00:00.000Z',
     );
+  });
+});
+
+describe('FREE_CREDITS', () => {
+  it('is one photo, so a new device can see its own face before being asked to pay', () => {
+    expect(FREE_CREDITS).toBe(1);
   });
 });

@@ -208,13 +208,13 @@ describe('GET /v1/credits', () => {
     expect(response.status).toBe(400);
   });
 
-  it('gives a new free device nothing to spend', async () => {
+  it('gives a new free device its one credit', async () => {
     const response = await SELF.fetch('https://loxa.test/v1/credits', {
       headers: { 'X-Device-Id': DEVICE },
     });
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual(
-      expect.objectContaining({ creditsLeft: 0, cap: 0, plan: 'free' }),
+      expect.objectContaining({ creditsLeft: 1, cap: 0, plan: 'free' }),
     );
   });
 
@@ -229,21 +229,21 @@ describe('GET /v1/credits', () => {
 });
 
 describe('POST /v1/tryon', () => {
-  it('renders and spends a credit', async () => {
+  it('renders and spends the free credit', async () => {
     interceptVertex(() => imageAnswer());
 
-    const response = await post('/v1/tryon', body(), { 'X-Dev-Premium': '1' });
+    const response = await post('/v1/tryon', body());
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
       imageBase64: 'RENDERED',
-      creditsLeft: 19,
+      creditsLeft: 0,
       cached: false,
     });
 
-    const row = await env.DB.prepare('SELECT week_used FROM device_credits WHERE device_id = ?')
+    const row = await env.DB.prepare('SELECT free_used FROM device_credits WHERE device_id = ?')
       .bind(DEVICE)
-      .first<{ week_used: number }>();
-    expect(row?.week_used).toBe(1);
+      .first<{ free_used: number }>();
+    expect(row?.free_used).toBe(1);
   });
 
   it('serves the second identical request from the cache, free', async () => {
@@ -259,35 +259,37 @@ describe('POST /v1/tryon', () => {
     expect(vertex.calls()).toBe(1);
   });
 
-  it('answers 402 to a free device, on its very first render', async () => {
-    // Nothing is on the house: a device that has not paid has never had a
-    // credit to spend, and the refusal happens before the model is called.
-    const vertex = interceptVertex(() => imageAnswer());
+  it('answers 402 once the credits are gone', async () => {
+    interceptVertex(() => imageAnswer());
 
-    const response = await post('/v1/tryon', body());
-    expect(response.status).toBe(402);
-    await expect(response.json()).resolves.toEqual(
+    await post('/v1/tryon', body());
+    // A different photo, so the cache cannot answer it.
+    const second = await post('/v1/tryon', body({ imageBase64: 'd29ybGQ=' }));
+
+    expect(second.status).toBe(402);
+    await expect(second.json()).resolves.toEqual(
       expect.objectContaining({ code: 'out_of_credits' }),
     );
-    expect(vertex.calls()).toBe(0);
   });
 
   it('refunds the credit when the model is down', async () => {
     interceptVertex(() => new Response('upstream on fire', { status: 503 }));
 
-    const response = await post('/v1/tryon', body(), { 'X-Dev-Premium': '1' });
+    const response = await post('/v1/tryon', body());
     expect(response.status).toBe(502);
 
     const credits = await SELF.fetch('https://loxa.test/v1/credits', {
-      headers: { 'X-Device-Id': DEVICE, 'X-Dev-Premium': '1' },
+      headers: { 'X-Device-Id': DEVICE },
     });
-    await expect(credits.json()).resolves.toEqual(expect.objectContaining({ creditsLeft: 20 }));
+    await expect(credits.json()).resolves.toEqual(
+      expect.objectContaining({ creditsLeft: 1 }),
+    );
   });
 
   it('reports a blocked photo as the user problem it is', async () => {
     interceptVertex(() => Response.json({ promptFeedback: { blockReason: 'SAFETY' } }));
 
-    const response = await post('/v1/tryon', body(), { 'X-Dev-Premium': '1' });
+    const response = await post('/v1/tryon', body());
     expect(response.status).toBe(422);
     await expect(response.json()).resolves.toEqual(
       expect.objectContaining({ code: 'photo_rejected' }),
@@ -316,7 +318,7 @@ describe('POST /v1/tryon', () => {
       }),
     );
 
-    const response = await post('/v1/tryon', body(), { 'X-Dev-Premium': '1' });
+    const response = await post('/v1/tryon', body());
     expect(response.status).toBe(502);
   });
 });

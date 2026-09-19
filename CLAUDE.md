@@ -42,7 +42,8 @@ Deploys are per-workspace, never from the root:
    Worker.
 2. **Credits are spent server-side, before the model call.** `spendCredit` runs
    first in `core/try-on.ts`, and refunds on any throw. A client that asks nicely
-   for a free render gets a 402.
+   for a render it has no credit for gets a 402 — the one free photo is a credit
+   like any other, spent through the same path.
 3. **`design-system/` is the source of truth for every pixel and every word of
    UI copy.** If a colour, radius, or font size is not in
    `design-system/tokens/`, it does not exist.

@@ -12,16 +12,16 @@ describe('getCredits', () => {
     });
 
     expect(view).toEqual({
-      creditsLeft: 20,
+      creditsLeft: 21,
       cap: 20,
       plan: 'weekly',
       resetsAt: '2026-08-31T00:00:00.000Z',
     });
   });
 
-  it('describes a free user, who has nothing', async () => {
+  it('describes a free user who has spent their one credit', async () => {
     const view = await getCredits('device-1', {
-      ledger: fakeLedger({ week: '2026-W35' }).port,
+      ledger: fakeLedger({ week: '2026-W35', freeUsed: 1 }).port,
       entitlements: fakeEntitlements('free'),
       now: fixedClock,
     });
@@ -48,7 +48,7 @@ describe('getCredits', () => {
     // nothing to spend — so the free interval left no trace and the next
     // subscription was compared against a stale "weekly" and refused its
     // allowance. Observing the change is what records it.
-    const ledger = fakeLedger({ week: '2026-W35', weekUsed: 20, lastPlan: 'weekly' });
+    const ledger = fakeLedger({ week: '2026-W35', weekUsed: 20, freeUsed: 1, lastPlan: 'weekly' });
     const view = await getCredits('device-1', {
       ledger: ledger.port,
       entitlements: fakeEntitlements('free'),
@@ -65,7 +65,7 @@ describe('getCredits', () => {
   it('starts the allowance over for a subscription bought after a lapse', async () => {
     // The whole point: read as free, then read as weekly, and the twenty they
     // just paid for are there.
-    const ledger = fakeLedger({ week: '2026-W35', weekUsed: 20, lastPlan: 'free' });
+    const ledger = fakeLedger({ week: '2026-W35', weekUsed: 20, freeUsed: 1, lastPlan: 'free' });
     const view = await getCredits('device-1', {
       ledger: ledger.port,
       entitlements: fakeEntitlements('weekly'),
@@ -89,7 +89,7 @@ describe('syncPurchases', () => {
 
     expect(result.granted).toBe(1);
     expect(ledger.state.extraCredits).toBe(1);
-    expect(result.creditsLeft).toBe(1); // the bought one, and nothing else
+    expect(result.creditsLeft).toBe(2); // the free credit plus the bought one
   });
 
   it('grants nothing when the store reports no purchases', async () => {
