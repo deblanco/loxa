@@ -126,6 +126,9 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
   const [selection, setSelection] = useState(() => initialSelection(catalogue.defaults));
+  // Whether the cut on screen is the user's choice rather than the app's. Once
+  // it is, nothing below reaches in and changes it.
+  const chosen = useRef(false);
   // The plate is a pager, and a pager needs to know how wide one page is. Zero
   // until the first layout, which is why the plain plate renders until then.
   const [plateWidth, setPlateWidth] = useState(0);
@@ -138,6 +141,27 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
   // because the profile is where it is set, and this screen is what the user
   // comes back to afterwards.
   const [portrait, setPortrait] = useState<string | null>(null);
+
+  /**
+   * Open on the cut the face suggests.
+   *
+   * The manifest's default is the catalogue's opinion; a measured face shape is
+   * about the person holding the phone, and the whole point of the suggestion
+   * is that the first thing they see is one of the cuts it names. The strip is
+   * already ordered, so this is its first tile.
+   *
+   * Only while they have not chosen. A shape measured from a photo taken *after*
+   * a cut was picked must not throw that pick away.
+   */
+  useEffect(() => {
+    const first = catalogue.styles[0];
+    if (!shape || chosen.current || !first) return;
+    setSelection((current) =>
+      current.styleId === first.id
+        ? current
+        : clampSelection({ ...current, styleId: first.id }, catalogue),
+    );
+  }, [shape, catalogue]);
 
   // A refresh in the background can withdraw the cut being looked at, and
   // choosing a style never rendered in the current colour is the same problem
@@ -192,6 +216,7 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
   function stepStyle(step: 1 | -1) {
     const next = adjacentStyle(catalogue, selection.styleId, step);
     if (!next) return;
+    chosen.current = true;
     setSelection((current) => clampSelection({ ...current, styleId: next.id }, catalogue));
     setLanding(step === 1 ? 'first' : 'last');
   }
@@ -358,7 +383,10 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
           catalogue={catalogue}
           shape={shape}
           selectedId={selection.styleId}
-          onSelect={(styleId) => setSelection((current) => ({ ...current, styleId }))}
+          onSelect={(styleId) => {
+            chosen.current = true;
+            setSelection((current) => ({ ...current, styleId }));
+          }}
         />
         <ColorStrip
           colors={colorsFor(catalogue, selection.styleId)}

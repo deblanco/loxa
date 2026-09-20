@@ -88,14 +88,20 @@ export async function prepare(uri: string, options: PrepareOptions = {}): Promis
   // would trade that saving for an app in which no photo can be chosen at all,
   // which is the worse of the two by a distance.
   const face = await checkFace(result.uri, { minPixelSize: MIN_PIXELS }).catch(() => null);
-  if (!face) return { ok: true, photo };
+  if (face && face.status !== 'READY') return { ok: false, reason: VERDICTS[face.status] };
 
-  if (face.status !== 'READY') return { ok: false, reason: VERDICTS[face.status] };
-
-  // Exactly one face, so this is a photo of the user and worth measuring for
-  // the "suits you" suggestions. Awaited because it is tens of milliseconds
-  // and the preview reads the shape on its way back into focus; it cannot
-  // throw, and it never decides whether the photo is accepted.
+  // A photo that was not turned away is a photo of the user, and worth
+  // measuring for the "suits you" suggestions.
+  //
+  // Deliberately after a *failed* check as well as a passed one: the two ask
+  // different questions of Vision, and the detector that fails open above is
+  // the one that fails on a simulator. Skipping the measurement whenever the
+  // check could not answer would mean no suggestions on exactly the machine a
+  // reviewer runs, for a reason that has nothing to do with the photograph.
+  //
+  // Awaited because it is tens of milliseconds and the preview reads the shape
+  // on its way back into focus; it cannot throw, and it never decides whether
+  // the photo is accepted.
   await measureFaceShape(result.uri);
 
   return { ok: true, photo };

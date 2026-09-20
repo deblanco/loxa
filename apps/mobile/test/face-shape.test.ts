@@ -9,8 +9,11 @@ import {
   faceShapeKey,
 } from '../src/face/shape';
 
-/** A balanced face, in pixels: every ratio comfortably inside the oval band. */
-const OVAL = { cheekWidth: 400, jawWidth: 320, browWidth: 360, browToChin: 380 };
+/**
+ * A balanced face, in pixels: the middle of the band forty catalogue faces
+ * measured at — length 0.99, jaw 0.82, taper 0.06.
+ */
+const OVAL = { cheekWidth: 400, jawWidth: 326, browWidth: 350, browToChin: 396 };
 
 describe('faceShape', () => {
   it('reads a balanced face as oval', () => {
@@ -18,7 +21,7 @@ describe('faceShape', () => {
   });
 
   it('does not depend on how large the face is in the frame', () => {
-    const doubled = { cheekWidth: 800, jawWidth: 640, browWidth: 720, browToChin: 760 };
+    const doubled = { cheekWidth: 800, jawWidth: 652, browWidth: 700, browToChin: 792 };
     expect(faceShape(doubled)).toBe(faceShape(OVAL));
   });
 
@@ -27,7 +30,7 @@ describe('faceShape', () => {
   });
 
   it('reads wide brows over a narrow jaw as a heart', () => {
-    const jawWidth = 280;
+    const jawWidth = 300;
     const browWidth = jawWidth + OVAL.cheekWidth * HEART_TAPER_AT;
     expect(faceShape({ ...OVAL, jawWidth, browWidth })).toBe('heart');
   });

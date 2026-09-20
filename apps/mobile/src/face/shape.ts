@@ -10,10 +10,18 @@ import type { FaceMeasure } from 'face-track';
  * sent anywhere — not with a render, not in a diagnostic, not in a tally.
  *
  * Every ratio is against the face at its widest, so the answer does not depend
- * on how large the face is in the frame. The thresholds are a first cut, set
- * from typical adult proportions rather than calibrated against a labelled set
- * of photos; they live here, named, so that calibrating them is a change to
- * this file and its tests and nothing else.
+ * on how large the face is in the frame.
+ *
+ * **The thresholds are provisional.** They were first set from typical adult
+ * proportions, which turned out to be the wrong scale entirely: measured
+ * through Vision's contour, brows sit inside the face's width and the jaw is
+ * read at mouth height, so the ratios cluster far more tightly than a tape
+ * measure would suggest — forty catalogue faces gave length 0.93–1.04, jaw
+ * 0.79–0.84 and taper 0.01–0.10, and every one of them read as oval under the
+ * first set. These are set around that observed band instead, which is enough
+ * for the buckets to separate at all; they still want calibrating against a
+ * spread of real faces of known shape. They live here, named, so that doing so
+ * is a change to this file and its tests and nothing else.
  *
  * Vision cannot see a hairline, so length is measured from the top of the
  * eyebrows rather than from the forehead. That is shorter than the "face
@@ -21,13 +29,13 @@ import type { FaceMeasure } from 'face-track';
  */
 
 /** Brow-to-chin over cheek width at or above which a face reads as long. */
-export const LONG_AT = 1.08;
+export const LONG_AT = 1.05;
 /** At or below which it reads as short: round, or square with a strong jaw. */
-export const SHORT_AT = 0.86;
+export const SHORT_AT = 0.93;
 /** Jaw over cheek width at or above which the jaw reads as square. */
-export const SQUARE_JAW_AT = 0.9;
+export const SQUARE_JAW_AT = 0.87;
 /** How much wider the brows are than the jaw, over cheek width, for a heart. */
-export const HEART_TAPER_AT = 0.2;
+export const HEART_TAPER_AT = 0.12;
 /**
  * Tilt or turn beyond which the photo is not measured at all: a turned head
  * foreshortens exactly the widths the classifier reads.
