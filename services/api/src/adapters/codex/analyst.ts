@@ -1,4 +1,4 @@
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { generateText } from 'ai';
 import { RendererUnavailableError } from '../../core/errors';
 import type { FaceAnalystPort } from '../../ports/face-analyst';
@@ -6,8 +6,15 @@ import { extractJson, readDraft } from '../json-answer';
 import { buildSuitabilityPrompt } from '../suitability-prompt';
 
 /**
- * The primary analyst: a self-hosted endpoint speaking the OpenAI Responses
- * API, reached through the Vercel AI SDK.
+ * The primary analyst: an OpenAI-compatible endpoint we reach through the
+ * Vercel AI SDK.
+ *
+ * The model is a vision model with zero data retention. That is not a
+ * preference — the service's catalogue marks some of its models "training
+ * use", and this app's privacy policy says we do not use anybody's photos to
+ * train anything. A face is not a prompt we are free to donate, so a model
+ * that learns from what it is shown cannot be pointed at this route however
+ * well it answers.
  *
  * It is primary because it is ours and it is free, which keeps the Vertex text
  * quota for the times this machine is not answering. That is also its risk:
@@ -20,14 +27,10 @@ import { buildSuitabilityPrompt } from '../suitability-prompt';
  * the global at construction, and the test suite replaces that global per test;
  * without this the suite would reach the network.
  *
- * The SDK validates the reply against OpenAI's own Responses schema, which is
- * stricter than the endpoint it is pointed at may be — it requires, for
- * instance, an `annotations` array on every text part. A self-hosted server
- * that omits a field OpenAI always sends will therefore fail validation here
- * rather than at the parse below. That is survivable because of the rule in the
- * next paragraph: it reads as "this box is not answering properly", and Google
- * gets asked. If the endpoint turns out to be close-but-not-identical, this is
- * the line to replace with a plain fetch.
+ * Chat completions rather than the Responses API, because that is what the
+ * vision model speaks. The SDK still validates the reply, and a server that
+ * omits a field OpenAI always sends fails here rather than at the parse below
+ * — survivable because of the rule in the next paragraph.
  *
  * Failures here are **transient by default**, which is the opposite of the
  * image renderer's posture and deliberate: an image call carries a bill and a
@@ -42,7 +45,8 @@ export interface CodexAnalystConfig {
 }
 
 export function codexFaceAnalyst(config: CodexAnalystConfig): FaceAnalystPort {
-  const provider = createOpenAI({
+  const provider = createOpenAICompatible({
+    name: 'codex',
     baseURL: config.baseUrl,
     apiKey: config.token,
     fetch: (...args) => globalThis.fetch(...args),
@@ -53,7 +57,7 @@ export function codexFaceAnalyst(config: CodexAnalystConfig): FaceAnalystPort {
       let text: string;
       try {
         const answer = await generateText({
-          model: provider.responses(config.model),
+          model: provider.chatModel(config.model),
           headers: {
             // The endpoint refuses a request without a session and says so:
             // "cannot be routed efficiently". A fresh id per call rather than

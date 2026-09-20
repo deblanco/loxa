@@ -16,15 +16,15 @@ const ANSWER = JSON.stringify({
   cuts: [{ styleId: 'blunt-bob', reason: 'A level line answers a soft jaw.' }],
 });
 
-/** One Responses-API reply, with whatever text the test wants in it. */
+/** One chat-completions reply, with whatever text the test wants in it. */
 function reply(text: string) {
   return {
-    id: 'resp_1',
+    id: 'chat_1',
+    object: 'chat.completion',
+    created: 1,
     model: CONFIG.model,
-    output: [
-      { type: 'message', id: 'msg_1', role: 'assistant', content: [{ type: 'output_text', text, annotations: [] }] },
-    ],
-    usage: { input_tokens: 1, output_tokens: 1 },
+    choices: [{ index: 0, finish_reason: 'stop', message: { role: 'assistant', content: text } }],
+    usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
   };
 }
 

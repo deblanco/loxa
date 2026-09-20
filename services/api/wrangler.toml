@@ -94,10 +94,13 @@ OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
 # on the key the render fallback already uses. ANALYSIS_TEXT_MODEL stays unset
 # until this project is granted one.
 OPENROUTER_ANALYSIS_MODEL = "google/gemini-2.5-flash"
-# Uncomment when the endpoint has an address, and put the token in as a secret:
+# The primary. The model must be a **vision** model with zero data retention:
+# some models on this service are marked "training use", and this app's privacy
+# policy says nobody's photos train anything. Measured: the vision model answers
+# in about ten seconds, against twenty-three for the reasoning one.
 #   wrangler secret put CODEX_TOKEN
-# CODEX_BASE_URL = "https://…/v1"
-# CODEX_MODEL = "…"
+CODEX_BASE_URL = "https://opencode.ai/zen/go/v1"
+CODEX_MODEL = "deepseek-v4-flash-vision-exp"
 
 # --- Entitlements -----------------------------------------------------------
 # The weekly subscription is verified server-side, against RevenueCat API v2,
