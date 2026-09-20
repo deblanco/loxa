@@ -3,6 +3,13 @@ import type { CreditLedgerPort } from '../src/ports/credit-ledger';
 import type { EntitlementsPort } from '../src/ports/entitlements';
 import type { HairRendererPort, RenderRequest } from '../src/ports/hair-renderer';
 import type { RenderCachePort } from '../src/ports/render-cache';
+import type { AnalysisCachePort } from '../src/ports/analysis-cache';
+import type { ReportQuotaPort } from '../src/ports/report-quota';
+import type {
+  FaceAnalystPort,
+  SuitabilityDraft,
+  SuitabilityRequest,
+} from '../src/ports/face-analyst';
 import type { UsageStatsPort } from '../src/ports/usage-stats';
 import type { PlanId } from '@loxa/shared';
 
@@ -94,6 +101,51 @@ export function fakeUsageStats(fail?: Error) {
     async record(styleId, colorId, cached) {
       calls.push({ styleId, colorId, cached });
       if (fail) throw fail;
+    },
+  };
+  return { port, calls };
+}
+
+/** An analysis cache, which holds JSON rather than pictures. */
+export function fakeAnalysisCache(seed: Record<string, string> = {}) {
+  const store = new Map(Object.entries(seed));
+  const port: AnalysisCachePort = {
+    async get(key) {
+      return store.get(key) ?? null;
+    },
+    async put(key, value) {
+      store.set(key, value);
+    },
+  };
+  return { port, store };
+}
+
+/** An analyst that answers, or one that fails, plus a record of what it was asked. */
+export function fakeAnalyst(answer: SuitabilityDraft | Error = DRAFT) {
+  const calls: SuitabilityRequest[] = [];
+  const port: FaceAnalystPort = {
+    async analyse(request) {
+      calls.push(request);
+      if (answer instanceof Error) throw answer;
+      return answer;
+    },
+  };
+  return { port, calls };
+}
+
+/** A believable answer about a face, for tests that are about something else. */
+export const DRAFT: SuitabilityDraft = {
+  faceShape: 'oval',
+  cuts: [{ styleId: 'blunt-bob', reason: 'A level line answers a soft jaw.' }],
+};
+
+/** A quota that grants what is asked, or one that has nothing left. */
+export function fakeQuota(exhausted = false) {
+  const calls: { deviceId: string; wanted: number; limit: number }[] = [];
+  const port: ReportQuotaPort = {
+    async consume(deviceId, wanted, limit) {
+      calls.push({ deviceId, wanted, limit });
+      return exhausted ? 0 : wanted;
     },
   };
   return { port, calls };
