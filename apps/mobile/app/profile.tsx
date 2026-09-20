@@ -194,6 +194,11 @@ export default function Profile() {
             <View>
               <Meta tone="paper50">{t('profile.creditsLeft')}</Meta>
               <View style={styles.count}>
+                {/* The header chip's spark, at the size of the number it
+                    counts: a credit is drawn the same way wherever it is. */}
+                <Body variant="caption" tone="paper" style={styles.spark}>
+                  ✦
+                </Body>
                 <Display variant="numeral" tone="paper">
                   {left}
                 </Display>
@@ -402,7 +407,8 @@ const styles = StyleSheet.create({
     backgroundColor: color.ink,
   },
   creditTop: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  count: { flexDirection: 'row', alignItems: 'baseline', marginTop: space.s1 },
+  count: { flexDirection: 'row', alignItems: 'baseline', marginTop: space.s1, gap: 7 },
+  spark: { fontSize: 22, lineHeight: 26 },
   resetLines: { alignItems: 'flex-end' },
   right: { textAlign: 'right' },
   meter: { marginTop: space.s3 + 2 },

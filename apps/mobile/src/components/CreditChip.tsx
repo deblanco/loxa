@@ -7,15 +7,19 @@ import { Body } from './Text';
 /**
  * The credit count in the header.
  *
- * A filled black pill with a dot, and the dot is doing the labelling: there is
- * no room for the word "credits" and a bare number in a pill would be a mystery.
+ * A filled black pill with a spark, and the spark is doing the labelling: there
+ * is no room for the word "credits" and a bare number in a pill would be a
+ * mystery. It is the same glyph the Try On pill spends a credit with, so the
+ * thing counted here and the thing spent there read as one.
  */
 export function CreditChip({ credits, onPress }: { credits: number; onPress?: () => void }) {
   const { t } = useTranslation();
 
   const content = (
     <View style={styles.chip}>
-      <View style={styles.dot} />
+      <Body variant="caption" tone="paper" style={styles.spark}>
+        ✦
+      </Body>
       <Body variant="caption" weight="medium" tone="paper">
         {creditChipLabel(credits)}
       </Body>
@@ -39,7 +43,8 @@ const styles = StyleSheet.create({
     backgroundColor: color.ink,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
-  dot: { width: 5, height: 5, borderRadius: radius.pill, backgroundColor: color.paper },
+  // Sized off the pill's own badge, which is the other place a credit is drawn.
+  spark: { fontSize: 14, lineHeight: 16 },
 });

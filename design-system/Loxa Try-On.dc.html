@@ -117,7 +117,9 @@
               <div style="font-family:'Instrument Serif',Georgia,serif;font-size:21px;letter-spacing:.2em">LOXA</div>
               <div style="display:flex;align-items:center;gap:10px">
                 <div style="height:30px;padding:0 12px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;gap:6px;font:500 12px/1 'Instrument Sans',system-ui">
-                  <div style="width:5px;height:5px;border-radius:9px;background:#faf8f5"></div>{{ credits }}
+                  <!-- The same spark as the Try On pill's cost badge: one credit, one glyph,
+                       wherever a credit is counted. -->
+                  <div style="font-size:14px;line-height:1;margin-top:-1px">✦</div>{{ credits }}
                 </div>
                 <div onClick="{{ goProfile }}" style="width:34px;height:34px;border-radius:999px;background:#e7e1d8;background-image:repeating-linear-gradient(102deg,rgba(13,12,11,.09) 0 6px,transparent 6px 13px);border:1px solid rgba(13,12,11,.14);cursor:pointer" style-hover="border-color:#0d0c0b"></div>
               </div>
@@ -266,7 +268,7 @@
               <div style="display:flex;align-items:flex-end;justify-content:space-between">
                 <div>
                   <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(250,248,245,.5)">Credits left</div>
-                  <div style="font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1.05;margin-top:4px">{{ credits }}<span style="font-size:20px;opacity:.5"> / {{ creditCap }}</span></div>
+                  <div style="font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1.05;margin-top:4px;display:flex;align-items:baseline;gap:7px"><span style="font-family:'Instrument Sans',system-ui;font-size:22px;line-height:1">✦</span>{{ credits }}<span style="font-size:20px;opacity:.5"> / {{ creditCap }}</span></div>
                 </div>
                 <div style="text-align:right;font:400 10.5px/1.6 ui-monospace,monospace;color:rgba(250,248,245,.5)">resets Monday<br>no roll-over</div>
               </div>
