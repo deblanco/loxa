@@ -93,11 +93,11 @@ export async function prepare(uri: string, options: PrepareOptions = {}): Promis
   // A photo that was not turned away is a photo of the user, and worth
   // measuring for the "suits you" suggestions.
   //
-  // Deliberately after a *failed* check as well as a passed one: the two ask
-  // different questions of Vision, and the detector that fails open above is
-  // the one that fails on a simulator. Skipping the measurement whenever the
-  // check could not answer would mean no suggestions on exactly the machine a
-  // reviewer runs, for a reason that has nothing to do with the photograph.
+  // Deliberately after a *failed* check as well as a passed one: a detector
+  // that could not answer is not a verdict on the photograph, and skipping the
+  // measurement whenever it happened to fail would tie one Vision request's
+  // availability to another's. (Both are unavailable on a simulator, where the
+  // landmarks model cannot build an inference context — see `face-shape.ts`.)
   //
   // Awaited because it is tens of milliseconds and the preview reads the shape
   // on its way back into focus; it cannot throw, and it never decides whether

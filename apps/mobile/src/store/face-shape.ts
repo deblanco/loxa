@@ -41,6 +41,11 @@ export async function measureFaceShape(uri: string): Promise<void> {
     if (shape) await AsyncStorage.setItem(KEY, shape);
   } catch {
     // Vision refused, or the module is absent on this build. No suggestion.
+    //
+    // A simulator always lands here: `VNDetectFaceLandmarksRequest` throws
+    // "Could not create inference context" there, the same way `checkFace`
+    // does. The strip then shows its ordinary order, which is why nothing
+    // above this line treats a missing shape as a failure.
   }
 }
 
