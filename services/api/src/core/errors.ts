@@ -59,3 +59,33 @@ export class RendererUnavailableError extends Error {
     this.transient = transient;
   }
 }
+
+/**
+ * A provider answered, and what it said was unusable.
+ *
+ * Not the same as a provider being down: the call succeeded and was billed,
+ * and it is the *content* that cannot be shown — a face shape that is not one
+ * of ours, or a list of cuts with nothing left in it once the invented ids were
+ * dropped. A 502 either way, because there is nothing the user did wrong and
+ * nothing they can do about it.
+ */
+export class AnalysisUnusableError extends Error {
+  constructor(reason: string) {
+    super(reason);
+    this.name = 'AnalysisUnusableError';
+  }
+}
+
+/**
+ * This device has asked for enough analyses today.
+ *
+ * The analysis route spends no credit, so this is what stands between it and a
+ * model bill with no ceiling. A 429 rather than a 402: buying credits would
+ * change nothing, and the fix is to come back tomorrow.
+ */
+export class AnalysisQuotaError extends Error {
+  constructor() {
+    super('too many analyses today');
+    this.name = 'AnalysisQuotaError';
+  }
+}
