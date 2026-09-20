@@ -57,6 +57,39 @@ export interface Env {
   OPENROUTER_IMAGE_MODEL?: string;
 
   /**
+   * The self-hosted analysis endpoint: where it is, which model, and the token.
+   *
+   * All three or none. A base URL with no token is a 401 on the one path
+   * nobody exercises until it is needed, which is the same argument that keeps
+   * GOOGLE_PROJECT_ID and GOOGLE_SA_KEY moving together.
+   *
+   * Unset is supported: Gemini answers every analysis instead, which costs
+   * latency and the text quota rather than correctness. `wrangler secret put
+   * CODEX_TOKEN`, or .dev.vars locally — it is a Worker secret and never
+   * reaches the app.
+   */
+  CODEX_BASE_URL?: string;
+  CODEX_MODEL?: string;
+  CODEX_TOKEN?: string;
+
+  /**
+   * The model that reads a face and names cuts. **Never `IMAGE_MODEL`.**
+   *
+   * Written out rather than derived, for the reason OPENROUTER_IMAGE_MODEL is
+   * written out and for a harder one: the image model's quota is about two
+   * requests a minute for the whole project, and that quota is what renders are
+   * sold against. An analysis sharing it would take a photo somebody paid for.
+   * This is a different base model with a limit of its own.
+   *
+   * Unset is supported and means the self-hosted endpoint has no fallback.
+   * **Unset together with the CODEX_* three is not**: with no provider at all
+   * the analysis route answers 502 for everybody. That is where the parallel
+   * with OPENROUTER_API_KEY ends — that key costs availability, these two
+   * together cost the feature.
+   */
+  ANALYSIS_TEXT_MODEL?: string;
+
+  /**
    * Secret: the RevenueCat `sk_` key, for looking a customer up server-side.
    *
    * Not the key the app ships with — that one is publishable and can only buy

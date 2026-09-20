@@ -21,6 +21,14 @@ export default defineConfig({
         bindings: {
           GOOGLE_PROJECT_ID: 'loxa-test',
           IMAGE_MODEL: 'gemini-3.1-flash-lite-image',
+          ANALYSIS_TEXT_MODEL: 'gemini-test-text',
+          // Pinned off, for the reason OPENROUTER_API_KEY is pinned off below:
+          // .dev.vars is loaded here too, so a developer with their own
+          // endpoint configured would otherwise wire a second provider into
+          // every route test — and into a host the interceptor does not allow.
+          CODEX_BASE_URL: '',
+          CODEX_MODEL: '',
+          CODEX_TOKEN: '',
           // A real but worthless RSA pair: the adapter signs a JWT on every
           // render, so a placeholder would fail inside crypto.subtle rather
           // than at the intercepted call, and the auth path would go untested.

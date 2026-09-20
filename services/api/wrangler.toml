@@ -83,6 +83,18 @@ IMAGE_MODEL = "gemini-3.1-flash-lite-image"
 #   wrangler secret put OPENROUTER_API_KEY
 OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
 
+# --- Which cuts suit you ----------------------------------------------------
+# The analysis route's two providers. The self-hosted endpoint answers first
+# and Gemini catches what it drops; with neither configured the route 502s.
+#
+# NOT the image model: that quota is about two requests a minute for the whole
+# project and it is what renders are sold against.
+ANALYSIS_TEXT_MODEL = "gemini-3-flash"
+# Uncomment when the endpoint has an address, and put the token in as a secret:
+#   wrangler secret put CODEX_TOKEN
+# CODEX_BASE_URL = "https://…/v1"
+# CODEX_MODEL = "…"
+
 # --- Entitlements -----------------------------------------------------------
 # The weekly subscription is verified server-side, against RevenueCat API v2,
 # with a secret key:

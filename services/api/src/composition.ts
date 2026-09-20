@@ -1,21 +1,27 @@
 import { d1CreditLedger } from './adapters/d1/credit-ledger';
 import { d1Diagnostics } from './adapters/d1/diagnostics';
 import { d1UsageStats } from './adapters/d1/usage-stats';
+import { codexFaceAnalyst } from './adapters/codex/analyst';
 import { devEntitlements } from './adapters/entitlements/dev';
+import { fallbackAnalyst, unavailableAnalyst } from './adapters/fallback-analyst';
 import { fallbackRenderer } from './adapters/fallback-renderer';
 import { revenueCatEntitlements } from './adapters/entitlements/revenuecat';
 import { stubEntitlements } from './adapters/entitlements/stub';
+import { kvAnalysisCache } from './adapters/kv/analysis-cache';
 import { kvRenderCache } from './adapters/kv/render-cache';
-import { kvReportQuota } from './adapters/kv/report-quota';
+import { kvAnalysisQuota, kvReportQuota } from './adapters/kv/report-quota';
 import { openRouterHairRenderer } from './adapters/openrouter/hair-renderer';
 import { parseServiceAccountKey } from './adapters/vertex/auth';
+import { vertexFaceAnalyst } from './adapters/vertex/analyst';
 import { vertexHairRenderer } from './adapters/vertex/hair-renderer';
+import type { AnalyseFaceDeps } from './core/analyse-face';
 import type { GetCreditsDeps } from './core/get-credits';
 import type { ReportDiagnosticsDeps } from './core/report-diagnostics';
 import type { SyncPurchasesDeps } from './core/sync-purchases';
 import type { TryOnDeps } from './core/try-on';
 import type { Env } from './env';
 import type { EntitlementsPort } from './ports/entitlements';
+import type { FaceAnalystPort } from './ports/face-analyst';
 import type { HairRendererPort } from './ports/hair-renderer';
 
 /**
@@ -82,6 +88,55 @@ export function rendererFor(env: Env): HairRendererPort {
       model: env.OPENROUTER_IMAGE_MODEL,
     }),
   );
+}
+
+/**
+ * The analyst, and which providers are configured for it.
+ *
+ * Mirrors `rendererFor`, with the primary and the fallback the other way round
+ * from what the renderer does: the endpoint we host ourselves goes first,
+ * because it is free and because every call it answers is one that did not
+ * spend the Vertex text quota.
+ *
+ * If the self-hosted box ever cannot promise TLS, no request logging and no
+ * retention, swap the two arguments below and accept the quota cost. That is
+ * the whole of the change.
+ */
+export function faceAnalystFor(env: Env): FaceAnalystPort {
+  const codex =
+    env.CODEX_BASE_URL && env.CODEX_MODEL && env.CODEX_TOKEN
+      ? codexFaceAnalyst({
+          baseUrl: env.CODEX_BASE_URL,
+          model: env.CODEX_MODEL,
+          token: env.CODEX_TOKEN,
+        })
+      : null;
+
+  const gemini = env.ANALYSIS_TEXT_MODEL
+    ? vertexFaceAnalyst({
+        credentials: parseServiceAccountKey(env.GOOGLE_SA_KEY),
+        projectId: env.GOOGLE_PROJECT_ID,
+        model: env.ANALYSIS_TEXT_MODEL,
+      })
+    : null;
+
+  if (codex && gemini) return fallbackAnalyst(codex, gemini);
+  // A deployment with neither says so on every request rather than guessing.
+  return codex ?? gemini ?? unavailableAnalyst();
+}
+
+export function buildAnalysisDeps(env: Env, devPremium: boolean): AnalyseFaceDeps {
+  return {
+    ledger: d1CreditLedger(env.DB),
+    entitlements: entitlementsFor(env, devPremium),
+    analyst: faceAnalystFor(env),
+    cache: kvAnalysisCache(env.RESULTS_CACHE),
+    // The same namespace as the render cache and the diagnostics quota,
+    // key-prefixed `analysis:` so one device's crash loop cannot eat the
+    // allowance it needs to ask what suits it.
+    quota: kvAnalysisQuota(env.RESULTS_CACHE),
+    now: () => new Date(),
+  };
 }
 
 export function buildTryOnDeps(env: Env, devPremium: boolean): TryOnDeps {
