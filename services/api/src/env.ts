@@ -73,19 +73,34 @@ export interface Env {
   CODEX_TOKEN?: string;
 
   /**
-   * The model that reads a face and names cuts. **Never `IMAGE_MODEL`.**
+   * The OpenRouter slug for the model that reads a face, on the same key the
+   * render fallback uses.
    *
-   * Written out rather than derived, for the reason OPENROUTER_IMAGE_MODEL is
-   * written out and for a harder one: the image model's quota is about two
-   * requests a minute for the whole project, and that quota is what renders are
-   * sold against. An analysis sharing it would take a photo somebody paid for.
-   * This is a different base model with a limit of its own.
+   * This is the analysis fallback, and it is OpenRouter rather than Vertex for
+   * a blunt reason: `loxa-506814` is entitled to the image model and to nothing
+   * else, so every Gemini *text* id answers 404 there — measured, not assumed.
+   * A few hundred output tokens is cents, so unlike the render fallback this
+   * one does not move the margin arithmetic.
    *
-   * Unset is supported and means the self-hosted endpoint has no fallback.
+   * Unset means the self-hosted endpoint has no fallback, which is supported.
    * **Unset together with the CODEX_* three is not**: with no provider at all
    * the analysis route answers 502 for everybody. That is where the parallel
-   * with OPENROUTER_API_KEY ends — that key costs availability, these two
+   * with OPENROUTER_API_KEY ends — that key costs availability, and these
    * together cost the feature.
+   */
+  OPENROUTER_ANALYSIS_MODEL?: string;
+
+  /**
+   * A Vertex text model, if this project ever gets one.
+   *
+   * Kept because the adapter is written and tested and the day the project is
+   * granted a text model this is one variable away from being the fallback
+   * again — and a direct relationship with Google beats a reseller. Today it
+   * must stay unset: there is no such model to point it at.
+   *
+   * **Never `IMAGE_MODEL`.** That quota is about two requests a minute for the
+   * whole project and it is what renders are sold against; an analysis sharing
+   * it would take a photo somebody paid for.
    */
   ANALYSIS_TEXT_MODEL?: string;
 

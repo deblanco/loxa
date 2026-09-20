@@ -54,6 +54,16 @@ export function codexFaceAnalyst(config: CodexAnalystConfig): FaceAnalystPort {
       try {
         const answer = await generateText({
           model: provider.responses(config.model),
+          headers: {
+            // The endpoint refuses a request without a session and says so:
+            // "cannot be routed efficiently". A fresh id per call rather than
+            // one per device, deliberately — a stable id would let a third
+            // party link one person's analyses to each other, and the privacy
+            // policy says nothing about this request identifies whose it is.
+            // The cost is their prompt cache, which is theirs to lose.
+            'x-opencode-session': crypto.randomUUID(),
+            'user-agent': 'loxa/1.0',
+          },
           // The SDK's own retry is off: this port already has a retry, and it
           // is a different provider rather than the same one again. Leaving
           // both on would make a dead endpoint take three timeouts before

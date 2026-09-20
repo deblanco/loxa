@@ -22,6 +22,7 @@ export default defineConfig({
           GOOGLE_PROJECT_ID: 'loxa-test',
           IMAGE_MODEL: 'gemini-3.1-flash-lite-image',
           ANALYSIS_TEXT_MODEL: 'gemini-test-text',
+          OPENROUTER_ANALYSIS_MODEL: '',
           // Pinned off, for the reason OPENROUTER_API_KEY is pinned off below:
           // .dev.vars is loaded here too, so a developer with their own
           // endpoint configured would otherwise wire a second provider into

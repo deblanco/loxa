@@ -89,7 +89,11 @@ OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
 #
 # NOT the image model: that quota is about two requests a minute for the whole
 # project and it is what renders are sold against.
-ANALYSIS_TEXT_MODEL = "gemini-3-flash"
+# Measured: loxa-506814 is entitled to the image model and to no text model at
+# all, so every Gemini text id 404s there. The analysis fallback is OpenRouter,
+# on the key the render fallback already uses. ANALYSIS_TEXT_MODEL stays unset
+# until this project is granted one.
+OPENROUTER_ANALYSIS_MODEL = "google/gemini-2.5-flash"
 # Uncomment when the endpoint has an address, and put the token in as a secret:
 #   wrangler secret put CODEX_TOKEN
 # CODEX_BASE_URL = "https://…/v1"

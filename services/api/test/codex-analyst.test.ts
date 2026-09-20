@@ -58,7 +58,21 @@ describe('codexFaceAnalyst', () => {
     const sent = calls[0]!;
     expect(sent.url.startsWith('https://codex.test/v1')).toBe(true);
     expect(sent.headers.get('authorization')).toBe('Bearer secret-token');
+    // The endpoint refuses a request with no session id.
+    expect(sent.headers.get('x-opencode-session')).toBeTruthy();
     expect(sent.body).toContain('aGVsbG8=');
+  });
+
+  it('gives each call its own session, so nobody can link one user to themselves', async () => {
+    // A factory, not one Response: a body can only be read once.
+    const { calls } = intercept(() => Response.json(reply(ANSWER)));
+    const analyst = codexFaceAnalyst(CONFIG);
+    await analyst.analyse(REQUEST);
+    await analyst.analyse(REQUEST);
+
+    expect(calls[0]!.headers.get('x-opencode-session')).not.toBe(
+      calls[1]!.headers.get('x-opencode-session'),
+    );
   });
 
   it('never shows a provider our prompts', async () => {

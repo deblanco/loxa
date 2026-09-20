@@ -10,6 +10,7 @@ import { stubEntitlements } from './adapters/entitlements/stub';
 import { kvAnalysisCache } from './adapters/kv/analysis-cache';
 import { kvRenderCache } from './adapters/kv/render-cache';
 import { kvAnalysisQuota, kvReportQuota } from './adapters/kv/report-quota';
+import { openRouterFaceAnalyst } from './adapters/openrouter/analyst';
 import { openRouterHairRenderer } from './adapters/openrouter/hair-renderer';
 import { parseServiceAccountKey } from './adapters/vertex/auth';
 import { vertexFaceAnalyst } from './adapters/vertex/analyst';
@@ -112,17 +113,26 @@ export function faceAnalystFor(env: Env): FaceAnalystPort {
         })
       : null;
 
-  const gemini = env.ANALYSIS_TEXT_MODEL
-    ? vertexFaceAnalyst({
-        credentials: parseServiceAccountKey(env.GOOGLE_SA_KEY),
-        projectId: env.GOOGLE_PROJECT_ID,
-        model: env.ANALYSIS_TEXT_MODEL,
-      })
-    : null;
+  // OpenRouter first among the fallbacks, and Vertex only if this project is
+  // ever granted a text model — today it has none, so `ANALYSIS_TEXT_MODEL` is
+  // unset everywhere and this resolves to OpenRouter or to nothing.
+  const fallback =
+    env.OPENROUTER_API_KEY && env.OPENROUTER_ANALYSIS_MODEL
+      ? openRouterFaceAnalyst({
+          apiKey: env.OPENROUTER_API_KEY,
+          model: env.OPENROUTER_ANALYSIS_MODEL,
+        })
+      : env.ANALYSIS_TEXT_MODEL
+        ? vertexFaceAnalyst({
+            credentials: parseServiceAccountKey(env.GOOGLE_SA_KEY),
+            projectId: env.GOOGLE_PROJECT_ID,
+            model: env.ANALYSIS_TEXT_MODEL,
+          })
+        : null;
 
-  if (codex && gemini) return fallbackAnalyst(codex, gemini);
+  if (codex && fallback) return fallbackAnalyst(codex, fallback);
   // A deployment with neither says so on every request rather than guessing.
-  return codex ?? gemini ?? unavailableAnalyst();
+  return codex ?? fallback ?? unavailableAnalyst();
 }
 
 export function buildAnalysisDeps(env: Env, devPremium: boolean): AnalyseFaceDeps {
