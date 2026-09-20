@@ -7,6 +7,7 @@ import { suitsShape, tileFor } from '../catalogue';
 import { faceShapeKey } from '../face/shape';
 import { color, radius, space } from '../theme';
 import { PhotoPlate } from './PhotoPlate';
+import { SuitsSeal } from './SuitsSeal';
 import { Body, Meta } from './Text';
 
 /**
@@ -86,10 +87,8 @@ export function StyleStrip({ catalogue, shape, selectedId, onSelect }: Props) {
                 </View>
               ) : null}
               {suits ? (
-                <View style={styles.suits} pointerEvents="none">
-                  <Meta variant="metaSmall" tone="paper">
-                    {t('strips.suitsYou')}
-                  </Meta>
+                <View style={styles.seal} pointerEvents="none">
+                  <SuitsSeal />
                 </View>
               ) : null}
               <Body variant="tile" tone={selected ? 'ink' : 'ink55'} style={styles.name}>
@@ -103,6 +102,12 @@ export function StyleStrip({ catalogue, shape, selectedId, onSelect }: Props) {
   );
 }
 
+/** The tile's photograph. The caption sits under it, and the seal on its corner. */
+const THUMB_HEIGHT = 84;
+
+/** `SuitsSeal`'s own diameter, which this file needs to hang it off the corner. */
+const SEAL = 18;
+
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -113,7 +118,7 @@ const styles = StyleSheet.create({
   },
   strip: { paddingHorizontal: space.gutterScreen, gap: space.s3 },
   tile: { width: 70 },
-  thumb: { height: 84, borderRadius: radius.tile, borderWidth: 1 },
+  thumb: { height: THUMB_HEIGHT, borderRadius: radius.tile, borderWidth: 1 },
   tick: {
     position: 'absolute',
     top: 6,
@@ -126,16 +131,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   name: { marginTop: space.s1 + 2, textAlign: 'center' },
-  // On the photograph, bottom-left, in the tick's ink: the same mark language
-  // as selection, smaller, so the two never read as the same thing.
-  suits: {
-    position: 'absolute',
-    left: 5,
-    top: 84 - 5 - 14,
-    height: 14,
-    paddingHorizontal: 5,
-    borderRadius: radius.pill,
-    backgroundColor: color.ink,
-    justifyContent: 'center',
-  },
+  // Diagonally opposite the tick, so selection and suitability can sit on one
+  // tile without either being read as the other. Hung off the corner rather
+  // than inset, which is what makes it a seal rather than a sticker.
+  //
+  // Placed from the top, off the photograph's own height: the caption below it
+  // is one line in English and two in German, so anything measured from the
+  // tile's bottom would move with the language.
+  seal: { position: 'absolute', right: -2, top: THUMB_HEIGHT - SEAL + 2 },
 });

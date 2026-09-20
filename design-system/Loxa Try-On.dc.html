@@ -161,10 +161,14 @@
                     <sc-if value="{{ st.on }}" hint-placeholder-val="{{ false }}">
                       <div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:9px">✓</div>
                     </sc-if>
-                    <!-- "Suits you": cuts usually suggested for the face shape measured on the phone
-                         from the user's own photo. In the app they are also moved to the front. -->
+                    <!-- "Suits you": cuts suggested for this face. A seal rather than a label —
+                         the tile is a photograph of somebody, and words across it are a caption on
+                         their face. The words survive as the tile's accessibility hint. Diagonally
+                         opposite the tick so selection and suitability never read as each other. -->
                     <sc-if value="{{ st.suits }}" hint-placeholder-val="{{ false }}">
-                      <div style="position:absolute;top:65px;left:5px;height:14px;padding:0 5px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;font:500 9.5px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase">suits you</div>
+                      <div style="position:absolute;top:68px;right:-2px;width:18px;height:18px;border-radius:999px;background:#0d0c0b;border:1.5px solid #faf8f5;box-sizing:border-box;display:flex;align-items:center;justify-content:center">
+                        <div style="width:6px;height:6px;background:#faf8f5;transform:rotate(45deg)"></div>
+                      </div>
                     </sc-if>
                   </div>
                 </sc-for>
