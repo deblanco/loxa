@@ -2,6 +2,12 @@ name = "loxa"
 main = "src/index.ts"
 compatibility_date = "2025-08-01"
 
+# The Vercel AI SDK, which `adapters/codex` calls the analysis endpoint
+# through, expects Node's async-context machinery. Nothing else in this Worker
+# needs it — the flag is here for that one dependency, and it applies to the
+# test suite as well because miniflare reads this same file.
+compatibility_flags = ["nodejs_compat"]
+
 # --- Credit ledger ----------------------------------------------------------
 # Local dev creates its own SQLite file; database_id only matters for deploy.
 # Fill it in after `wrangler d1 create loxa`.

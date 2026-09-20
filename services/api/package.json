@@ -13,7 +13,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.71",
     "@loxa/shared": "workspace:*",
+    "ai": "^7.0.107",
     "hono": "^4.9.0",
     "zod": "^4.1.5"
   },
