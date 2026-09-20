@@ -36,14 +36,22 @@ function post(path: string, payload: unknown, headers: Record<string, string> = 
  * because "was the model called at all" is how the cache test proves a hit —
  * the response body alone cannot tell a hit from a fresh render.
  */
-function interceptVertex(vertex: () => Response) {
+function interceptVertex(vertex: () => Response, analysis?: () => Response) {
   let calls = 0;
+  let analyses = 0;
 
   vi.stubGlobal('fetch', async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
 
     if (url.startsWith('https://oauth2.test/token')) {
       return Response.json({ access_token: 'test-token', expires_in: 3600 });
+    }
+    // Split on the model, not on the host: the analysis route calls Vertex too,
+    // and counting one as the other makes the cache test above pass for the
+    // wrong reason — it would read as a render nobody made.
+    if (url.includes(`models/${ANALYSIS_MODEL}:`)) {
+      analyses += 1;
+      return analysis ? analysis() : analysisAnswer();
     }
     if (url.includes('aiplatform.googleapis.com')) {
       calls += 1;
@@ -52,8 +60,30 @@ function interceptVertex(vertex: () => Response) {
     throw new Error(`unexpected fetch to ${url}`);
   });
 
-  return { calls: () => calls };
+  return { calls: () => calls, analyses: () => analyses };
 }
+
+/** What the test bindings call the analysis model. */
+const ANALYSIS_MODEL = 'gemini-test-text';
+
+/** One believable answer about a face. */
+const analysisAnswer = (styleId = 'blunt-bob') =>
+  Response.json({
+    candidates: [
+      {
+        content: {
+          parts: [
+            {
+              text: JSON.stringify({
+                faceShape: 'oval',
+                cuts: [{ styleId, reason: 'A level line answers a soft jaw.' }],
+              }),
+            },
+          ],
+        },
+      },
+    ],
+  });
 
 const imageAnswer = (data = 'RENDERED') =>
   Response.json({
@@ -337,6 +367,125 @@ describe('POST /v1/purchases/sync', () => {
 
   it('refuses an empty batch', async () => {
     const response = await post('/v1/purchases/sync', { transactionIds: [] });
+    expect(response.status).toBe(400);
+  });
+});
+
+describe('POST /v1/analysis', () => {
+  const photos = { photos: ['aGVsbG8='] };
+
+  it('answers a device that has a credit, and takes none of it', async () => {
+    interceptVertex(() => imageAnswer());
+
+    const response = await post('/v1/analysis', photos);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      faceShape: 'oval',
+      cuts: [{ styleId: 'blunt-bob', reason: 'A level line answers a soft jaw.' }],
+      // The free credit, still there afterwards. This is the whole rule.
+      creditsLeft: 1,
+      cached: false,
+    });
+
+    const row = await env.DB.prepare('SELECT free_used FROM device_credits WHERE device_id = ?')
+      .bind(DEVICE)
+      .first<{ free_used: number }>();
+    expect(row).toBeNull();
+  });
+
+  it('serves the second identical request from the cache', async () => {
+    const vertex = interceptVertex(() => imageAnswer());
+
+    await post('/v1/analysis', photos);
+    const second = await post('/v1/analysis', photos);
+
+    await expect(second.json()).resolves.toMatchObject({ cached: true });
+    expect(vertex.analyses()).toBe(1);
+  });
+
+  it('refuses a device with nothing in the pot, and calls nobody', async () => {
+    const vertex = interceptVertex(() => imageAnswer());
+    // Spend the free credit on a render first, which is the ordinary way to
+    // arrive here: the analysis is included with a balance, not sold.
+    await post('/v1/tryon', body());
+
+    const response = await post('/v1/analysis', { photos: ['d29ybGQ='] });
+    expect(response.status).toBe(402);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({ code: 'out_of_credits' }),
+    );
+    expect(vertex.analyses()).toBe(0);
+  });
+
+  it('drops a cut the model invented and keeps the rest', async () => {
+    interceptVertex(() => imageAnswer(), () =>
+      Response.json({
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: JSON.stringify({
+                    faceShape: 'oval',
+                    cuts: [
+                      { styleId: 'beehive', reason: 'Retro.' },
+                      { styleId: 'pixie', reason: 'Balances a soft jaw.' },
+                    ],
+                  }),
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    );
+
+    const response = await post('/v1/analysis', photos);
+    await expect(response.json()).resolves.toMatchObject({
+      cuts: [{ styleId: 'pixie', reason: 'Balances a soft jaw.' }],
+    });
+  });
+
+  it('answers 502 when the model is down', async () => {
+    interceptVertex(() => imageAnswer(), () => new Response('upstream on fire', { status: 503 }));
+
+    const response = await post('/v1/analysis', photos);
+    expect(response.status).toBe(502);
+  });
+
+  it('refuses a body with no photo, three photos, or nonsense in it', async () => {
+    interceptVertex(() => imageAnswer());
+
+    await expect(post('/v1/analysis', { photos: [] })).resolves.toMatchObject({ status: 400 });
+    await expect(
+      post('/v1/analysis', { photos: ['a', 'b', 'c'] }),
+    ).resolves.toMatchObject({ status: 400 });
+    await expect(post('/v1/analysis', { photos: ['not base64!'] })).resolves.toMatchObject({
+      status: 400,
+    });
+  });
+
+  it('refuses a body that announces itself as too large to parse', async () => {
+    interceptVertex(() => imageAnswer());
+
+    const response = await SELF.fetch('https://loxa.test/v1/analysis', {
+      method: 'POST',
+      headers: {
+        'X-Device-Id': DEVICE,
+        'content-type': 'application/json',
+        'content-length': String(7 * 1024 * 1024),
+      },
+      body: JSON.stringify(photos),
+    });
+    expect(response.status).toBe(400);
+  });
+
+  it('wants a device id like every other metered-looking route', async () => {
+    interceptVertex(() => imageAnswer());
+    const response = await SELF.fetch('https://loxa.test/v1/analysis', {
+      method: 'POST',
+      body: JSON.stringify(photos),
+    });
     expect(response.status).toBe(400);
   });
 });

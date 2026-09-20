@@ -1,4 +1,5 @@
 import {
+  analysisRequestSchema,
   diagnosticsRequestSchema,
   purchaseSyncRequestSchema,
   tryOnRequestSchema,
@@ -7,18 +8,22 @@ import {
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import {
+  buildAnalysisDeps,
   buildCreditsDeps,
   buildDiagnosticsDeps,
   buildSyncDeps,
   buildTryOnDeps,
 } from '../../composition';
 import {
+  AnalysisQuotaError,
+  AnalysisUnusableError,
   OutOfCreditsError,
   PhotoRejectedError,
   RendererUnavailableError,
   UnknownStyleError,
 } from '../../core/errors';
 import { readCatalogue } from '../r2/catalogue';
+import { analyseFace } from '../../core/analyse-face';
 import { getCredits } from '../../core/get-credits';
 import { reportDiagnostics } from '../../core/report-diagnostics';
 import { syncPurchases } from '../../core/sync-purchases';
@@ -54,11 +59,24 @@ function fail(code: ApiErrorCode, message: string) {
 }
 
 /** Domain error to wire error. Anything unrecognised is ours, and is a 500. */
+/**
+ * The most a request to the analysis route may declare.
+ *
+ * Two photos at the schema's own ceiling, plus room for the JSON around them.
+ * The schema is the real limit; this only spares the isolate from parsing
+ * something that was never going to pass it.
+ */
+const MAX_ANALYSIS_BODY = 6 * 1024 * 1024;
+
 function translate(err: unknown): Response {
   if (err instanceof UnknownStyleError) return fail('bad_request', err.message);
   if (err instanceof OutOfCreditsError) return fail('out_of_credits', err.message);
   if (err instanceof PhotoRejectedError) return fail('photo_rejected', err.message);
   if (err instanceof RendererUnavailableError) return fail('renderer_unavailable', err.message);
+  // The call succeeded and what came back cannot be shown. A 502 like the
+  // others: there is nothing the user did and nothing they can do.
+  if (err instanceof AnalysisUnusableError) return fail('renderer_unavailable', err.message);
+  if (err instanceof AnalysisQuotaError) return fail('rate_limited', err.message);
 
   console.error('unhandled error', err);
   return fail('internal', 'something went wrong');
@@ -141,6 +159,54 @@ export function createApp() {
       const result = await tryOn(
         { deviceId, ...parsed.data },
         buildTryOnDeps(c.env, devPremiumFrom(c)),
+      );
+      return Response.json(result);
+    } catch (err) {
+      return translate(err);
+    }
+  });
+
+  /**
+   * Which cuts suit the face in these photographs.
+   *
+   * **Unmetered, and the third route with no credit check.** The rule is that a
+   * new route gets one or does not merge, so here is the argument. What stands
+   * in for the spend is a *balance*: the route refuses a device with nothing in
+   * the pot and then takes nothing from it, so the feature is included with any
+   * credit rather than sold by the call. Nobody is charged for being told what
+   * would suit them, and nobody gets it for free forever either.
+   *
+   * Two more things stand between that and an uncapped model bill: a cache
+   * keyed on the photographs, so asking twice costs one call, and a daily quota
+   * per device in KV, because a balance is not a rate.
+   *
+   * The photographs are read and dropped. What is stored is the answer.
+   */
+  app.post('/v1/analysis', async (c) => {
+    const deviceId = deviceIdFrom(c);
+    if (!deviceId) return fail('bad_request', 'missing or malformed X-Device-Id');
+
+    // Read before the body is parsed rather than after: a hostile body is then
+    // a header read instead of megabytes of JSON in an isolate that is also
+    // holding somebody's render. It is a mitigation and not a gate — a chunked
+    // body arrives with no length — which is why the schema caps each photo too.
+    const declared = Number(c.req.header('content-length') ?? 0);
+    if (declared > MAX_ANALYSIS_BODY) return fail('bad_request', 'the photos are too large');
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return fail('bad_request', 'body is not JSON');
+    }
+
+    const parsed = analysisRequestSchema.safeParse(body);
+    if (!parsed.success) return fail('bad_request', parsed.error.issues[0]?.message ?? 'invalid body');
+
+    try {
+      const result = await analyseFace(
+        { deviceId, photosBase64: parsed.data.photos },
+        buildAnalysisDeps(c.env, devPremiumFrom(c)),
       );
       return Response.json(result);
     } catch (err) {
