@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MAX_REASON,
+  analysisRequestSchema,
+  analysisResponseSchema,
   catalogueResponseSchema,
   apiErrorSchema,
   creditsResponseSchema,
@@ -298,5 +301,71 @@ describe('diagnosticsRequestSchema', () => {
         reports: [{ ...report, breadcrumbs: [{ at: -1, label: 'step' }] }],
       }).success,
     ).toBe(false);
+  });
+});
+
+describe('analysisRequestSchema', () => {
+  const photo = 'aGVsbG8=';
+
+  it('takes one photo, or two', () => {
+    expect(analysisRequestSchema.safeParse({ photos: [photo] }).success).toBe(true);
+    expect(analysisRequestSchema.safeParse({ photos: [photo, photo] }).success).toBe(true);
+  });
+
+  it('refuses none, and refuses three', () => {
+    expect(analysisRequestSchema.safeParse({ photos: [] }).success).toBe(false);
+    expect(analysisRequestSchema.safeParse({ photos: [photo, photo, photo] }).success).toBe(false);
+  });
+
+  it('refuses a photo too large to hold two of in one isolate', () => {
+    // The cap is memory, not bandwidth: the body is parsed into UTF-16 and then
+    // re-embedded in the outbound request, so a pair at the render route's
+    // ceiling is tens of megabytes live.
+    const huge = 'a'.repeat(2 * 1024 * 1024 + 1);
+    expect(analysisRequestSchema.safeParse({ photos: [huge] }).success).toBe(false);
+  });
+
+  it('refuses something that is not base64', () => {
+    expect(analysisRequestSchema.safeParse({ photos: ['data:image/jpeg;base64,aaa'] }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe('analysisResponseSchema', () => {
+  const answer = {
+    faceShape: 'oval',
+    cuts: [{ styleId: 'blunt-bob', reason: 'A level cut line balances a long jaw.' }],
+    creditsLeft: 3,
+    cached: false,
+  };
+
+  it('describes an answer', () => {
+    expect(analysisResponseSchema.safeParse(answer).success).toBe(true);
+  });
+
+  it('refuses a shape outside the vocabulary', () => {
+    expect(analysisResponseSchema.safeParse({ ...answer, faceShape: 'triangle' }).success).toBe(
+      false,
+    );
+  });
+
+  it('refuses an answer with no cuts in it', () => {
+    // An empty list is a failure, not a result: the screen has nothing to show
+    // for the wait, and the Worker turns it into a 502 rather than sending it.
+    expect(analysisResponseSchema.safeParse({ ...answer, cuts: [] }).success).toBe(false);
+  });
+
+  it('refuses a reason longer than a phone has room for', () => {
+    const cuts = [{ styleId: 'blunt-bob', reason: 'x'.repeat(MAX_REASON + 1) }];
+    expect(analysisResponseSchema.safeParse({ ...answer, cuts }).success).toBe(false);
+  });
+});
+
+describe('apiErrorSchema', () => {
+  it('carries the rate limit the analysis route answers with', () => {
+    expect(apiErrorSchema.safeParse({ code: 'rate_limited', message: 'slow down' }).success).toBe(
+      true,
+    );
   });
 });

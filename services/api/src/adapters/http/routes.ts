@@ -34,7 +34,7 @@ import { deviceIdFrom, devPremiumFrom } from './device';
  * error into a status. Any product logic that appears here is in the wrong file.
  */
 
-type ErrorStatus = 400 | 402 | 422 | 502 | 500;
+type ErrorStatus = 400 | 402 | 422 | 429 | 502 | 500;
 
 const STATUS: Record<ApiErrorCode, ErrorStatus> = {
   bad_request: 400,
@@ -42,6 +42,9 @@ const STATUS: Record<ApiErrorCode, ErrorStatus> = {
   // credits, and the fix is a purchase rather than a wait.
   out_of_credits: 402,
   photo_rejected: 422,
+  // 429 rather than 402: this one *is* going too fast, and the fix is a wait
+  // rather than a purchase. Buying credits would change nothing.
+  rate_limited: 429,
   renderer_unavailable: 502,
   internal: 500,
 };

@@ -346,6 +346,75 @@ export const diagnosticsResponseSchema = z.object({
 });
 export type DiagnosticsResponse = z.infer<typeof diagnosticsResponseSchema>;
 
+// --- POST /v1/analysis ------------------------------------------------------
+
+/**
+ * Asking which cuts suit the face in a photograph.
+ *
+ * One photo, or two — a second is a different angle of the same face, and the
+ * model is told to read them as one person rather than to compare them.
+ *
+ * The ceiling is far below `imageBase64Schema`'s. Two photos at that size is
+ * around eighty megabytes live inside one isolate once the body is parsed into
+ * UTF-16 strings and re-embedded in the outbound request, and an isolate that
+ * runs out of memory takes down whatever else it was holding — including a
+ * render between the credit being spent and the image coming back. The app
+ * sends a 1024px JPEG, which is a few hundred kilobytes, so this is generous
+ * by a factor of four and still refuses anything that is not a phone photo.
+ */
+const MAX_ANALYSIS_BASE64 = 2 * 1024 * 1024;
+
+export const analysisPhotoSchema = z
+  .string()
+  .min(1, 'the photo is empty')
+  .max(MAX_ANALYSIS_BASE64, 'the photo is too large')
+  .regex(/^[A-Za-z0-9+/]+={0,2}$/, 'the photo is not base64');
+
+export const analysisRequestSchema = z.object({
+  photos: z.array(analysisPhotoSchema).min(1, 'send a photo').max(2, 'two photos at most'),
+});
+export type AnalysisRequest = z.infer<typeof analysisRequestSchema>;
+
+/**
+ * How long a reason may be.
+ *
+ * A model wrote it, so the length is the app's business rather than the
+ * model's. One sentence under a cut's name on a phone; anything longer is a
+ * paragraph the screen has nowhere to put.
+ */
+export const MAX_REASON = 140;
+
+/**
+ * One suggested cut, and why.
+ *
+ * `styleId` is a catalogue id and nothing else — the Worker drops anything the
+ * model invents before this schema ever sees it. `reason` is model prose and is
+ * treated as such: capped here, stripped of control characters server-side, and
+ * rendered as text. **It must never be rendered as markup.**
+ */
+export const suitableCutSchema = z.object({
+  styleId: catalogueIdSchema,
+  reason: z.string().min(1).max(MAX_REASON),
+});
+export type SuitableCut = z.infer<typeof suitableCutSchema>;
+
+export const analysisResponseSchema = z.object({
+  faceShape: faceShapeSchema,
+  /** Best first. Never empty: an answer with nothing in it is an error, not a result. */
+  cuts: z.array(suitableCutSchema).min(1),
+  /**
+   * The balance, unchanged.
+   *
+   * This route reads the ledger and never writes it. The number rides along so
+   * the credit chip stays in step without a second request, exactly as it does
+   * on a render — where it has gone down by one.
+   */
+  creditsLeft: z.number().int().min(0),
+  /** Whether this came back from the cache rather than from a model. */
+  cached: z.boolean(),
+});
+export type AnalysisResponse = z.infer<typeof analysisResponseSchema>;
+
 // --- Errors -----------------------------------------------------------------
 
 /**
@@ -361,6 +430,16 @@ export const apiErrorSchema = z.object({
     'out_of_credits',
     'photo_rejected',
     'renderer_unavailable',
+    /**
+     * Too many of something in too short a time. Only the analysis route
+     * answers this today: it spends no credit, so a daily cap is what stands
+     * between it and a model bill with no ceiling.
+     *
+     * Added after the app shipped, which is safe: `client.ts` falls back to
+     * `internal` for a code it does not know, so an older build shows its
+     * general failure line instead of a specific one.
+     */
+    'rate_limited',
     'internal',
   ]),
   message: z.string(),
