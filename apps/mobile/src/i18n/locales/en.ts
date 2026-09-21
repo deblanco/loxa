@@ -283,7 +283,7 @@ const en = {
     slotFront: 'Your face, straight on',
     slotAngle: 'Another angle (optional)',
     take: 'Take photo',
-    choose: 'Choose from library',
+    choose: 'Library',
     replace: 'Replace',
     go: 'Ask',
     working: 'Reading your face',

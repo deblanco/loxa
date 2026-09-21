@@ -214,7 +214,7 @@ const de: typeof en = {
     slotFront: 'Dein Gesicht, von vorn',
     slotAngle: 'Anderer Winkel (optional)',
     take: 'Foto machen',
-    choose: 'Aus der Mediathek',
+    choose: 'Mediathek',
     replace: 'Ändern',
     go: 'Fragen',
     working: 'Dein Gesicht wird gelesen',

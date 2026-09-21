@@ -214,7 +214,7 @@ const es: typeof en = {
     slotFront: 'Tu cara, de frente',
     slotAngle: 'Otro ángulo (opcional)',
     take: 'Hacer foto',
-    choose: 'Elegir de la galería',
+    choose: 'Galería',
     replace: 'Cambiar',
     go: 'Preguntar',
     working: 'Leyendo tu cara',

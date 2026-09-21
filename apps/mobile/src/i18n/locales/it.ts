@@ -214,7 +214,7 @@ const it: typeof en = {
     slotFront: 'Il tuo viso, di fronte',
     slotAngle: 'Un altro angolo (facoltativo)',
     take: 'Scatta una foto',
-    choose: 'Scegli dalla galleria',
+    choose: 'Galleria',
     replace: 'Cambia',
     go: 'Chiedi',
     working: 'Sto leggendo il tuo viso',

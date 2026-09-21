@@ -177,7 +177,13 @@ export default function Profile() {
           <View style={styles.looks}>
             <View style={styles.looksHead}>
               <Meta>{t('profile.looks')}</Meta>
-              <Pressable accessibilityRole="button" onPress={() => router.push('/looks')} hitSlop={space.s2}>
+              {/* A capsule, so it reads as the way into the gallery rather
+                  than as a second label beside the first. */}
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push('/looks')}
+                style={styles.seeAll}
+              >
                 <Meta tone="ink">{t('profile.seeAll')}</Meta>
               </Pressable>
             </View>
@@ -384,6 +390,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  seeAll: {
+    height: 28,
+    paddingHorizontal: space.s3,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: color.ink12,
+    justifyContent: 'center',
   },
   looksStrip: { paddingHorizontal: space.gutterScreen, gap: space.s3 },
   looksTile: { width: 104 },

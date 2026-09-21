@@ -227,19 +227,30 @@ export default function Suits() {
               </Meta>
             ) : null}
 
-            <Pill
-              label={t('suits.go')}
-              // Off the state rather than off the holder: the holder is a
-              // module variable and does not re-render anything when it fills.
-              disabled={!shots.some(Boolean)}
-              onPress={() => void ask()}
-            />
-            <Meta variant="note" tone="ink40" sentence style={styles.included}>
-              {t('suits.included')}
-            </Meta>
           </>
         )}
       </ScrollView>
+
+      {/*
+        Ask sits on the floor rather than under the slots. It is the one thing
+        this screen is for, and a primary control that scrolls away with the
+        content is a control somebody has to go looking for — the two slots and
+        a verdict are both taller than a phone.
+      */}
+      {answer || asking ? null : (
+        <View style={[styles.footer, { paddingBottom: insets.bottom + space.s6 }]}>
+          <Pill
+            label={t('suits.go')}
+            // Off the state rather than off the holder: the holder is a module
+            // variable and does not re-render anything when it fills.
+            disabled={!shots.some(Boolean)}
+            onPress={() => void ask()}
+          />
+          <Meta variant="note" tone="ink40" sentence style={styles.included}>
+            {t('suits.included')}
+          </Meta>
+        </View>
+      )}
     </View>
   );
 }
@@ -263,17 +274,22 @@ function Slot({
       <PhotoPlate uri={uri} style={styles.slotPlate} />
       <View style={styles.slotText}>
         <Body variant="bodySmall">{label}</Body>
+        {/* Buttons, not mono captions. Getting a photo into the slot is the
+            only thing this row does, and as text the two ways to do it were
+            indistinguishable from the label above them. */}
         <View style={styles.slotActions}>
-          <Pressable accessibilityRole="button" onPress={onTake} hitSlop={space.s2}>
-            <Meta variant="note" tone="ink" sentence>
-              {uri ? t('suits.replace') : t('suits.take')}
-            </Meta>
-          </Pressable>
-          <Pressable accessibilityRole="button" onPress={onChoose} hitSlop={space.s2}>
-            <Meta variant="note" tone="ink45" sentence>
-              {t('suits.choose')}
-            </Meta>
-          </Pressable>
+          <Pill
+            label={uri ? t('suits.replace') : t('suits.take')}
+            tone="quiet"
+            onPress={onTake}
+            style={styles.slotButton}
+          />
+          <Pill
+            label={t('suits.choose')}
+            tone="quiet"
+            onPress={onChoose}
+            style={styles.slotButton}
+          />
         </View>
       </View>
     </View>
@@ -316,11 +332,12 @@ function Answer({
                 <Body weight="medium" style={styles.cutName}>
                   {style.name}
                 </Body>
-                <Pressable accessibilityRole="button" onPress={() => onTryOn(cut.styleId)}>
-                  <Meta variant="note" tone="ink" sentence>
-                    {t('suits.tryOn')}
-                  </Meta>
-                </Pressable>
+                <Pill
+                  label={t('suits.tryOn')}
+                  tone="quiet"
+                  onPress={() => onTryOn(cut.styleId)}
+                  style={styles.tryOn}
+                />
               </View>
               {/* Model prose. Rendered as text and never as markup — the
                   Worker caps and cleans it, and this is the other half. */}
@@ -363,7 +380,11 @@ const styles = StyleSheet.create({
   slot: { flexDirection: 'row', alignItems: 'center', gap: space.s4 },
   slotPlate: { width: 72, height: 96, borderRadius: radius.tile },
   slotText: { flex: 1, gap: space.s2 },
-  slotActions: { flexDirection: 'row', gap: space.s4 },
+  slotActions: { flexDirection: 'row', gap: space.s2 },
+  // Short and side by side: two full-height pills per slot, twice over, would
+  // be four of them above the fold.
+  slotButton: { flex: 1, height: 38, paddingHorizontal: space.s3 },
+  tryOn: { height: 34, paddingHorizontal: space.s3 },
   working: { gap: space.s1, paddingTop: space.s10 },
   bar: { marginTop: space.s6 },
   cuts: { gap: space.s4 },
@@ -372,4 +393,5 @@ const styles = StyleSheet.create({
   cutName: { flex: 1 },
   failed: { textAlign: 'center' },
   included: { textAlign: 'center' },
+  footer: { paddingHorizontal: space.gutterHero, paddingTop: space.s4, gap: space.s3 },
 });
