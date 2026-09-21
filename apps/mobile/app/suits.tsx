@@ -278,9 +278,10 @@ function Slot({
             only thing this row does, and as text the two ways to do it were
             indistinguishable from the label above them. */}
         <View style={styles.slotActions}>
+          {/* Filled, like the welcome step's: taking the photo is the action
+              this row exists for, and the library is the alternative to it. */}
           <Pill
             label={uri ? t('suits.replace') : t('suits.take')}
-            tone="quiet"
             onPress={onTake}
             style={styles.slotButton}
           />
