@@ -22,11 +22,13 @@ export const metadata: Metadata = { title: "Terms of use — Loxa" };
  * Required by App Store review, and linked from the app's profile screen and
  * from both paywalls.
  *
- * This doubles as the EULA. Apple's standard licence agreement applies unless
- * you supply your own, and supplying your own carries two obligations that are
- * easy to miss: the terms must be at least as protective of the user as
- * Apple's, and Apple must be named as a third-party beneficiary able to enforce
- * them. Both are below.
+ * **This is not the EULA.** App Store Connect has no custom licence agreement,
+ * so Apple's standard one applies, and every localised store description links
+ * both it and this page (`apps/mobile/STORE_LISTING.md`). Supplying our own
+ * would carry two obligations that are easy to miss — terms at least as
+ * protective of the user as Apple's, and Apple named as a third-party
+ * beneficiary able to enforce them — and this page keeps both anyway, so that
+ * choosing to upload it as the EULA later would need no rewrite.
  */
 export default function Terms() {
   return (
