@@ -69,6 +69,13 @@ export default function Welcome() {
     } catch (err) {
       reportHandled(err, 'onboarding.complete');
     }
+    // `dismissAll` before the replace, so the stack afterwards is exactly
+    // `[preview]` — what it was when the carousel went straight there. Three
+    // screens pop back to it (`result`, `offer`, `looks`) with `dismissTo`,
+    // and leaving the carousel underneath would put a finished onboarding one
+    // back-gesture behind the app. `DevPanel`'s reset does the same thing for
+    // the same reason.
+    router.dismissAll();
     router.replace('/preview');
   }
 
@@ -191,15 +198,18 @@ export default function Welcome() {
 
       <View style={[styles.actions, { paddingBottom: insets.bottom + space.s6 }]}>
         <Pill label={last ? t('welcome.done') : t('welcome.next')} onPress={forward} />
-        {/* Only where there is something to skip. On the other two steps the
-            primary button is already the way on, and a second one saying the
-            same thing in quieter type is noise. */}
+        {/*
+          A button, not a caption.
+
+          Only where there is something to skip — on the other two steps the
+          primary control is already the way on. But where it does appear it
+          has to look as pressable as the thing above it: a grey line of mono
+          under a black pill reads as a footnote, and a step that *looks*
+          mandatory is a photo gate on the second screen of a first run, which
+          is the kind of thing 4.3(b) was about.
+        */}
         {step === 'photo' && !portrait ? (
-          <Pressable accessibilityRole="button" onPress={forward} hitSlop={space.s2}>
-            <Meta variant="note" tone="ink45" sentence style={styles.centred}>
-              {t('welcome.skip')}
-            </Meta>
-          </Pressable>
+          <Pill label={t('welcome.skip')} tone="quiet" onPress={forward} />
         ) : null}
       </View>
     </View>

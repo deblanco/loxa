@@ -86,9 +86,11 @@ export default function PrivacyPolicy() {
           saved on your device, together with the photo it was made from so
           that you can compare the two later, and a copy of it is held by us for up to thirty
           days so that repeating the same request does not cost you a second
-          credit — after that it is deleted automatically. If you set a profile
-          picture, it stays on your device and is never uploaded. We do not use
-          your photos to train anything, and no human at Loxa looks at them.
+          credit — after that it is deleted automatically. A profile picture is kept
+          on your phone and is sent only when you press Try On with it, like any
+          other photo you choose; it is not stored on our server either. We do
+          not use your photos to train anything, and no human at Loxa looks at
+          them.
         </Section>
 
         <Section title="What we count">
