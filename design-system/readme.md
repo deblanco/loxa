@@ -62,14 +62,22 @@ control sitting on paper — otherwise the black pill looks printed on. Surfaces
 do not stack with shadow; they separate with a hairline border and a warmer fill.
 
 **Motion.** Either a state change (180–350ms, eased) or ambience (seconds,
-linear, looping). Nothing in between and nothing bounces. The four ambient
-loops — the entry carousel's crossfade, the trial screen's drifting masonry, the
-generating plate's shimmer, and the camera's landmark sweep — are the only
-things on screen that move without being touched.
+linear, looping). Nothing in between and nothing bounces. The five ambient
+loops — the entry carousel's crossfade, the welcome reel's colour changes, the
+trial screen's drifting masonry, the generating plate's shimmer, and the
+camera's landmark sweep — are the only things on screen that move without being
+touched.
 
-Still four. Each cut is photographed on two models, and the strip picks which of
-the two it shows when it mounts — so the catalogue looks different between
-sessions without a fifth loop running under twenty-four tiles at once.
+The fifth is new and it is the one that had to earn its place. The welcome
+screen's first card says the app puts a different cut and colour on a face, and
+a paragraph is a poor way to say it when the catalogue art can show it: one cut
+through three colours, then the next cut. It runs on one screen that is seen
+once, which is the opposite of the case the rule protects against.
+
+Which is still the case it protects against: the strip. Each cut is photographed
+on two models, and the strip picks which of the two it shows when it mounts — so
+the catalogue looks different between sessions without a loop running under
+twenty-four tiles at once.
 
 ## Layout constants
 

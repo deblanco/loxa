@@ -152,4 +152,6 @@ export const motion = {
   shimmer: 1800,
   scan: 2600,
   carouselHold: 3200,
+  /** One colour on the welcome reel. Three of them, then the next cut. */
+  reelHold: 1600,
 } as const;

@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chevron } from '@/components/Chevron';
 import { FaceDiagram } from '@/components/FaceDiagram';
+import { StyleReel } from '@/components/StyleReel';
 import { PersonMark } from '@/components/PersonMark';
 import { PhotoPlate } from '@/components/PhotoPlate';
 import { Pill } from '@/components/Pill';
@@ -12,6 +13,7 @@ import { Body, Display, Meta } from '@/components/Text';
 import { reportHandled } from '@/diagnostics';
 import { pickFromLibrary } from '@/photo';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
+import { useCatalogue } from '@/store/catalogue';
 import { useOnboarding } from '@/store/onboarding';
 import { readProfilePhoto, saveProfilePhoto } from '@/store/profile-photo';
 import { isLastStep, nextStep, previousStep, welcomeCopy, WELCOME_STEPS, type WelcomeStep } from '@/welcome';
@@ -41,6 +43,7 @@ export default function Welcome() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { complete } = useOnboarding();
+  const { catalogue } = useCatalogue();
 
   const [step, setStep] = useState<WelcomeStep>(WELCOME_STEPS[0]);
   const [portrait, setPortrait] = useState<string | null>(null);
@@ -153,6 +156,11 @@ export default function Welcome() {
             {t(copy.headlineItalic)}
           </Display>
         </View>
+
+        {/* The claim above, demonstrated: one cut through three colours, then
+            the next cut. The card had a paragraph and then nothing for two
+            thirds of a phone. */}
+        {step === 'value' ? <StyleReel catalogue={catalogue} /> : null}
 
         {step === 'photo' ? (
           <View style={styles.portrait}>
