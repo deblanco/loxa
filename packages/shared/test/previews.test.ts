@@ -4,6 +4,7 @@ import {
   HAIR_STYLES,
   PREVIEW_SLOTS,
   heroKey,
+  modelKey,
   tileKey,
 } from '../src/index';
 
@@ -45,5 +46,14 @@ describe('preview keys', () => {
     // Only true while no colour is called "tile-0" — cheap to assert, and the
     // failure mode is a tile overwriting a full-frame preview in the bucket.
     for (const color of HAIR_COLORS) expect(color.id).not.toMatch(/^tile-/);
+  });
+});
+
+describe('modelKey', () => {
+  it('names the photograph a model was restyled from', () => {
+    // The manifest publishes these so the app can show the "before" beside a
+    // render. Nothing in the app builds the key itself: a guess that was wrong
+    // would be a 404 on the plate.
+    expect(modelKey('east-asian-18-24')).toBe('models/east-asian-18-24.jpg');
   });
 });
