@@ -264,7 +264,10 @@ export default function Camera() {
       const shot = await photoOutput.capturePhotoToFile({ enableShutterSound: true }, {});
 
       // `filePath` is a filesystem path, not a URL, and the manipulator wants one.
-      const result = await prepare(`file://${shot.filePath}`, { unmirror: facing === 'front' });
+      const result = await prepare(`file://${shot.filePath}`, {
+        unmirror: facing === 'front',
+        forReading: forSuits,
+      });
       if (!result.ok) {
         // Stay here. They are already pointing a camera at something, and the
         // fastest fix for a shot with nobody in it is the next shot.
@@ -283,7 +286,7 @@ export default function Camera() {
 
   async function fromLibrary() {
     try {
-      const result = await pickFromLibrary();
+      const result = await pickFromLibrary({ forReading: forSuits });
       if (!result) return;
       if (!result.ok) {
         setRejected(result.reason);

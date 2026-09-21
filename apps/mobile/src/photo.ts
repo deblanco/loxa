@@ -20,6 +20,19 @@ import { measureFaceShape } from '@/store/face-shape';
  * the device, before either happens.
  */
 const MAX_EDGE = 1024;
+
+/**
+ * The long edge for a photo that is only going to be *read*.
+ *
+ * A render is conditioned on the user's own photograph, so its resolution is
+ * the output's resolution and 1024 stays. "What suits me" asks a model for the
+ * proportions of a face — the width at the cheekbones, the line of the jaw — and
+ * nothing at 1024 helps with that which 640 does not, so the analysis sends
+ * about a third of the bytes. On a phone that is the part of the wait somebody
+ * feels; the model's own time varies far more than this saves, which is why
+ * this is the only size that changed.
+ */
+const READ_EDGE = 640;
 const QUALITY = 0.8;
 
 export interface PreparedPhoto {
@@ -61,6 +74,11 @@ export interface PrepareOptions {
    * model ever sees it. This puts it back.
    */
   unmirror?: boolean;
+  /**
+   * Prepare it to be read rather than rendered: smaller, and nothing else.
+   * See `READ_EDGE`.
+   */
+  forReading?: boolean;
 }
 
 export async function prepare(uri: string, options: PrepareOptions = {}): Promise<PhotoResult> {
@@ -68,7 +86,7 @@ export async function prepare(uri: string, options: PrepareOptions = {}): Promis
     uri,
     [
       ...(options.unmirror ? [{ flip: ImageManipulator.FlipType.Horizontal }] : []),
-      { resize: { width: MAX_EDGE } },
+      { resize: { width: options.forReading ? READ_EDGE : MAX_EDGE } },
     ],
     { compress: QUALITY, format: ImageManipulator.SaveFormat.JPEG, base64: true },
   );
@@ -121,7 +139,7 @@ export async function prepare(uri: string, options: PrepareOptions = {}): Promis
  * Returns null when the user backs out, which is not an error — it is them
  * saying no, and the screen should simply stay where it is.
  */
-export async function pickFromLibrary(): Promise<PhotoResult | null> {
+export async function pickFromLibrary(options: PrepareOptions = {}): Promise<PhotoResult | null> {
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
     allowsEditing: true,
@@ -131,5 +149,5 @@ export async function pickFromLibrary(): Promise<PhotoResult | null> {
   });
 
   if (result.canceled || !result.assets[0]) return null;
-  return await prepare(result.assets[0].uri);
+  return await prepare(result.assets[0].uri, options);
 }

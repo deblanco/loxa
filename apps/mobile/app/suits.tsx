@@ -14,7 +14,6 @@ import { reportHandled } from '@/diagnostics';
 import { faceShapeKey } from '@/face/shape';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary } from '@/photo';
-import { putRenderShot } from '@/store/render-shot';
 import { readAnalysis, saveAnalysis, type StoredAnalysis } from '@/store/analysis';
 import { useCatalogue } from '@/store/catalogue';
 import { ensureConsent } from '@/consent-prompt';
@@ -135,12 +134,13 @@ export default function Suits() {
       setAnswer(stored);
       await saveAnalysis(result);
       // The photographs have done their work. Nothing here keeps them, and
-      // neither does the Worker. The front one is the exception, and only in
-      // memory: somebody who asks which cuts suit them and presses Try On on one
-      // means their own face, the one they just gave, and not to be sent back to
-      // the camera. The render asks its own permission first.
-      const front = suitsShots()[0];
-      if (front) putRenderShot(front);
+      // neither does the Worker.
+      //
+      // They are not carried into a render either, though it would save a trip
+      // to the camera: these were prepared to be *read* and are 640 on the long
+      // edge (`photo.ts`, `READ_EDGE`). A render is conditioned on the
+      // photograph it is given, so rendering from one of these would quietly
+      // hand back a coarser face than the app promises.
       clearSuitsShots();
       setShots(suitsShots());
     } catch (err) {
@@ -161,8 +161,8 @@ export default function Suits() {
     const colorId = style?.colors[0]?.id ?? catalogue?.defaults.colorId;
     if (!colorId) return;
 
-    // No `source`: Confirm uses the photo held for it — the front one just
-    // analysed — and falls back to the saved portrait, then to the camera.
+    // No `source`: Confirm uses the saved portrait if there is one, and asks for
+    // a photo if there is not. It no longer silently does nothing either way.
     router.push({ pathname: '/confirm', params: { styleId, colorId } });
   }
 
