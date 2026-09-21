@@ -43,6 +43,11 @@ screenshots/store/.art/
 # full-resolution UGC persona renders; the committed .jpg mirrors are what the slides use
 design-system/ugc-model/_fullres/
 
+# An empty `{"expo":{}}` that expo/eas tooling drops at the repo root when it is
+# run from here instead of from apps/mobile. The app's real manifest is
+# apps/mobile/app.json; this one is read by nothing and keeps coming back.
+/app.json
+
 # Pairing identity that go-ios writes into whatever directory it is run from.
 # Holds a private key; it has no business in a commit.
 selfIdentity.plist
