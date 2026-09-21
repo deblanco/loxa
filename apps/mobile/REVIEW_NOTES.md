@@ -51,51 +51,54 @@ first, and sections 1, 3 and 7 updated for the new flow.
 Under 4,000 characters, which is the field's limit and the reason this is
 compressed rather than discursive.
 
-> Loxa restyles a photograph of your own face with a different haircut and colour, and suggests the cuts that suit your face shape. No account, no login. The first photo is free; after that it is a weekly subscription or a single photo.
+> Loxa restyles a photograph of your own face with a different haircut and colour, and suggests the cuts that suit your face. No account, no login. The first photo is free; after that a weekly subscription or a single photo.
 >
 > WHAT CHANGED SINCE THE 4.3(b) REVIEW
-> - The first photo is free: a new install sees its own face restyled without buying anything.
-> - The subscription offer no longer sits in front of the app; it appears once, after that first result.
-> - Face-shape suggestions: Apple Vision estimates the face shape on the device, and the cuts that usually suit it come first, marked "suits you". The shape never leaves the phone.
-> - A gallery of every look (Profile > Your looks), kept with its original photo to compare, share or delete later.
-> - A listing that describes these rather than the category.
+> - The first photo is free: a new install sees its own face restyled without paying.
+> - An intro explains the app, offers a profile photo (skippable), and says what the phone does with a face.
+> - The subscription offer no longer sits in front of the app; it appears once, after that result.
+> - Face shape: Apple Vision estimates it on the device and the cuts that suit it come first, marked "suits you". It never leaves the phone.
+> - "What suits me": one or two photos go to a model that names the cuts suiting the face, with a reason each. Needs a credit balance, spends none.
+> - A gallery of every look (Profile > Your looks), kept with its original to compare, share or delete.
+> - A listing describing these rather than the category.
 >
 > 1. SCREEN RECORDING
-> Attached, on a physical iPhone on iOS 26, from launch: carousel, catalogue with suggestions, a photo, the free render, the one-time offer, the gallery, and the out-of-credits sheet. Purchase controls show title, length, price, auto-renewal terms and links to the Terms and Privacy Policy.
+> Attached, on a physical iPhone on iOS 26, from launch: the intro, the catalogue, a photo, the free render, the one-time offer, the gallery, and the out-of-credits sheet. Purchase controls show title, length, price, auto-renewal terms and links to the Terms and Privacy Policy.
 >
 > 2. PURPOSE AND AUDIENCE
-> For anyone deciding whether to change their hair. A cut is irreversible, and a photo of a stranger does not answer "would this suit me". Loxa answers it on the user's own face, so they can decide or show a stylist what they mean. General consumers aged 16 and over.
+> For anyone deciding whether to change their hair. A cut is irreversible, and a photo of a stranger does not answer "would this suit me". Loxa answers it on the user's own face. General consumers aged 16 and over.
 >
 > 3. SETUP AND ACCESS
-> No sign-in, demo account, sample files or sandbox setup; review purchases use the sandbox account already on the device.
-> a. Launch Loxa and tap Get started.
-> b. Take a photo or choose one from the library. Cuts that suit the measured face shape move to the front and are marked "suits you".
-> c. Pick a cut and a colour, tap Try On. The free photo appears in roughly ten seconds.
-> d. Leave the result: the subscription offer appears once. Subscribe, or dismiss it with the X.
-> e. Tap Try On again: with the free photo spent, the out-of-credits sheet offers loxa_single_photo_099 and loxa_weekly_999.
-> f. Profile > Your looks shows every result; open one to compare, share or delete it.
-> Credits are granted by our server once the store confirms, a moment after the App Store sheet closes. Restore purchases is on both purchase screens and in Profile.
+> No sign-in, demo account, sample files or sandbox setup; purchases use the sandbox account on the device.
+> a. Launch Loxa, tap Get started, pass the three intro cards. The middle offers a profile photo and can be skipped.
+> b. Take a photo or choose one from the library. Cuts that suit the measured shape move to the front, marked "suits you".
+> c. Pick a cut and a colour, tap Try On. The free photo takes about ten seconds.
+> d. Leave the result: the offer appears once. Subscribe, or dismiss it with the X.
+> e. Tap Try On again: the free photo spent, the out-of-credits sheet offers both products.
+> f. Profile > Your looks shows every result; open one to compare, share or delete.
+> Credits are granted by our server once the store confirms, a moment after the sheet closes. Restore purchases is on both purchase screens and in Profile.
 >
 > 4. EXTERNAL SERVICES
-> - Google Cloud Vertex AI (Gemini image model): generates the restyled photograph.
-> - OpenRouter: reaches the same Google model when Vertex is rate-limited. Fallback only.
-> - RevenueCat: purchase and subscription verification.
-> - Cloudflare Workers, D1, KV, R2: our backend, credit ledger and image catalogue.
-> No analytics SDK, no advertising SDK, no advertising identifier, no tracking.
+> - Google Cloud Vertex AI (Gemini image model): the restyled photograph.
+> - OpenRouter: the same Google model when Vertex is rate-limited; also the fallback for "what suits me".
+> - opencode: the vision model behind "what suits me". Keeps nothing, trains on nothing.
+> - RevenueCat: purchase and subscription checks.
+> - Cloudflare Workers, D1, KV, R2: backend, credit ledger, image catalogue.
+> No analytics or advertising SDK, no advertising identifier, no tracking.
 >
 > 5. REGIONAL DIFFERENCES
-> None. Prices are the App Store's per storefront. English, Spanish, French, German and Italian, from the device language.
+> None. Prices are the App Store's per storefront. English, Spanish, French, German, Italian, from the device language.
 >
 > 6. REGULATED INDUSTRY OR THIRD-PARTY MATERIAL
-> Neither. The catalogue photographs are generated and owned by us; the only other image is the user's own photo.
+> Neither. The catalogue photographs are generated and owned by us; the only other image is the user's own.
 >
 > 7. IN-APP PURCHASE
 > Two products, both reachable without an account:
-> - Loxa Weekly (loxa_weekly_999), auto-renewable, one week, USD 9.99 per week, first week USD 0.99. Grants 20 generated photos each week, reset every Monday, no roll-over.
-> - One more photo (loxa_single_photo_099), consumable, USD 0.99. Grants one generated photo, no subscription.
-> To reach them: the subscription is on the offer shown once after the free result. After that, Try On with no credits opens the out-of-credits sheet with both products; a subscriber who has spent the week sees only the single photo. Profile links to both, and to Manage Subscription.
+> - Loxa Weekly (loxa_weekly_999), auto-renewable, one week, USD 9.99, first week USD 0.99. 20 photos a week, reset Monday, no roll-over.
+> - One more photo (loxa_single_photo_099), consumable, USD 0.99. One generated photo, no subscription.
+> To reach them: the subscription is on the offer shown once after the free result. After that, Try On with no credits opens the out-of-credits sheet with both; a subscriber who has spent the week sees only the single photo. Profile links to both, and to Manage Subscription.
 >
-> No user-generated content, social features, accounts or advertising. Errors are reported to our own server with no identifier and no photo, deleted after thirty days: the "Crash Data, not linked to identity" entry on the privacy label.
+> No user-generated content, social features, accounts or advertising. Errors go to our own server with no identifier and no photo, deleted after thirty days: the "Crash Data, not linked to identity" entry on the privacy label.
 >
 > Contact: apps@blankhexadecimal.com
 
@@ -136,5 +139,8 @@ these has failed in a way that looks, to a reviewer, exactly like a broken app:
 - **The new catalogue manifest is uploaded**, after the Worker deploy, so
   `GET /v1/catalogue` carries `suits`. Without it the "suits you" feature the
   notes describe is invisible.
-- **The screen recording is re-shot** on the new flow. The old one opens on the
-  offer screen that no longer exists there.
+- **The screen recording is re-shot** on the new flow: it now starts with the
+  three intro cards, and it should show the profile-photo card being **skipped**
+  at least once. A reviewer who only sees a tester dutifully take a photo learns
+  that the step is optional from nowhere, and a first-run photo gate is exactly
+  the kind of thing this submission is answering.

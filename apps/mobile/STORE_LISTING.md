@@ -59,7 +59,11 @@ HOW IT WORKS
 3. See yourself wearing it, usually in a few seconds. Your first photo is free.
 
 CUTS THAT SUIT YOUR FACE
-Loxa estimates the shape of your face — oval, round, square, heart or long — from your own photo, on your phone, and puts the cuts that often suit it at the front. It is a suggestion, not a rule: every cut is still there. The shape is never sent anywhere, and you can clear it from your profile.
+Loxa estimates the shape of your face — oval, round, square, heart or long — from your own photo, on your phone, and puts the cuts that often suit it at the front. That estimate is never sent anywhere, and you can clear it from your profile.
+
+Or ask outright. Give it a photo — two if you want, from another angle — and a model reads the face and names the cuts that suit it, with a sentence each saying why. Included with any credit balance: it costs you none. The photos are not kept.
+
+It is a suggestion, not a rule. Every cut is still there.
 
 24 CUTS
 Blunt bob, long layers, curtain bang, pixie, wolf cut, beach waves, sleek straight, braids, curly shag, buzz, long bob, French bob, bixie, blunt fringe, waist length, blowout, seventies flick, mullet, afro, locs, bantu knots, high ponytail, chignon, half-up knot.
@@ -90,7 +94,7 @@ NO ACCOUNT
 No sign-up, no login, no email address, no social feed. The app makes an anonymous identifier on your device and uses it for two things: counting the photos you have left, and telling our billing provider which subscription is yours.
 
 YOUR PHOTOS
-The photo you send is not stored on our servers. Generated images, and the photos they were made from, are saved on your phone; a copy of each generated image is held for up to thirty days so that repeating the same request does not cost a second credit. We use no analytics or advertising SDKs, we do not use the advertising identifier, and we do not use your photos to train anything.
+The photo you send is not stored on our servers. Generated images, and the photos they were made from, are saved on your phone; a copy of each generated image is held for up to thirty days, and an answer about which cuts suit you for seven, so that repeating the same request does not cost a second credit. We use no analytics or advertising SDKs, we do not use the advertising identifier, and we do not use your photos to train anything.
 
 IN FIVE LANGUAGES
 English, Spanish, French, German and Italian.

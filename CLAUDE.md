@@ -205,6 +205,33 @@ falls back costs what it would have cost anyway.
 hand, it already has its own quota-aware retry, and an eight-hour run is not the
 thing a user is waiting on.
 
+## The analysis model, and its fallback
+
+`POST /v1/analysis` reads one or two photographs of a face and answers with a
+face shape, the cuts from our catalogue that suit it, and a sentence for each.
+It is a different model from the renderer's, and a different company's.
+
+- **The primary is a vision model reached through opencode**, via the Vercel AI
+  SDK (`adapters/codex/analyst.ts`). The model id must be one that **reads
+  images and does not train on them** — the catalogue marks some of its models
+  "training use", and this app's privacy policy says nobody's photos train
+  anything. `CODEX_BASE_URL`, `CODEX_MODEL` and `CODEX_TOKEN` move together or
+  not at all.
+- **The fallback is OpenRouter's chat endpoint**, not Vertex. Measured:
+  `loxa-506814` is entitled to the image model and to no text model at all, so
+  every Gemini text id 404s there. `vertexFaceAnalyst` is written and tested and
+  stays unset, one variable from being useful if that ever changes.
+- **Never point either at `IMAGE_MODEL`.** That quota is about two requests a
+  minute for the whole project and it is what renders are sold against.
+- The AI SDK is why `services/api` carries `nodejs_compat`. Nothing else needs
+  it, and it applies to the test suite too.
+
+**The route requires a credit balance and spends nothing.** It is the third
+unmetered route, and what stands in for the credit check is written out in
+`adapters/http/routes.ts`: a balance gate, a cache keyed on the photographs, and
+a daily quota per device. The copy must say *included with any credit* and must
+never say free.
+
 ## Backend architecture — hexagonal
 
 `services/api` is ports and adapters. Dependencies point inwards, always.
@@ -222,6 +249,8 @@ Placement rules:
   in the wrong place.
 - HTTP status codes belong only in `adapters/http`. Core throws domain errors.
 - A new metered route gets a credit check and a cache key, or it does not merge.
+  The two that are unmetered — `/v1/diagnostics` and `/v1/analysis` — each carry
+  the argument for it in the handler, next to the route.
 - `GET /v1/catalogue` is the one route with neither, deliberately: it costs a
   bucket read rather than a model call, it is the same answer for everybody, and
   the app needs it before onboarding has minted a device id.

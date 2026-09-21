@@ -21,7 +21,10 @@ export const metadata: Metadata = { title: "Privacy policy — Loxa" };
  *
  * Every factual claim below is checkable against the code, and was checked:
  * the input photo is never written to a store (`core/try-on.ts`), the render is
- * cached for thirty days (`adapters/kv/render-cache.ts`), the device id is the
+ * cached for thirty days (`adapters/kv/render-cache.ts`), a suitability answer
+ * for seven (`adapters/kv/analysis-cache.ts`) under a key derived from the
+ * photographs alone (`core/cache-key.ts`), the analysis route never writes the
+ * style tally (`core/analyse-face.ts`), the device id is the
  * only identifier the Worker sees (`adapters/http/device.ts`), and the style
  * tally carries no device id (`schema.sql`). Nor does an error report: the
  * `diagnostic_report` table has no column for one, the id is spent on a rate
@@ -68,6 +71,15 @@ export default function PrivacyPolicy() {
           can clear the face shape from your profile. Your photo is then made
           smaller, sent to our server, passed
           to an image model to be restyled, and returned to you.
+          <br />
+          <br />
+          Asking us which cuts suit you is a separate thing you choose to do.
+          One or two photos are sent to our server and shown to a model that
+          answers with a face shape and a short list of cuts, each with a
+          sentence saying why. That answer replaces the estimate your phone
+          made, and you can clear it from your profile like any other. The
+          photographs are not kept; the answer is, for up to seven days, so
+          that asking the same thing twice does not mean a second call.
         </Section>
 
         <Section title="Which model, and whose">
@@ -79,6 +91,15 @@ export default function PrivacyPolicy() {
           OpenRouter as well. Neither is given anything about you beyond the
           photo and the style asked for: no identifier, no name, nothing that
           says which request belongs to whom.
+          <br />
+          <br />
+          The suggestion feature uses a different model, and not always the same
+          company&rsquo;s. Normally it is a vision model we reach through
+          opencode, on terms that keep nothing and train on nothing; when that
+          cannot be reached we ask a model on OpenRouter instead. Either way it
+          is shown your photograph and the names of the cuts in our catalogue,
+          and nothing else — no identifier, and nothing that says whose request
+          it is. Neither provider is given your photo to train on.
         </Section>
 
         <Section title="What happens to them afterwards">
@@ -163,7 +184,8 @@ export default function PrivacyPolicy() {
           Deleting the app removes every generated photo, every original and
           your profile picture from the device, but keeps the identifier so a reinstall does
           not cost you what you paid for. Erasing the device removes that too.
-          Cached results expire on their own within thirty days. To have us
+          Cached results expire on their own within thirty days, and a
+          suitability answer within seven. To have us
           delete the identifier and everything attached to it, write to{" "}
           <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
             {CONTACT_EMAIL}
