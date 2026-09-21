@@ -68,7 +68,10 @@ export default function PrivacyPolicy() {
           in it. The same check estimates the rough shape of the face — oval,
           round and so on — so the cuts that often suit it can be shown first.
           Both happen on your phone, and neither answer is sent anywhere; you
-          can clear the face shape from your profile. Your photo is then made
+          can clear the face shape from your profile. Before the first photo is
+          sent, and again before the first time you ask which cuts suit you,
+          the app tells you where it is going and asks you to agree. If you
+          decline, nothing is sent. Your photo is then made
           smaller, sent to our server, passed
           to an image model to be restyled, and returned to you.
           <br />
@@ -88,18 +91,20 @@ export default function PrivacyPolicy() {
           which happens because our rate limit there is low — through OpenRouter,
           which routes the same request to the same model on its own account.
           Your photo therefore passes through Google, and sometimes through
-          OpenRouter as well. Neither is given anything about you beyond the
+          OpenRouter as well. When we use OpenRouter we ask it to send the
+          request only to providers that do not collect data. Neither is given anything about you beyond the
           photo and the style asked for: no identifier, no name, nothing that
           says which request belongs to whom.
           <br />
           <br />
           The suggestion feature uses a different model, and not always the same
           company&rsquo;s. Normally it is a vision model we reach through
-          opencode, on terms that keep nothing and train on nothing; when that
-          cannot be reached we ask a model on OpenRouter instead. Either way it
-          is shown your photograph and the names of the cuts in our catalogue,
-          and nothing else — no identifier, and nothing that says whose request
-          it is. Neither provider is given your photo to train on.
+          opencode; when that cannot be reached we ask a model on OpenRouter
+          instead. Either way it is shown your photograph and the names of the
+          cuts in our catalogue, and nothing else — no identifier, and nothing
+          that says whose request it is. We do not keep the photograph and we do
+          not use it to train anything. How a provider handles a request on its
+          own systems is set out in that provider&rsquo;s own privacy terms.
         </Section>
 
         <Section title="What happens to them afterwards">
@@ -121,6 +126,15 @@ export default function PrivacyPolicy() {
           a cut was picked. We use no analytics or advertising SDKs, we do not
           use the advertising identifier, and we do not track you across other
           apps or websites.
+        </Section>
+
+        <Section title="Keeping the service fair">
+          To stop one person minting free photos without limit, and to keep the
+          service from being flooded, the server counts how many new devices
+          and how many requests come from one network address. The address is
+          turned into a one-way hash first and only the hash is used, the
+          counters expire within two days, and they are never stored next to a
+          device identifier or a photo.
         </Section>
 
         <Section title="When something goes wrong">
@@ -190,7 +204,9 @@ export default function PrivacyPolicy() {
           <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
             {CONTACT_EMAIL}
           </a>
-          . Deleting it ends any credits attached to it, including bought ones,
+          . The Help &amp; contact row in the app&rsquo;s profile opens an email
+          to that address with your identifier already in it, which is the one
+          thing we need to find it. Deleting it ends any credits attached to it, including bought ones,
           because there is nothing else that could identify them as yours. Error
           reports cannot be deleted on request, because nothing in them says
           they are yours &mdash; that is the same reason they are safe to keep

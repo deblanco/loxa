@@ -22,4 +22,4 @@ export const JURISDICTION = "Spain";
 export const COURTS = "the courts of Madrid, Spain";
 
 export const CONTACT_EMAIL = "apps@blankhexadecimal.com";
-export const LAST_UPDATED = "1 September 2026";
+export const LAST_UPDATED = "21 September 2026";

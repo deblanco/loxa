@@ -61,12 +61,16 @@ export default function Terms() {
           {WEEKLY_CREDITS} photos each week. New subscribers pay{" "}
           {INTRO_PRICE_LABEL} for the first week, then {WEEKLY_PRICE_LABEL}{" "}
           until cancelled; the introductory price is offered once per Apple ID,
-          so it does not apply if you have subscribed to Loxa before. Credits
-          reset every Monday and do not carry over. If you run out you can buy a
-          single photo for {SINGLE_PHOTO_PRICE_LABEL}. Prices are shown in your
+          so it does not apply if you have subscribed to Loxa before. The
+          weekly photos reset every Monday and do not carry over; a photo you
+          buy singly never expires. If you run out you can buy a single photo
+          for {SINGLE_PHOTO_PRICE_LABEL}. Prices are shown in your
           own currency in the app, and the price the App Store charges is the
-          one that counts. Credits are tied to the device the app is installed
-          on; use Restore purchases if you reinstall or change phone.
+          one that counts. Photos are tied to the device the app is installed
+          on, and stay with it if you reinstall. Restore purchases brings back
+          an active subscription on a new phone; single photos you bought stay
+          with the device they were bought on, because Apple does not restore
+          one-off purchases.
         </Section>
 
         <Section title="Cancelling">
