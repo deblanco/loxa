@@ -172,6 +172,7 @@ const it: typeof en = {
     faceShapeNote: 'Misurata su questo telefono dalla tua ultima foto e mai inviata altrove. I tagli che di solito le donano vengono prima.',
     faceShapeForget: 'Dimenticala',
     faceShapeKeep: 'OK',
+    suits: 'Cosa mi dona',
   },
 
   faceShape: {
@@ -180,6 +181,28 @@ const it: typeof en = {
     square: 'Viso squadrato',
     heart: 'Viso a cuore',
     long: 'Viso lungo',
+  },
+
+  suits: {
+    tile: 'Cosa mi dona?',
+    tileHint: 'Cosa mi dona',
+    title: 'Cosa mi dona',
+    headline: 'Quali tagli donano',
+    headlineItalic: 'al tuo viso.',
+    note: 'Scatta o scegli una foto del tuo viso. Una seconda da un altro angolo affina la risposta, ed è facoltativa.',
+    slotFront: 'Il tuo viso, di fronte',
+    slotAngle: 'Un altro angolo (facoltativo)',
+    take: 'Scatta una foto',
+    choose: 'Scegli dalla galleria',
+    replace: 'Cambia',
+    go: 'Chiedi',
+    working: 'Sto leggendo il tuo viso',
+    workingItalic: 'un momento.',
+    resultNote: 'Stimato dalla tua foto. Un suggerimento, non una regola.',
+    again: 'Chiedi di nuovo',
+    tryOn: 'Prova',
+    failed: 'Non ha funzionato. Prova una foto nitida del tuo viso, guardando dritto in camera.',
+    included: 'Incluso se hai crediti: non ne consuma nessuno.',
   },
 
   looks: {

@@ -172,6 +172,7 @@ const fr: typeof en = {
     faceShapeNote: 'Mesurée sur ce téléphone à partir de ta dernière photo, et jamais envoyée nulle part. Les coupes qui lui vont souvent passent en premier.',
     faceShapeForget: 'L’oublier',
     faceShapeKeep: 'OK',
+    suits: 'Ce qui me va',
   },
 
   faceShape: {
@@ -180,6 +181,28 @@ const fr: typeof en = {
     square: 'Visage carré',
     heart: 'Visage en cœur',
     long: 'Visage long',
+  },
+
+  suits: {
+    tile: 'Ça me va ?',
+    tileHint: 'Ce qui me va',
+    title: 'Ce qui me va',
+    headline: 'Les coupes qui vont',
+    headlineItalic: 'à ton visage.',
+    note: 'Prends ou choisis une photo de ton visage. Une seconde sous un autre angle affine la réponse, et reste facultative.',
+    slotFront: 'Ton visage, de face',
+    slotAngle: 'Un autre angle (facultatif)',
+    take: 'Prendre une photo',
+    choose: 'Choisir dans la galerie',
+    replace: 'Changer',
+    go: 'Demander',
+    working: 'Lecture de ton visage',
+    workingItalic: 'un instant.',
+    resultNote: 'Estimé à partir de ta photo. Une suggestion, pas une règle.',
+    again: 'Redemander',
+    tryOn: 'Essayer',
+    failed: 'Ça n’a pas marché. Essaie une photo nette de ton visage, face à l’appareil.',
+    included: 'Inclus dès que tu as des crédits : cela n’en coûte aucun.',
   },
 
   looks: {

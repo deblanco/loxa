@@ -37,6 +37,7 @@ import { reportHandled } from '@/diagnostics';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary, prepare, type PreparedPhoto } from '@/photo';
 import { saveProfilePhoto } from '@/store/profile-photo';
+import { putSuitsShot } from '@/store/suits-shots';
 import { FaceTracker } from 'face-track';
 import { useSharedValue } from 'react-native-reanimated';
 import { color, motion, radius, space } from '@/theme';
@@ -119,12 +120,16 @@ export default function Camera() {
   // The cut and colour ride along untouched. They belong to the screen that
   // sent the user here and to the one waiting on the other side; this screen
   // has no opinion about them and only has to not drop them.
-  const { from, styleId, colorId } = useLocalSearchParams<{
+  const { from, slot, styleId, colorId } = useLocalSearchParams<{
     from?: string;
+    slot?: string;
     styleId?: string;
     colorId?: string;
   }>();
   const forProfile = from === 'profile';
+  // A photo for the "what suits me" screen, which holds one or two of them and
+  // asks for them in the order it names.
+  const forSuits = from === 'suits';
   const [facing, setFacing] = useState<TargetCameraPosition>('front');
 
   const device = useCameraDevice(facing);
@@ -293,6 +298,13 @@ export default function Camera() {
   }
 
   async function handOff(photo: PreparedPhoto) {
+    if (forSuits) {
+      // Into the holder and straight back: the screen that asked owns what
+      // happens next, and the photo never crosses the router.
+      putSuitsShot(slot === '1' ? 1 : 0, photo);
+      router.back();
+      return;
+    }
     if (forProfile) {
       await saveProfilePhoto(photo.base64);
       // Back rather than replace: the profile pushed this screen and re-reads

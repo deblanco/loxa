@@ -151,6 +151,32 @@ export function suitedFirst(catalogue: CatalogueResponse, shape: FaceShape | nul
 }
 
 /**
+ * The catalogue in the order a model ranked it.
+ *
+ * Takes precedence over `suitedFirst` when there is an analysis: that one
+ * orders by a shape the phone guessed at and a tag we wrote by hand, this one
+ * by something that looked at the user's own photograph. Cuts it did not name
+ * keep the manifest's order behind the ones it did.
+ *
+ * Same contract as `suitedFirst` in every other way — the whole catalogue back,
+ * the same object by identity when there is nothing to reorder, so the strip
+ * and the plate's swipe keep walking one list.
+ */
+export function rankedFirst(
+  catalogue: CatalogueResponse,
+  ranking: readonly { styleId: string }[],
+): CatalogueResponse {
+  const order = new Map(ranking.map((cut, index) => [cut.styleId, index]));
+  const ranked = catalogue.styles.filter((style) => order.has(style.id));
+  if (ranked.length === 0) return catalogue;
+
+  const rest = catalogue.styles.filter((style) => !order.has(style.id));
+  ranked.sort((a, b) => order.get(a.id)! - order.get(b.id)!);
+
+  return { ...catalogue, styles: [...ranked, ...rest] };
+}
+
+/**
  * The cut before or after this one in the strip, if there is one.
  *
  * The plate's pager runs off its edges into the neighbouring styles, so a user

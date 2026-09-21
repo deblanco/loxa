@@ -172,6 +172,7 @@ const de: typeof en = {
     faceShapeNote: 'Auf diesem Telefon aus deinem letzten Foto gemessen und nirgendwohin gesendet. Schnitte, die oft dazu passen, stehen vorne.',
     faceShapeForget: 'Vergessen',
     faceShapeKeep: 'OK',
+    suits: 'Was mir passt',
   },
 
   faceShape: {
@@ -180,6 +181,28 @@ const de: typeof en = {
     square: 'Eckiges Gesicht',
     heart: 'Herzförmiges Gesicht',
     long: 'Langes Gesicht',
+  },
+
+  suits: {
+    tile: 'Was passt mir?',
+    tileHint: 'Was mir passt',
+    title: 'Was mir passt',
+    headline: 'Welche Schnitte zu',
+    headlineItalic: 'deinem Gesicht passen.',
+    note: 'Mach oder wähle ein Foto deines Gesichts. Ein zweites aus einem anderen Winkel schärft die Antwort und ist optional.',
+    slotFront: 'Dein Gesicht, von vorn',
+    slotAngle: 'Anderer Winkel (optional)',
+    take: 'Foto machen',
+    choose: 'Aus der Mediathek',
+    replace: 'Ändern',
+    go: 'Fragen',
+    working: 'Dein Gesicht wird gelesen',
+    workingItalic: 'einen Moment.',
+    resultNote: 'Aus deinem Foto geschätzt. Ein Vorschlag, keine Regel.',
+    again: 'Noch einmal fragen',
+    tryOn: 'Ausprobieren',
+    failed: 'Das hat nicht geklappt. Versuch ein scharfes Foto deines Gesichts, direkt in die Kamera.',
+    included: 'Enthalten, sobald du Credits hast — das kostet keinen.',
   },
 
   looks: {

@@ -1,10 +1,12 @@
 import {
+  analysisResponseSchema,
   apiErrorSchema,
   diagnosticsResponseSchema,
   catalogueResponseSchema,
   creditsResponseSchema,
   purchaseSyncResponseSchema,
   tryOnResponseSchema,
+  type AnalysisResponse,
   type ApiErrorCode,
   type CatalogueResponse,
   type DiagnosticReport,
@@ -36,6 +38,17 @@ const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8787';
  */
 const REQUEST_TIMEOUT_MS = 30_000;
 
+/**
+ * Longer, for the analysis.
+ *
+ * Measured at about twenty-three seconds against the primary provider, which
+ * reasons before it answers — close enough to the figure above that a slow
+ * afternoon would abort a call that was going to succeed. The user is watching
+ * a progress screen either way; the failure to avoid is the one where the
+ * answer arrives a second after we stopped listening.
+ */
+const ANALYSIS_TIMEOUT_MS = 60_000;
+
 // Re-exported so callers have one import for "talking to the Worker". The
 // implementation lives apart because where the id is stored is a durability
 // decision, not a networking one — see device-id.ts.
@@ -52,13 +65,16 @@ export class ApiRequestError extends Error {
   }
 }
 
+/** A request, plus the one thing about it that is not fetch's business. */
+type RequestOptions = RequestInit & { timeoutMs?: number };
+
 async function request<T>(
   path: string,
   parse: (body: unknown) => T,
-  init: RequestInit = {},
+  init: RequestOptions = {},
 ): Promise<T> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), init.timeoutMs ?? REQUEST_TIMEOUT_MS);
 
   let response: Response;
   try {
@@ -123,6 +139,21 @@ export async function tryOn(input: {
   return await request('/v1/tryon', (body) => tryOnResponseSchema.parse(body), {
     method: 'POST',
     body: JSON.stringify(input),
+  });
+}
+
+/**
+ * Which cuts suit the face in these photographs.
+ *
+ * Spends no credit and requires a balance — the Worker answers `out_of_credits`
+ * to a device with nothing in the pot, and the screen opens the paywall on it,
+ * exactly as the confirm screen does.
+ */
+export async function analyseFace(photos: string[]): Promise<AnalysisResponse> {
+  return await request('/v1/analysis', (body) => analysisResponseSchema.parse(body), {
+    method: 'POST',
+    body: JSON.stringify({ photos }),
+    timeoutMs: ANALYSIS_TIMEOUT_MS,
   });
 }
 

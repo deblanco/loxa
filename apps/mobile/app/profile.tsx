@@ -299,6 +299,7 @@ export default function Profile() {
               onPress={() => explainFaceShape(shape)}
             />
           ) : null}
+          <Row label={t('profile.suits')} onPress={() => router.push('/suits')} />
           <Row
             label={t('profile.language')}
             value={LANGUAGE_NAMES[currentLanguage()]}

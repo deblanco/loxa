@@ -7,6 +7,7 @@ import {
   colorsFor,
   findStyle,
   heroKeys,
+  rankedFirst,
   suitedFirst,
   suitsShape,
   tileFor,
@@ -232,5 +233,34 @@ describe('suitsShape', () => {
     expect(suitsShape({ ...CATALOGUE.styles[0]!, suits: ['oval'] }, 'oval')).toBe(true);
     expect(suitsShape({ ...CATALOGUE.styles[0]!, suits: ['oval'] }, null)).toBe(false);
     expect(suitsShape(CATALOGUE.styles[0]!, 'oval')).toBe(false);
+  });
+});
+
+describe('rankedFirst', () => {
+  it('puts the cuts a model named at the front, in its order', () => {
+    const ordered = rankedFirst(CATALOGUE, [{ styleId: 'wolf-cut' }, { styleId: 'blunt-bob' }]);
+    expect(ordered.styles.map((s) => s.id)).toEqual(['wolf-cut', 'blunt-bob']);
+  });
+
+  it('keeps the manifest order among the cuts it did not name', () => {
+    const ordered = rankedFirst(CATALOGUE, [{ styleId: 'wolf-cut' }]);
+    expect(ordered.styles.map((s) => s.id)).toEqual(['wolf-cut', 'blunt-bob']);
+  });
+
+  it('ignores a cut this manifest does not carry', () => {
+    // The answer is validated server-side against everything we ship, but a
+    // phone holds a served subset and a withdrawn cut can still be named.
+    const ordered = rankedFirst(CATALOGUE, [{ styleId: 'mullet' }, { styleId: 'wolf-cut' }]);
+    expect(ordered.styles.map((s) => s.id)).toEqual(['wolf-cut', 'blunt-bob']);
+  });
+
+  it('is the same catalogue when there is nothing to reorder by', () => {
+    expect(rankedFirst(CATALOGUE, [])).toBe(CATALOGUE);
+    expect(rankedFirst(CATALOGUE, [{ styleId: 'mullet' }])).toBe(CATALOGUE);
+  });
+
+  it('is the order the swipe walks, not only the strip', () => {
+    const ordered = rankedFirst(CATALOGUE, [{ styleId: 'wolf-cut' }, { styleId: 'blunt-bob' }]);
+    expect(adjacentStyle(ordered, 'wolf-cut', 1)?.id).toBe('blunt-bob');
   });
 });

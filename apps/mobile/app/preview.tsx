@@ -21,11 +21,13 @@ import {
   findColor,
   findStyle,
   heroKeys,
+  rankedFirst,
   suitedFirst,
 } from '@/catalogue';
 import { initialSelection, primaryAction, primaryActionLabel, withSource } from '@/selection';
 import { useCatalogue } from '@/store/catalogue';
 import { useCredits } from '@/store/credits';
+import { readAnalysis, type StoredAnalysis } from '@/store/analysis';
 import { readFaceShape } from '@/store/face-shape';
 import { readProfilePhoto } from '@/store/profile-photo';
 import { color, radius, space } from '@/theme';
@@ -122,7 +124,14 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
   // swipe into the next cut included — so the two can never walk different
   // orders. Read on focus, because the camera is where it is measured.
   const [shape, setShape] = useState<FaceShape | null>(null);
-  const catalogue = useMemo(() => suitedFirst(served, shape), [served, shape]);
+  // An answer from "what suits me", if one has been asked for. It outranks the
+  // measured shape: that orders by a guess the phone made and a tag we wrote,
+  // this by something that looked at the user's own photograph.
+  const [analysis, setAnalysis] = useState<StoredAnalysis | null>(null);
+  const catalogue = useMemo(
+    () => (analysis ? rankedFirst(served, analysis.cuts) : suitedFirst(served, shape)),
+    [served, shape, analysis],
+  );
   const insets = useSafeAreaInsets();
   const { credits, refresh } = useCredits();
   const [selection, setSelection] = useState(() => initialSelection(catalogue.defaults));
@@ -247,6 +256,7 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
       void refresh();
       void readProfilePhoto().then(setPortrait);
       void readFaceShape().then(setShape);
+      void readAnalysis().then(setAnalysis);
     }, [refresh]),
   );
 
@@ -382,6 +392,7 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
         <StyleStrip
           catalogue={catalogue}
           shape={shape}
+          onAsk={() => router.push('/suits')}
           selectedId={selection.styleId}
           onSelect={(styleId) => {
             chosen.current = true;

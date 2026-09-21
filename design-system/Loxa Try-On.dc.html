@@ -154,6 +154,14 @@
                 <div style="font-size:12px;color:rgba(13,12,11,.4)">{{ stripNote }}</div>
               </div>
               <div style="display:flex;gap:10px;overflow-x:auto;padding:2px 16px 0;scrollbar-width:none;-ms-overflow-style:none">
+                <!-- The first tile, and not a cut: it opens "what suits me". Deliberately
+                     outside the styles list, because that list is what the plate's swipe walks
+                     and what the selection is clamped against. Ink on paper rather than the
+                     hatch — the hatch means "a picture goes here", and this is an action. -->
+                <div onClick="{{ goSuits }}" style="flex:none;width:70px;cursor:pointer">
+                  <div style="height:84px;border-radius:12px;background:#0d0c0b;display:flex;align-items:center;justify-content:center"><div style="width:18px;height:18px;border-radius:999px;background:#0d0c0b;border:1.5px solid #faf8f5;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><div style="width:6px;height:6px;background:#faf8f5;transform:rotate(45deg)"></div></div></div>
+                  <div style="margin-top:6px;font-size:11px;line-height:1.25;text-align:center">Suits me?</div>
+                </div>
                 <sc-for list="{{ styles }}" as="st" hint-placeholder-count="6">
                   <div onClick="{{ st.go }}" style="flex:none;width:70px;cursor:pointer;position:relative">
                     <div style="height:84px;border-radius:12px;background:#e7e1d8;background-image:repeating-linear-gradient(102deg,rgba(13,12,11,.08) 0 6px,transparent 6px 14px);border:1px solid {{ st.ring }};box-sizing:border-box;transition:border-color .2s ease"></div>
@@ -330,6 +338,40 @@
           </div>
         </sc-if>
 
+        <sc-if value="{{ sSuits }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;inset:0;background:#faf8f5;overflow:auto;padding-top:60px">
+            <div style="padding:0 22px 16px;display:flex;align-items:center;justify-content:space-between">
+              <div onClick="{{ goPreview }}" style="width:34px;height:34px;border-radius:999px;border:1px solid rgba(13,12,11,.12);display:flex;align-items:center;justify-content:center;cursor:pointer">‹</div>
+              <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,12,11,.45)">What suits me</div>
+              <div style="width:34px;height:34px"></div>
+            </div>
+            <!-- One photo, optionally two. A model reads them and names cuts from our own
+                 catalogue, with a sentence each. The photographs are dropped once the answer
+                 lands; the verdict is what is kept. Needs a credit and spends none, which is
+                 what the line under the button says — it must never say "free". -->
+            <div style="padding:0 26px;display:flex;flex-direction:column;gap:20px">
+              <div>
+                <div style="font-family:'Instrument Serif',Georgia,serif;font-size:40px;line-height:1.05;letter-spacing:-.01em">Which cuts suit<br><span style="font-style:italic">your face.</span></div>
+                <div style="margin-top:12px;font-size:14.5px;line-height:1.55;color:rgba(13,12,11,.55)">Take or choose a photo of your face. A second from another angle sharpens the answer, and is optional.</div>
+              </div>
+              <sc-for list="{{ suitsSlots }}" as="sl" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:16px">
+                  <div style="flex:none;width:72px;height:96px;border-radius:12px;background:#e7e1d8;background-image:repeating-linear-gradient(102deg,rgba(13,12,11,.07) 0 8px,transparent 8px 18px)"></div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="font-size:14px">{{ sl.label }}</div>
+                    <div style="display:flex;gap:16px;font:400 11px/1.6 ui-monospace,monospace">
+                      <div style="color:#0d0c0b;cursor:pointer">Take photo</div>
+                      <div style="color:rgba(13,12,11,.45);cursor:pointer">Choose from library</div>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+              <div onClick="{{ askSuits }}" style="height:56px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;cursor:pointer">Ask</div>
+              <div style="text-align:center;font:400 11px/1.5 ui-monospace,monospace;color:rgba(13,12,11,.4)">Included with any credit — this costs none.</div>
+            </div>
+          </div>
+        </sc-if>
+
         <sc-if value="{{ sCamera }}" hint-placeholder-val="{{ true }}">
           <div style="position:absolute;inset:0;background:#0b0a0a">
             <div style="position:absolute;top:54px;left:0;right:0;height:calc(100% - 220px);margin:0 12px;border-radius:18px;overflow:hidden;background:#181614;background-image:repeating-linear-gradient(102deg,rgba(255,255,255,.06) 0 12px,transparent 12px 26px)">
@@ -462,7 +504,7 @@ const COLORS = [
   ['Cherry','#7d2230'],['Lilac','#b7a3c8']
 ];
 const MODELS = ['your photo · 2 days ago','model · warm skin','model · deep skin','model · fair skin'];
-const SCREENS = [['entry','Entry'],['preview','Preview'],['gen','Generating'],['result','Result'],['offer','Offer'],['profile','Profile'],['looks','Looks'],['camera','Camera']];
+const SCREENS = [['entry','Entry'],['preview','Preview'],['gen','Generating'],['result','Result'],['suits','Suits'],['offer','Offer'],['profile','Profile'],['looks','Looks'],['camera','Camera']];
 const STEPS = ['reading your photo','mapping hairline','painting colour','matching light'];
 
 class Component extends DCLogic {
@@ -510,7 +552,7 @@ class Component extends DCLogic {
     const [colorName] = COLORS[s.color];
     return {
       sEntry: s.screen === 'entry', sOffer: s.screen === 'offer', sPreview: s.screen === 'preview',
-      sGen: s.screen === 'gen', sResult: s.screen === 'result', sProfile: s.screen === 'profile', sLooks: s.screen === 'looks', sCamera: s.screen === 'camera',
+      sGen: s.screen === 'gen', sResult: s.screen === 'result', sProfile: s.screen === 'profile', sLooks: s.screen === 'looks', sSuits: s.screen === 'suits', sCamera: s.screen === 'camera',
       showPaywall: s.paywall, toast: s.toast,
       isDark: s.screen === 'entry' || s.screen === 'result' || s.screen === 'camera',
       credits: s.credits, creditCap: cap, creditW: Math.round((s.credits / cap) * 100) + '%',
@@ -557,6 +599,7 @@ class Component extends DCLogic {
       looks: ['Blunt bob · Platinum', 'Curtain bang · Copper', 'Pixie · Espresso', 'Long layers · Honey', 'Wolf cut · Ash', 'French bob · Cherry'].map(caption => ({ caption })),
       // The prototype shows a user measured as a round face.
       stripNote: 'Round face · suited first',
+      suitsSlots: [{ label: 'Your face, straight on' }, { label: 'Another angle (optional)' }],
       styles: STYLES.map((name, i) => ({
         name, on: s.style === i, suits: ROUND_SUITS.has(name),
         ring: s.style === i ? '#0d0c0b' : 'rgba(13,12,11,.12)',
@@ -590,7 +633,7 @@ class Component extends DCLogic {
         go: this.go(key)
       })),
 
-      goOffer: this.go('offer'), goPreview: this.go('preview'), goProfile: this.go('profile'), goLooks: this.go('looks'), goResult: this.go('result'),
+      goOffer: this.go('offer'), goPreview: this.go('preview'), goProfile: this.go('profile'), goLooks: this.go('looks'), goResult: this.go('result'), goSuits: this.go('suits'), askSuits: this.go('preview'),
       goCamera: () => this.setState({ screen: 'camera', camFrom: 'profile', camShot: false }),
       // Entry goes straight into the app on the one free photo. The offer comes
       // once, when the first result is left, and both of its doors return to preview.

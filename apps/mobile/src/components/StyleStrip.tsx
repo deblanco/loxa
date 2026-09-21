@@ -41,9 +41,14 @@ interface Props {
   shape: FaceShape | null;
   selectedId: string;
   onSelect: (id: string) => void;
+  /**
+   * Opens "what suits me". When given, the strip grows a leading tile that is
+   * not a cut — see the note on `styles.ask`.
+   */
+  onAsk?: () => void;
 }
 
-export function StyleStrip({ catalogue, shape, selectedId, onSelect }: Props) {
+export function StyleStrip({ catalogue, shape, selectedId, onSelect, onAsk }: Props) {
   const { t } = useTranslation();
   const [seed] = useState(() => Math.floor(Math.random() * 1000));
 
@@ -63,6 +68,32 @@ export function StyleStrip({ catalogue, shape, selectedId, onSelect }: Props) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.strip}
       >
+        {/*
+          The first tile, and deliberately not a member of `catalogue.styles`.
+          That array is what the plate's swipe walks and what the selection is
+          clamped against, so a synthetic entry in it would be selectable and
+          swipeable — a cut that cannot be rendered. This is a button that
+          happens to sit in a row of tiles.
+
+          Ink on paper rather than the hatch: the hatch means "a picture goes
+          here", and the camera screen already learned that lesson the hard way.
+        */}
+        {onAsk ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityHint={t('suits.tileHint')}
+            onPress={onAsk}
+            style={styles.tile}
+          >
+            <View style={styles.ask}>
+              <SuitsSeal />
+            </View>
+            <Body variant="tile" style={styles.name}>
+              {t('suits.tile')}
+            </Body>
+          </Pressable>
+        ) : null}
+
         {catalogue.styles.map((style) => {
           const selected = style.id === selectedId;
           const suits = suitsShape(style, shape);
@@ -117,6 +148,15 @@ const styles = StyleSheet.create({
     paddingBottom: space.s2,
   },
   strip: { paddingHorizontal: space.gutterScreen, gap: space.s3 },
+  // The tile's own footprint, in ink, so it reads as the one control in a row
+  // of photographs rather than as a cut whose picture failed to load.
+  ask: {
+    height: THUMB_HEIGHT,
+    borderRadius: radius.tile,
+    backgroundColor: color.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   tile: { width: 70 },
   thumb: { height: THUMB_HEIGHT, borderRadius: radius.tile, borderWidth: 1 },
   tick: {

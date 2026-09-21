@@ -225,6 +225,7 @@ const en = {
     faceShapeNote: 'Measured on this phone from your last photo, and never sent anywhere. Cuts that often suit it come first in the strip.',
     faceShapeForget: 'Forget it',
     faceShapeKeep: 'OK',
+    suits: 'What suits me',
   },
 
   faceShape: {
@@ -237,6 +238,33 @@ const en = {
     square: 'Square face',
     heart: 'Heart-shaped face',
     long: 'Long face',
+  },
+
+  suits: {
+    /**
+     * The screen that asks a model which cuts suit the user's own face.
+     * `included` is the credit rule in one line: it needs a balance and spends
+     * nothing, and must never be called free.
+     */
+    tile: 'Suits me?',
+    tileHint: 'What suits me',
+    title: 'What suits me',
+    headline: 'Which cuts suit',
+    headlineItalic: 'your face.',
+    note: 'Take or choose a photo of your face. A second from another angle sharpens the answer, and is optional.',
+    slotFront: 'Your face, straight on',
+    slotAngle: 'Another angle (optional)',
+    take: 'Take photo',
+    choose: 'Choose from library',
+    replace: 'Replace',
+    go: 'Ask',
+    working: 'Reading your face',
+    workingItalic: 'one moment.',
+    resultNote: 'Estimated from your photo. A suggestion, not a rule.',
+    again: 'Ask again',
+    tryOn: 'Try on',
+    failed: 'That did not work. Try a clear photo of your face, looking straight at the camera.',
+    included: 'Included with any credit — this costs none.',
   },
 
   looks: {

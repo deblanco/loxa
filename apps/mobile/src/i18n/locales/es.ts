@@ -172,6 +172,7 @@ const es: typeof en = {
     faceShapeNote: 'Se mide en este teléfono a partir de tu última foto y nunca se envía a ningún sitio. Los cortes que suelen favorecerla aparecen primero.',
     faceShapeForget: 'Olvidarla',
     faceShapeKeep: 'OK',
+    suits: 'Qué me favorece',
   },
 
   faceShape: {
@@ -180,6 +181,28 @@ const es: typeof en = {
     square: 'Cara cuadrada',
     heart: 'Cara de corazón',
     long: 'Cara alargada',
+  },
+
+  suits: {
+    tile: '¿Qué me va?',
+    tileHint: 'Qué me favorece',
+    title: 'Qué me favorece',
+    headline: 'Qué cortes le van',
+    headlineItalic: 'a tu cara.',
+    note: 'Haz o elige una foto de tu cara. Una segunda desde otro ángulo afina la respuesta, y es opcional.',
+    slotFront: 'Tu cara, de frente',
+    slotAngle: 'Otro ángulo (opcional)',
+    take: 'Hacer foto',
+    choose: 'Elegir de la galería',
+    replace: 'Cambiar',
+    go: 'Preguntar',
+    working: 'Leyendo tu cara',
+    workingItalic: 'un momento.',
+    resultNote: 'Estimado a partir de tu foto. Una sugerencia, no una regla.',
+    again: 'Preguntar otra vez',
+    tryOn: 'Probar',
+    failed: 'No ha salido. Prueba con una foto nítida de tu cara, mirando de frente a la cámara.',
+    included: 'Incluido si tienes créditos: esto no gasta ninguno.',
   },
 
   looks: {

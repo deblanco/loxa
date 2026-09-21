@@ -75,6 +75,12 @@ const KEYS = [
    */
   'loxa.faceShape.v1',
   /**
+   * The last answer to "which cuts suit me". An install that starts fresh but
+   * remembers somebody else's face reads as the app knowing something it was
+   * never told.
+   */
+  'loxa.analysis.v1',
+  /**
    * Error reports written but not yet sent. A reset is meant to hand back a
    * fresh install, and a queue full of the previous one's crashes would be
    * flushed on the next launch and attributed to this one.
