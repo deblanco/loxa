@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -340,6 +341,7 @@ export default function Camera() {
 
   return (
     <View style={styles.screen}>
+      <StatusBar style="light" />
       <View style={[styles.viewfinder, { top: insets.top + space.s3 }]} onLayout={onViewfinderLayout}>
         {device ? (
           <VisionCamera
@@ -374,6 +376,7 @@ export default function Camera() {
           accessibilityRole="button"
           accessibilityLabel={t('camera.close')}
           onPress={() => router.back()}
+          hitSlop={8}
           style={styles.round}
         >
           <Body tone="paper">✕</Body>

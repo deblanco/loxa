@@ -8,6 +8,7 @@ import { syncPurchases } from '@/api/client';
 import { LegalLinks } from '@/components/LegalLinks';
 import { Pill } from '@/components/Pill';
 import { PurchaseSettling } from '@/components/PurchaseSettling';
+import { SubscriptionTerms } from '@/components/SubscriptionTerms';
 import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
 import { reportHandled } from '@/diagnostics';
@@ -171,7 +172,13 @@ export default function Paywall() {
             Off the reset the Worker sent, not a fixed "Monday" — on a Sunday
             night the sheet was naming a day that had already arrived.
           */}
-          {t(credits ? paywallResetLabel(credits.resetsAt, new Date()) : 'paywall.untilMonday')}
+          {t(
+            !subscribed
+              ? 'paywall.addMore'
+              : credits
+                ? paywallResetLabel(credits.resetsAt, new Date())
+                : 'paywall.untilMonday',
+          )}
         </Display>
 
         {settling ? (
@@ -230,11 +237,9 @@ export default function Paywall() {
           wrong purchase.
         */}
         {!subscribed && (
-          <Meta variant="note" tone="ink40" sentence style={styles.terms}>
-            {introPrice
-              ? t('common.subscriptionTermsIntro', { price: introPrice, weekly: price })
-              : t('common.subscriptionTerms', { weekly: price })}
-          </Meta>
+          <View style={styles.terms}>
+            <SubscriptionTerms price={price} introPrice={introPrice} />
+          </View>
         )}
 
         {/*
@@ -309,7 +314,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(250,248,245,0.18)',
   },
   note: { marginTop: 2 },
-  terms: { marginTop: space.s3 + 2, textAlign: 'center' },
+  terms: { marginTop: space.s3 + 2 },
   footer: {
     marginTop: space.s3,
     flexDirection: 'row',
@@ -318,5 +323,5 @@ const styles = StyleSheet.create({
   },
   // Equal halves: neither declining nor restoring is the sheet's main act,
   // and one wider than the other would say it was.
-  footerButton: { flex: 1, height: 44 },
+  footerButton: { flex: 1, height: 44, paddingHorizontal: space.s3 },
 });

@@ -56,6 +56,9 @@ export default function Generating() {
 
   const [progress, setProgress] = useState(0);
   const [failed, setFailed] = useState(false);
+  // A refused photograph and a render that broke are different things to be told:
+  // one is fixed by a different photo, the other by trying again.
+  const [rejected, setRejected] = useState(false);
   const shimmer = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
@@ -119,6 +122,14 @@ export default function Generating() {
         // back to the screen they came from with nothing said and nothing
         // recorded — the largest silent failure in the app. Now it says so, and
         // tells us.
+        // A safety block or an unusable photo is a verdict on the picture, not a
+        // fault of ours, so it is said plainly and is not an error report.
+        if (err instanceof ApiRequestError && err.code === 'photo_rejected') {
+          setRejected(true);
+          setFailed(true);
+          return;
+        }
+
         reportHandled(err, 'tryOn');
         setFailed(true);
       }
@@ -141,7 +152,7 @@ export default function Generating() {
             {t(failed ? 'error.renderTitle' : 'generating.title')}
           </Display>
           <Meta variant="note" tone="ink45" sentence>
-            {t(failed ? 'error.renderBody' : step)}
+            {t(failed ? (rejected ? 'error.renderRejected' : 'error.renderBody') : step)}
           </Meta>
           {/* The bar goes rather than freezing. A progress bar stopped at 60%
               is a screen that is still working; this one is not. */}

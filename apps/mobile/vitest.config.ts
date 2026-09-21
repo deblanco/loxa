@@ -30,6 +30,8 @@ export default defineConfig({
         'src/store/look-record.ts',
         'src/selection.ts',
         'src/welcome.ts',
+        'src/consent.ts',
+        'src/purchases/outcome.ts',
         'src/catalogue.ts',
         'src/catalogue-cache.ts',
         'src/diagnostics/breadcrumbs.ts',

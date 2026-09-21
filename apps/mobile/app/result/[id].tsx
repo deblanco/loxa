@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import * as MediaLibrary from 'expo-media-library';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
@@ -200,6 +201,7 @@ export default function Result() {
 
   return (
     <View style={styles.screen}>
+      <StatusBar style="light" />
       {/*
         Contained, and stopping above the pills rather than running under them.
 
@@ -227,6 +229,7 @@ export default function Result() {
           accessibilityRole="button"
           accessibilityLabel={t('common.back')}
           onPress={backToPreview}
+          hitSlop={8}
           style={styles.round}
         >
           <Chevron tone="paper" />

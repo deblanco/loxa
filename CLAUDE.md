@@ -50,6 +50,16 @@ Deploys are per-workspace, never from the root:
 4. **It is the user's own face.** Every render is conditioned on their photo. A
    generic model with the right haircut is the one thing this app must not
    return.
+5. **A photo of a face does not leave the phone until the person has agreed, in
+   the app, to where it is going.** Two questions, because the recipients differ:
+   `ensureConsent('render')` before a Try On and `ensureConsent('analysis')`
+   before an Ask, each a sheet that names the recipients and asks (App Review
+   5.1.2(i), third-party AI). `src/api/client.ts` refuses to upload without the
+   stored answer, so a call site added later fails loudly instead of sending a
+   face. Every line of the sheet is about what *we* do; a provider's own
+   retention is pointed to, never asserted. Change who receives a photo, or what
+   is done with it, and you change the sheet, the privacy page, and the `.v1`
+   on the keys in `src/store/consent.ts` in the same commit.
 
 ## Design system
 

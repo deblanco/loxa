@@ -1,5 +1,5 @@
 import Purchases, { INTRO_ELIGIBILITY_STATUS, PURCHASES_ERROR_CODE } from 'react-native-purchases';
-import { SINGLE_PHOTO_PRODUCT_ID, WEEKLY_PRODUCT_ID } from '@loxa/shared';
+import { SINGLE_PHOTO_PRICE_LABEL, SINGLE_PHOTO_PRODUCT_ID, WEEKLY_PRODUCT_ID } from '@loxa/shared';
 import { reportHandled } from '@/diagnostics';
 import type { PurchasesPort } from './types';
 
@@ -82,6 +82,11 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
         const products = await Purchases.getProducts([WEEKLY_PRODUCT_ID, SINGLE_PHOTO_PRODUCT_ID]);
         const product = products.find((p) => p.identifier === WEEKLY_PRODUCT_ID);
         const single = products.find((p) => p.identifier === SINGLE_PHOTO_PRODUCT_ID);
+        // The weekly is what a purchase decision rests on and the single photo is
+        // a side offer, so one missing must not take the other with it. A store
+        // that answered for the subscription and not for the $0.99 photo used to
+        // return null here, which put the *subscription's* price back to the
+        // shipped US-dollar label on the one screen that has to be right.
         if (!product || !single) {
           // The screen falls back to the shipped labels and says nothing, which
           // is why this went unnoticed: a paywall quoting the wrong currency
@@ -96,8 +101,8 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
             ),
             'pricing.products',
           );
-          return null;
         }
+        if (!product) return null;
 
         // `introPrice` is set whenever the *product* carries an offer, which is
         // always — so it says nothing about whether this customer can have it.
@@ -131,7 +136,9 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
         return {
           price: product.priceString,
           introPrice: eligible ? (product.introPrice?.priceString ?? null) : null,
-          singlePhoto: single.priceString,
+          // Only the side offer falls back, and only to the label the shipped
+          // build already carries; the subscription above is the store's own.
+          singlePhoto: single?.priceString ?? SINGLE_PHOTO_PRICE_LABEL,
         };
       } catch (err) {
         // A price we could not fetch is not an error worth a screen: the caller
@@ -160,7 +167,13 @@ export function revenueCatPurchases(apiKey: string): PurchasesPort {
     async restore() {
       await awaitConfigured();
       const customerInfo = await Purchases.restorePurchases();
-      return customerInfo.nonSubscriptionTransactions.map((t) => t.transactionIdentifier);
+      return {
+        transactionIds: customerInfo.nonSubscriptionTransactions.map((t) => t.transactionIdentifier),
+        // Any active entitlement, rather than naming ours: this file would
+        // otherwise have to know the RevenueCat dashboard's identifier, and the
+        // Worker is the one that decides what an entitlement is worth.
+        subscribed: Object.keys(customerInfo.entitlements.active).length > 0,
+      };
     },
 
     /**

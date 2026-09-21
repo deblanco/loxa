@@ -11,10 +11,10 @@ const de: typeof en = {
     restoreNothing: 'Nichts wiederherzustellen',
     restoreFailed: 'Store nicht erreichbar',
     confirmingPurchase: 'Kauf wird bestätigt…',
-    subscriptionTermsIntro:
-      '{{price}} für die erste Woche, danach {{weekly}} pro Woche. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ablauf der Woche gekündigt wird; die Abbuchung erfolgt über deine Apple-ID.',
+    subscriptionPriceIntro: '{{price}} für die erste Woche, danach {{weekly}} pro Woche.',
+    subscriptionPrice: '{{weekly}} pro Woche.',
     subscriptionTerms:
-      '{{weekly}} pro Woche. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ablauf der Woche gekündigt wird; die Abbuchung erfolgt über deine Apple-ID.',
+      'Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ablauf der Woche gekündigt wird; die Abbuchung erfolgt über deine Apple-ID. Jederzeit verwalten oder kündigen unter Einstellungen › Apple-ID › Abonnements.',
   },
 
   entry: {
@@ -26,13 +26,13 @@ const de: typeof en = {
   },
 
   offer: {
-    badgeIntro: 'Erste Woche {{price}}',
+    badgeIntro: 'Angebot für die erste Woche',
     badge: '{{count}} Fotos pro Woche',
     headline: 'Ändere deine Haare',
     headlineSecond: 'zwanzigmal pro Woche.',
     perkCredits: '{{count}} Fotos pro Woche, jeder Schnitt und jede Farbe',
     perkOwnFace: 'Dein eigenes Gesicht, kein Stockmodel',
-    startIntro: 'Für {{price}} starten',
+    startIntro: 'Erste Woche starten',
     start: 'Abonnieren',
     skip: 'Ohne Abo fortfahren',
   },
@@ -47,15 +47,45 @@ const de: typeof en = {
     faceHeadline: 'Wir lesen das Gesicht,',
     faceHeadlineItalic: 'nie die Person.',
     faceBody: 'Dein Telefon findet das Gesicht auf deinem Foto und misst seine Proportionen: die Breite der Wangen, die Linie des Kiefers. Diese Messung bleibt auf dem Telefon, und die passenden Schnitte stehen vorne.',
+    notifyHeadline: 'Ein Schnitt am Tag,',
+    notifyHeadlineItalic: 'zum Ausprobieren.',
+    notifyBody: 'Schalte es ein, und Loxa schickt dir einmal am Tag um {{time}} eine Benachrichtigung: ein Look zum Ausprobieren, sonst nichts. Du kannst sie jederzeit in deinem Profil ausschalten.',
     next: 'Weiter',
     back: 'Zurück',
     skip: 'Später',
-    done: 'Loslegen',
     take: 'Foto machen',
     choose: 'Aus der Mediathek',
     change: 'Foto ändern',
     saved: 'in deinem profil gespeichert',
     privacyNote: 'nichts davon identifiziert dich',
+    sealNote: 'Dieses Zeichen steht auf den Schnitten, die zu deinem Gesicht passen.',
+    notifyNote: 'auf diesem telefon geplant, kein server beteiligt',
+    notifyOn: 'Tägliche Style-Ideen einschalten',
+  },
+
+  consent: {
+    /**
+     * The question before a photo leaves the phone. Each line is a claim about
+     * what the Worker and its providers do, and is checked against the privacy
+     * page: change one, change the other, and bump the key's version suffix in
+     * `store/consent.ts` so that everybody who agreed to the old wording is asked
+     * about the new.
+     */
+    goesTo: 'Geht an',
+    kept: 'Gespeichert',
+    never: 'Nie gesendet',
+    agree: 'Zustimmen und weiter',
+    decline: 'Nicht jetzt',
+    renderHeadline: 'Bevor wir dein',
+    renderHeadlineItalic: 'Foto umstylen.',
+    renderGoesTo: 'Ein Bildmodell von Google, das es umstylt. Ist Google ausgelastet, führt OpenRouter dasselbe Modell aus.',
+    renderKept: 'Wir speichern es nicht und trainieren nichts damit. Das fertige Ergebnis bleibt 30 Tage erhalten, damit dich eine Wiederholung nicht doppelt kostet.',
+    renderNever: 'Dein Name oder irgendetwas, das sagt, wessen Foto es ist.',
+    analysisHeadline: 'Bevor wir dein',
+    analysisHeadlineItalic: 'Gesicht ansehen.',
+    analysisGoesTo: 'Ein KI-Modell, das es liest, über opencode angebunden. Ist das nicht erreichbar, nimmt OpenRouter ein anderes.',
+    analysisKept: 'Wir speichern die Fotos nicht und trainieren nichts damit. Die Antwort wird bis zu sieben Tage gespeichert.',
+    analysisNever: 'Dein Name oder irgendetwas, das sagt, wessen Fotos es sind.',
   },
 
   preview: {
@@ -76,6 +106,7 @@ const de: typeof en = {
   confirm: {
     title: 'Bestätigen',
     swipeHint: 'wischen für einen anderen schnitt',
+    ownFaces: 'fotos von dir oder von jemandem, der zugestimmt hat',
     yourPhoto: 'Dein Foto',
   },
 
@@ -92,7 +123,7 @@ const de: typeof en = {
     titleProfile: 'Profilfoto',
     permission: 'Kamera',
     permissionBody:
-      'Loxa braucht die Kamera für das Foto, das umgestylt wird. Nichts wird hochgeladen, bis du auf Anprobieren tippst.',
+      'Loxa braucht die Kamera für dein Foto. Nichts wird gesendet, bis du einen Look oder Vorschläge anforderst – und vorher fragen wir dich.',
     allow: 'Kamera erlauben',
     openSettings: 'Einstellungen öffnen',
     permissionDenied:
@@ -111,6 +142,7 @@ const de: typeof en = {
     body: 'Dieser Bildschirm hat angehalten, bevor er fertig gezeichnet war. Ein neuer Versuch hilft meistens.',
     renderTitle: 'Der ist uns entwischt',
     renderBody: 'wir konnten es nicht abschließen · versuche es gleich noch einmal',
+    renderRejected: 'dieses foto ließ sich nicht verwenden · versuch es mit einem klaren foto deines gesichts',
     photoFailed: 'dieses Foto ließ sich nicht öffnen · versuche ein anderes',
   },
 
@@ -156,6 +188,7 @@ const de: typeof en = {
     title: 'Keine Credits mehr',
     untilMonday: 'bis Montag.',
     untilTomorrow: 'bis morgen.',
+    addMore: 'hol dir mehr, um weiterzumachen.',
     single: 'Noch ein Foto',
     singleNote: 'Eine Generierung, kein Abo',
     weekly: 'Loxa Wöchentlich',
@@ -174,7 +207,7 @@ const de: typeof en = {
     creditsLeft: 'Verbleibende Credits',
     resetsMonday: 'neu am montag',
     resetsTomorrow: 'neu morgen',
-    noRollOver: 'keine übertragung',
+    noRollOver: 'wöchentliche fotos werden nicht übertragen',
     planFree: 'Gratis-Tarif',
     planWeekly: 'Loxa Wöchentlich',
     planFreeNote: 'Keine wöchentlichen Credits — {{price}} pro Foto',
@@ -185,12 +218,14 @@ const de: typeof en = {
     notificationsNote: 'Eine Mitteilung am Tag, neue Looks',
     rate: 'Loxa bewerten',
     privacy: 'Datenschutzerklärung',
+    contact: 'Hilfe & Kontakt',
     terms: 'Nutzungsbedingungen',
     language: 'Sprache',
     looks: 'Deine Looks',
     seeAll: 'Alle ansehen',
     faceShape: 'Gesichtsform',
     faceShapeNote: 'Auf diesem Telefon aus deinem letzten Foto gemessen und nirgendwohin gesendet. Schnitte, die oft dazu passen, stehen vorne.',
+    faceShapeNoteAnswer: 'Aus deinem letzten „Was mir passt“, auf diesem Telefon gespeichert. Die Fotos wurden nicht gespeichert. Schnitte, die oft dazu passen, stehen vorne.',
     faceShapeForget: 'Vergessen',
     faceShapeKeep: 'OK',
     suits: 'Was mir passt',
@@ -210,7 +245,7 @@ const de: typeof en = {
     title: 'Was mir passt',
     headline: 'Welche Schnitte zu',
     headlineItalic: 'deinem Gesicht passen.',
-    note: 'Mach oder wähle ein Foto deines Gesichts. Ein zweites aus einem anderen Winkel schärft die Antwort und ist optional.',
+    note: 'Mach oder wähle ein Foto deines Gesichts. Ein zweites aus einem anderen Winkel schärft die Antwort und ist optional. Die Fotos liest ein KI-Modell – vor dem ersten fragen wir dich.',
     slotFront: 'Dein Gesicht, von vorn',
     slotAngle: 'Anderer Winkel (optional)',
     take: 'Foto machen',

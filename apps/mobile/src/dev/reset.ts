@@ -81,6 +81,18 @@ const KEYS = [
    */
   'loxa.analysis.v1',
   /**
+   * Whether the person has agreed to a photo of their face being sent to the
+   * image model, and separately to the vision model. A fresh install has agreed
+   * to neither, and must be asked again before its first upload.
+   */
+  /**
+   * Whether daily style ideas were asked for, kept apart from what iOS happens
+   * to be holding. A fresh install has asked for nothing.
+   */
+  'loxa.daily.v1',
+  'loxa.consent.render.v1',
+  'loxa.consent.analysis.v1',
+  /**
    * Error reports written but not yet sent. A reset is meant to hand back a
    * fresh install, and a queue full of the previous one's crashes would be
    * flushed on the next launch and attributed to this one.

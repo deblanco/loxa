@@ -16,10 +16,11 @@ import { faceShapeKey } from '@/face/shape';
 import { planLabel, resetLabel } from '@/format';
 import { currentLanguage } from '@/i18n';
 import { LANGUAGE_NAMES } from '@/i18n/languages';
-import { openPrivacy, openTerms } from '@/legal';
+import { openContact, openPrivacy, openTerms } from '@/legal';
 import { disableDaily, enableDaily, isDailyEnabled } from '@/notifications';
 import { restoreAndSync, usePricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
+import { clearAnalysis, readAnalysis } from '@/store/analysis';
 import { clearFaceShape, readFaceShape } from '@/store/face-shape';
 import { readProfilePhoto } from '@/store/profile-photo';
 import { listLooks, type Look } from '@/store/results';
@@ -53,7 +54,11 @@ export default function Profile() {
   const [notify, setNotify] = useState(false);
   const [portrait, setPortrait] = useState<string | null>(null);
   const [looks, setLooks] = useState<Look[]>([]);
-  const [shape, setShape] = useState<FaceShape | null>(null);
+  // The shape the strip is using, and where it came from. An answer to "what
+  // suits me" outranks the phone's own measurement (`store/analysis.ts`), and the
+  // note has to say which it is: one was measured here and never sent, the other
+  // was read by a model from photos that were.
+  const [shape, setShape] = useState<{ shape: FaceShape; fromAnswer: boolean } | null>(null);
 
   // Re-read on focus rather than once: the camera is pushed from here and
   // writes the portrait on its way back, so the only moment this screen can
@@ -67,7 +72,10 @@ export default function Profile() {
       void listLooks()
         .then(setLooks)
         .catch(() => setLooks([]));
-      void readFaceShape().then(setShape);
+      void Promise.all([readFaceShape(), readAnalysis()]).then(([measured, answer]) => {
+        if (answer) setShape({ shape: answer.faceShape, fromAnswer: true });
+        else setShape(measured ? { shape: measured, fromAnswer: false } : null);
+      });
     }, []),
   );
   const [toast, setToast] = useState<string | null>(null);
@@ -88,18 +96,26 @@ export default function Profile() {
     setNotify(await enableDaily());
   }
 
-  function explainFaceShape(current: FaceShape) {
-    Alert.alert(t(faceShapeKey(current)), t('profile.faceShapeNote'), [
+  function explainFaceShape(current: { shape: FaceShape; fromAnswer: boolean }) {
+    Alert.alert(
+      t(faceShapeKey(current.shape)),
+      t(current.fromAnswer ? 'profile.faceShapeNoteAnswer' : 'profile.faceShapeNote'),
+      [
       {
         text: t('profile.faceShapeForget'),
         style: 'destructive',
         onPress: () => {
           setShape(null);
+          // Both, because the privacy page says the answer can be cleared from
+          // here "like any other", and clearing only the measurement would leave
+          // the strip ordered by an answer that had just been "forgotten".
           void clearFaceShape();
+          void clearAnalysis();
         },
       },
       { text: t('profile.faceShapeKeep'), style: 'cancel' },
-    ]);
+      ],
+    );
   }
 
   async function restore() {
@@ -140,6 +156,7 @@ export default function Profile() {
             accessibilityRole="button"
             accessibilityLabel={t('common.back')}
             onPress={() => router.back()}
+            hitSlop={8}
             style={styles.round}
           >
             <Chevron />
@@ -281,7 +298,9 @@ export default function Profile() {
             </View>
             <Pressable
               accessibilityRole="switch"
+              accessibilityLabel={t('profile.notifications')}
               accessibilityState={{ checked: notify }}
+              hitSlop={10}
               onPress={toggleNotifications}
               style={[styles.toggle, notify ? styles.toggleOn : styles.toggleOff]}
             >
@@ -301,7 +320,7 @@ export default function Profile() {
           {shape ? (
             <Row
               label={t('profile.faceShape')}
-              value={t(faceShapeKey(shape))}
+              value={t(faceShapeKey(shape.shape))}
               onPress={() => explainFaceShape(shape)}
             />
           ) : null}
@@ -316,6 +335,7 @@ export default function Profile() {
               row that opens a 404 is worse than no row. The automatic prompt on
               the result screen does not depend on this. */}
           {storeUrl ? <Row label={t('profile.rate')} onPress={openReviewPage} /> : null}
+          <Row label={t('profile.contact')} onPress={() => void openContact()} />
           <Row label={t('profile.privacy')} onPress={openPrivacy} />
           <Row label={t('profile.terms')} onPress={openTerms} last />
         </View>

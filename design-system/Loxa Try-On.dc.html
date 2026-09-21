@@ -93,7 +93,7 @@
             <div onClick="{{ continueFree }}" style="position:absolute;top:60px;right:20px;width:34px;height:34px;border-radius:999px;background:rgba(13,12,11,.72);display:flex;align-items:center;justify-content:center;font-size:15px;color:#faf8f5;cursor:pointer" style-hover="background:rgba(13,12,11,.86)">&#10005;</div>
             <div style="position:absolute;left:26px;right:26px;bottom:44px;display:flex;flex-direction:column;gap:18px">
               <div style="display:flex;flex-direction:column;gap:9px">
-                <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,12,11,.42)">First week {{ introPrice }}</div>
+                <div style="font:500 10px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(13,12,11,.42)">First week offer</div>
                 <div style="font-family:'Instrument Serif',Georgia,serif;font-size:40px;line-height:1.05;letter-spacing:-.01em">Change your hair<br>twenty times a week.</div>
               </div>
               <div style="display:flex;flex-direction:column;gap:10px">
@@ -104,8 +104,13 @@
                 </sc-for>
               </div>
               <div style="display:flex;flex-direction:column;gap:10px">
-                <div onClick="{{ subscribe }}" style="height:58px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:500;cursor:pointer;box-shadow:0 10px 24px rgba(13,12,11,.18)" style-hover="opacity:.9">Start for {{ introPrice }}</div>
-                <div style="text-align:center;font:400 11px/1.5 ui-monospace,monospace;color:rgba(13,12,11,.4)">{{ introPrice }} for the first week, then {{ priceLine }} · 20 photos a week · cancel anytime</div>
+                <div onClick="{{ subscribe }}" style="height:58px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:16.5px;font-weight:500;cursor:pointer;box-shadow:0 10px 24px rgba(13,12,11,.18)" style-hover="opacity:.9">Start your first week</div>
+                <!-- One sentence, one size: the recurring price is never quieter than the intro
+                     price, and neither the badge nor the button carries a price at all (3.1.2).
+                     The fine print under it is darker than the other captions because a purchase
+                     depends on it, and says where to cancel. -->
+                <div style="text-align:center;font-size:13.5px;line-height:1.45;font-weight:500;color:rgba(13,12,11,.8)">{{ introPrice }} for the first week, then {{ priceLine }}.</div>
+                <div style="text-align:center;font:400 11px/1.5 ui-monospace,monospace;color:rgba(13,12,11,.6)">Renews automatically unless cancelled at least 24 hours before the week ends; payment is charged to your Apple ID. Manage or cancel any time in Settings › Apple ID › Subscriptions.</div>
               </div>
             </div>
           </div>

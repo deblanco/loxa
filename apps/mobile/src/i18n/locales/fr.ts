@@ -11,10 +11,10 @@ const fr: typeof en = {
     restoreNothing: 'Rien à restaurer',
     restoreFailed: 'Boutique injoignable',
     confirmingPurchase: 'Confirmation de votre achat…',
-    subscriptionTermsIntro:
-      '{{price}} la première semaine, puis {{weekly}} par semaine. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine ; le paiement est débité de ton compte Apple.',
+    subscriptionPriceIntro: '{{price}} la première semaine, puis {{weekly}} par semaine.',
+    subscriptionPrice: '{{weekly}} par semaine.',
     subscriptionTerms:
-      '{{weekly}} par semaine. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine ; le paiement est débité de ton compte Apple.',
+      'Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine ; le paiement est débité de ton compte Apple. Gère ou résilie à tout moment dans Réglages › ton compte Apple › Abonnements.',
   },
 
   entry: {
@@ -26,13 +26,13 @@ const fr: typeof en = {
   },
 
   offer: {
-    badgeIntro: 'Première semaine {{price}}',
+    badgeIntro: 'Offre de la première semaine',
     badge: '{{count}} photos par semaine',
     headline: 'Change de cheveux',
     headlineSecond: 'vingt fois par semaine.',
     perkCredits: '{{count}} photos par semaine, coupe et couleur au choix',
     perkOwnFace: 'Ton propre visage, pas un mannequin de banque d’images',
-    startIntro: 'Commencer pour {{price}}',
+    startIntro: 'Commencer la première semaine',
     start: 'S’abonner',
     skip: 'Continuer sans abonnement',
   },
@@ -47,15 +47,45 @@ const fr: typeof en = {
     faceHeadline: 'On lit le visage,',
     faceHeadlineItalic: 'jamais la personne.',
     faceBody: 'Ton téléphone trouve le visage sur ta photo et mesure ses proportions : la largeur des pommettes, la ligne de la mâchoire. Cette mesure reste sur le téléphone, et les coupes qui lui vont passent en premier.',
+    notifyHeadline: 'Une coupe à essayer,',
+    notifyHeadlineItalic: 'une fois par jour.',
+    notifyBody: 'Active-le et Loxa t’envoie une notification par jour, à {{time}} : un look à essayer, rien d’autre. Tu peux la désactiver dans ton profil quand tu veux.',
     next: 'Suivant',
     back: 'Retour',
     skip: 'Passer pour l’instant',
-    done: 'Commencer',
     take: 'Prendre une photo',
     choose: 'Choisir dans la galerie',
     change: 'Changer la photo',
     saved: 'enregistrée dans ton profil',
     privacyNote: 'rien ici ne t’identifie',
+    sealNote: 'Cette marque apparaît sur les coupes qui vont à ton visage.',
+    notifyNote: 'programmée sur ce téléphone, aucun serveur impliqué',
+    notifyOn: 'Activer les idées coiffure du jour',
+  },
+
+  consent: {
+    /**
+     * The question before a photo leaves the phone. Each line is a claim about
+     * what the Worker and its providers do, and is checked against the privacy
+     * page: change one, change the other, and bump the key's version suffix in
+     * `store/consent.ts` so that everybody who agreed to the old wording is asked
+     * about the new.
+     */
+    goesTo: 'Envoyée à',
+    kept: 'Conservée',
+    never: 'Jamais envoyé',
+    agree: 'Accepter et continuer',
+    decline: 'Pas maintenant',
+    renderHeadline: 'Avant de retoucher',
+    renderHeadlineItalic: 'ta photo.',
+    renderGoesTo: 'Un modèle d’image de Google, qui la transforme. Si Google est occupé, OpenRouter exécute le même modèle.',
+    renderKept: 'Nous ne la conservons pas et ne l’utilisons pas pour entraîner quoi que ce soit. Le résultat est conservé 30 jours, donc refaire une demande ne te coûte pas deux fois.',
+    renderNever: 'Ton nom, ni rien qui dise à qui est la photo.',
+    analysisHeadline: 'Avant de regarder',
+    analysisHeadlineItalic: 'ton visage.',
+    analysisGoesTo: 'Un modèle de vision IA qui la lit, joint via opencode. S’il est indisponible, OpenRouter en utilise un autre.',
+    analysisKept: 'Nous ne conservons pas les photos et ne les utilisons pas pour entraîner quoi que ce soit. La réponse, elle, est conservée jusqu’à sept jours.',
+    analysisNever: 'Ton nom, ni rien qui dise à qui sont les photos.',
   },
 
   preview: {
@@ -76,6 +106,7 @@ const fr: typeof en = {
   confirm: {
     title: 'Confirmer',
     swipeHint: 'balaie pour changer de coupe',
+    ownFaces: 'des photos de toi, ou de quelqu’un qui a accepté',
     yourPhoto: 'Ta photo',
   },
 
@@ -92,7 +123,7 @@ const fr: typeof en = {
     titleProfile: 'Photo de profil',
     permission: 'Appareil photo',
     permissionBody:
-      'Loxa a besoin de l’appareil photo pour prendre la photo qu’il transforme. Rien n’est envoyé tant que tu n’as pas appuyé sur Essayer.',
+      'Loxa a besoin de l’appareil photo pour prendre ta photo. Rien n’est envoyé tant que tu ne demandes pas un look ou des suggestions, et nous te le demandons d’abord.',
     allow: 'Autoriser l’appareil photo',
     openSettings: 'Ouvrir Réglages',
     permissionDenied:
@@ -111,6 +142,7 @@ const fr: typeof en = {
     body: "Cet écran s'est arrêté avant la fin de l'affichage. Réessayer suffit généralement.",
     renderTitle: 'Celui-ci nous a échappé',
     renderBody: "nous n'avons pas pu le terminer · réessayez dans un instant",
+    renderRejected: 'cette photo n’a pas pu être utilisée · essayez avec une photo nette de votre visage',
     photoFailed: "cette photo n'a pas pu s'ouvrir · essayez-en une autre",
   },
 
@@ -156,6 +188,7 @@ const fr: typeof en = {
     title: 'Plus de crédits',
     untilMonday: 'jusqu’à lundi.',
     untilTomorrow: 'jusqu’à demain.',
+    addMore: 'ajoute-en pour continuer.',
     single: 'Une photo de plus',
     singleNote: 'Une seule génération, sans abonnement',
     weekly: 'Loxa Hebdo',
@@ -174,7 +207,7 @@ const fr: typeof en = {
     creditsLeft: 'Crédits restants',
     resetsMonday: 'renouvelés lundi',
     resetsTomorrow: 'renouvelés demain',
-    noRollOver: 'non reportables',
+    noRollOver: 'les photos hebdo ne se reportent pas',
     planFree: 'Formule gratuite',
     planWeekly: 'Loxa Hebdo',
     planFreeNote: 'Pas de crédits hebdomadaires — {{price}} par photo',
@@ -185,12 +218,14 @@ const fr: typeof en = {
     notificationsNote: 'Une notification par jour, de nouveaux looks',
     rate: 'Noter Loxa',
     privacy: 'Politique de confidentialité',
+    contact: 'Aide et contact',
     terms: 'Conditions d’utilisation',
     language: 'Langue',
     looks: 'Tes looks',
     seeAll: 'Tout voir',
     faceShape: 'Forme du visage',
     faceShapeNote: 'Mesurée sur ce téléphone à partir de ta dernière photo, et jamais envoyée nulle part. Les coupes qui lui vont souvent passent en premier.',
+    faceShapeNoteAnswer: 'Issue de ton dernier « Ce qui me va », conservée sur ce téléphone. Les photos n’ont pas été conservées. Les coupes qui lui vont souvent passent en premier.',
     faceShapeForget: 'L’oublier',
     faceShapeKeep: 'OK',
     suits: 'Ce qui me va',
@@ -210,7 +245,7 @@ const fr: typeof en = {
     title: 'Ce qui me va',
     headline: 'Les coupes qui vont',
     headlineItalic: 'à ton visage.',
-    note: 'Prends ou choisis une photo de ton visage. Une seconde sous un autre angle affine la réponse, et reste facultative.',
+    note: 'Prends ou choisis une photo de ton visage. Une seconde sous un autre angle affine la réponse, et reste facultative. Les photos sont lues par un modèle d’IA ; nous te demandons avant la première.',
     slotFront: 'Ton visage, de face',
     slotAngle: 'Un autre angle (facultatif)',
     take: 'Prendre une photo',

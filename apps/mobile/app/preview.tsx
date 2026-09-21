@@ -309,6 +309,7 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
             accessibilityRole="button"
             accessibilityLabel={t(portrait ? 'preview.profile' : 'preview.setUpProfile')}
             onPress={() => router.push('/profile')}
+            hitSlop={8}
           >
             <PhotoPlate
               uri={portrait}
@@ -342,7 +343,13 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
             style={styles.pager}
           >
             {pages.map((item) => (
-              <Pressable key={item.key} onPress={onPlate} style={{ width: plateWidth }}>
+              <Pressable
+                key={item.key}
+                accessibilityRole="button"
+                accessibilityLabel={t('preview.tapToTakePhoto')}
+                onPress={onPlate}
+                style={{ width: plateWidth }}
+              >
                 <PhotoPlate uri={item.uri} focus={item.focus} style={styles.plate} />
               </Pressable>
             ))}

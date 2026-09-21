@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -77,6 +78,7 @@ export default function Entry() {
 
   return (
     <View style={styles.screen}>
+      <StatusBar style="light" />
       {SLIDES.map((clip, i) => (
         <Fade key={clip.name} on={i === slide}>
           <VideoPlate

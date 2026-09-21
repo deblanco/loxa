@@ -86,7 +86,7 @@ WHAT IT COSTS
 Your first photo is free, once. After that, and with no advertising:
 • Loxa Weekly — 20 photos every week, $9.99 per week. First week $0.99.
 • One photo — $0.99, no subscription.
-Weekly credits reset every Monday and do not roll over.
+Weekly credits reset every Monday and do not roll over; a single photo you buy never expires.
 
 Payment is charged to your Apple ID account at confirmation of purchase. A subscription renews automatically unless it is cancelled at least 24 hours before the end of the current week. Manage or cancel it in your Apple ID account settings, reachable from Profile → Manage inside the app.
 
@@ -136,7 +136,7 @@ Haz una foto o elige una de tu galería, escoge un corte y un color, y en unos s
 Tu primera foto es gratis, una vez. Después, y sin publicidad:
 • Loxa Weekly: 20 fotos por semana, 9,99 € a la semana. Primera semana 0,99 €.
 • Una foto suelta: 0,99 €, sin suscripción.
-Los créditos se renuevan cada lunes y no se acumulan. El pago se carga a tu cuenta de Apple al confirmar la compra y la suscripción se renueva sola salvo que la canceles al menos 24 horas antes del final de la semana, desde los ajustes de tu cuenta de Apple.
+Los créditos semanales se renuevan cada lunes y no se acumulan; una foto suelta que compres no caduca. El pago se carga a tu cuenta de Apple al confirmar la compra y la suscripción se renueva sola salvo que la canceles al menos 24 horas antes del final de la semana, desde los ajustes de tu cuenta de Apple.
 
 Sin cuenta, sin registro y sin correo electrónico. Tu foto no se guarda en nuestros servidores y no usamos SDK de analítica ni de publicidad.
 
@@ -181,7 +181,7 @@ Haz una foto o elige una de tu galería, escoge un corte y un color, y en unos s
 Tu primera foto es gratis, una vez. Después, y sin publicidad:
 • Loxa Weekly: 20 fotos por semana, 199 $ MXN a la semana. Primera semana 19 $ MXN.
 • Una foto suelta: 19 $ MXN, sin suscripción.
-Los créditos se renuevan cada lunes y no se acumulan. El pago se carga a tu cuenta de Apple al confirmar la compra y la suscripción se renueva sola salvo que la canceles al menos 24 horas antes del final de la semana, desde los ajustes de tu cuenta de Apple.
+Los créditos semanales se renuevan cada lunes y no se acumulan; una foto suelta que compres no caduca. El pago se carga a tu cuenta de Apple al confirmar la compra y la suscripción se renueva sola salvo que la canceles al menos 24 horas antes del final de la semana, desde los ajustes de tu cuenta de Apple.
 
 Sin cuenta, sin registro y sin correo electrónico. Tu foto no se guarda en nuestros servidores y no usamos SDK de analítica ni de publicidad.
 
@@ -222,7 +222,7 @@ Prenez une photo ou choisissez-en une dans votre galerie, choisissez une coupe e
 Votre première photo est offerte, une fois. Ensuite, sans publicité :
 • Loxa Weekly : 20 photos par semaine, 9,99 € par semaine. Première semaine 0,99 €.
 • Une photo : 0,99 €, sans abonnement.
-Les crédits repartent chaque lundi et ne se cumulent pas. Le paiement est débité de votre compte Apple à la confirmation de l'achat et l'abonnement se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine, depuis les réglages de votre compte Apple.
+Les crédits hebdomadaires repartent chaque lundi et ne se cumulent pas ; une photo achetée à l'unité n'expire jamais. Le paiement est débité de votre compte Apple à la confirmation de l'achat et l'abonnement se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la semaine, depuis les réglages de votre compte Apple.
 
 Pas de compte, pas d'inscription, pas d'adresse e-mail. Votre photo n'est pas conservée sur nos serveurs et nous n'utilisons aucun SDK d'analyse ou de publicité.
 
@@ -263,7 +263,7 @@ Mach ein Foto oder wähle eines aus deiner Mediathek, such dir Schnitt und Farbe
 Dein erstes Foto ist gratis, einmal. Danach, ohne Werbung:
 • Loxa Weekly: 20 Fotos pro Woche für 9,99 € pro Woche. Erste Woche 0,99 €.
 • Einzelnes Foto: 0,99 €, ohne Abo.
-Das Guthaben wird jeden Montag zurückgesetzt und wird nicht übertragen. Die Zahlung wird bei Kaufbestätigung deinem Apple-Account belastet; das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der Woche in den Einstellungen deines Apple-Accounts gekündigt wird.
+Das wöchentliche Guthaben wird jeden Montag zurückgesetzt und nicht übertragen; ein einzeln gekauftes Foto verfällt nie. Die Zahlung wird bei Kaufbestätigung deinem Apple-Account belastet; das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der Woche in den Einstellungen deines Apple-Accounts gekündigt wird.
 
 Kein Konto, keine Registrierung, keine E-Mail-Adresse. Dein Foto wird nicht auf unseren Servern gespeichert, und wir verwenden keine Analyse- oder Werbe-SDKs.
 
@@ -304,7 +304,7 @@ Scatta una foto o scegline una dalla galleria, scegli taglio e colore, e in poch
 La prima foto è gratis, una volta. Poi, senza pubblicità:
 • Loxa Weekly: 20 foto a settimana, 9,99 € a settimana. Prima settimana 0,99 €.
 • Foto singola: 0,99 €, senza abbonamento.
-I crediti si azzerano ogni lunedì e non si accumulano. Il pagamento viene addebitato sull'account Apple alla conferma dell'acquisto e l'abbonamento si rinnova da solo salvo disdetta almeno 24 ore prima della fine della settimana, dalle impostazioni dell'account Apple.
+I crediti settimanali si azzerano ogni lunedì e non si accumulano; una foto acquistata singolarmente non scade mai. Il pagamento viene addebitato sull'account Apple alla conferma dell'acquisto e l'abbonamento si rinnova da solo salvo disdetta almeno 24 ore prima della fine della settimana, dalle impostazioni dell'account Apple.
 
 Nessun account, nessuna registrazione, nessun indirizzo e-mail. La tua foto non viene conservata sui nostri server e non usiamo SDK di analisi o di pubblicità.
 

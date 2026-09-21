@@ -1,6 +1,7 @@
 import { syncPurchases } from '@/api/client';
 import { reportHandled } from '@/diagnostics';
 import { purchases } from './index';
+import { restoreVerdict } from './outcome';
 
 /** What a restore turned up, in the terms a screen needs to report it. */
 export type RestoreOutcome = 'restored' | 'nothing' | 'failed';
@@ -25,12 +26,13 @@ export type RestoreOutcome = 'restored' | 'nothing' | 'failed';
  */
 export async function restoreAndSync(): Promise<RestoreOutcome> {
   try {
-    const transactionIds = await purchases().restore();
-    if (transactionIds.length) {
-      await syncPurchases(transactionIds);
+    const found = await purchases().restore();
+    const verdict = restoreVerdict(found);
+    if (verdict === 'sync') {
+      await syncPurchases(found.transactionIds);
       return 'restored';
     }
-    return 'nothing';
+    return verdict;
   } catch (err) {
     // The outcome the caller shows is unchanged; the difference is that we now
     // hear about it. A restore that fails is how somebody who has already paid

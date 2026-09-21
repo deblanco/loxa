@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { openPrivacy, openTerms } from '../legal';
+import { space } from '../theme';
 import { Meta } from './Text';
 
 /**
@@ -35,6 +36,6 @@ export function LegalLinks({ onNight }: { onNight?: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  row: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingTop: space.s3 },
   link: { textDecorationLine: 'underline' },
 });

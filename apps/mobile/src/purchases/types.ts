@@ -37,6 +37,14 @@ export interface Pricing {
   singlePhoto: string;
 }
 
+/** What a restore found. */
+export interface RestoreResult {
+  /** Consumable purchases, whose credits the Worker has to be told about. */
+  transactionIds: string[];
+  /** Whether the customer now holds an active subscription. */
+  subscribed: boolean;
+}
+
 export interface PurchasesPort {
   /** Called once at launch, with the anonymous device id as the customer id. */
   configure(deviceId: string): Promise<void>;
@@ -46,8 +54,14 @@ export interface PurchasesPort {
   pricing(): Promise<Pricing | null>;
   /** Buy one $0.99 photo. Resolves with the transaction ids to sync, or null. */
   buySinglePhoto(): Promise<string[] | null>;
-  /** Restore, for a reinstall or a new device. Returns ids worth syncing. */
-  restore(): Promise<string[]>;
+  /**
+   * Restore, for a reinstall or a new device.
+   *
+   * Two things come back, because a restore can turn up two different kinds of
+   * thing: consumable transaction ids worth syncing, and an active subscription,
+   * which the Worker reads for itself and which has no id to hand over.
+   */
+  restore(): Promise<RestoreResult>;
   /**
    * Where this customer's subscription is actually managed, or null.
    *

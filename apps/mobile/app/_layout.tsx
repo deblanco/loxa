@@ -12,11 +12,13 @@ import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { deviceId } from '@/api/client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { flushDiagnostics, installDiagnostics, noteRoute, reportHandled } from '@/diagnostics';
 import { loadLanguage } from '@/i18n';
+import { topUpDaily } from '@/notifications';
 import { loadCatalogue } from '@/store/catalogue';
 import { purchases } from '@/purchases';
 import { color } from '@/theme';
@@ -86,6 +88,17 @@ export default function RootLayout() {
     // Behind the splash that was already held, and never on the crash path: a
     // report written on the launch that died is sent on this one.
     void flushDiagnostics();
+
+    // After the language is loaded, not before: iOS holds finished text, so a
+    // week written on a Spanish install has to be written in Spanish. Again each
+    // time the app comes forward, because "one a day" is a week at a time and
+    // the week runs out whether or not anybody opens the profile.
+    const topUp = () => void topUpDaily().catch((err: unknown) => reportHandled(err, 'notifications.topUp'));
+    topUp();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') topUp();
+    });
+    return () => subscription.remove();
   }, [ready]);
 
   // Which screen the user was on when it broke, and a breadcrumb for how they
@@ -124,6 +137,10 @@ export default function RootLayout() {
         <Stack.Screen
           name="paywall"
           options={{ presentation: 'transparentModal', animation: 'none' }}
+        />
+        <Stack.Screen
+          name="consent"
+          options={{ presentation: 'transparentModal', animation: 'none', gestureEnabled: false }}
         />
         {/* Full-screen rather than a sheet: the wall of results is drawn edge
             to edge, and its ✕ is placed off the top inset. */}

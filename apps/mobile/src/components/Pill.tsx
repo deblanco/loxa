@@ -55,6 +55,9 @@ export function Pill({ label, onPress, tone = 'filled', cost, disabled, style }:
         variant="button"
         weight="medium"
         tone={filled ? 'paper' : light ? 'ink' : tone === 'quiet' ? 'ink60' : 'paper85'}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.8}
       >
         {label}
       </Body>

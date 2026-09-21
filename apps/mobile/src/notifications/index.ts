@@ -1,7 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import i18n from '@/i18n';
 import { copyForDay } from './copy';
-import { scheduleFrom } from './schedule';
+import { needsTopUp, scheduleFrom } from './schedule';
 
 /**
  * The platform half of the daily notification.
@@ -16,10 +17,15 @@ import { scheduleFrom } from './schedule';
  * `app/language.tsx`.
  */
 
-export async function enableDaily(now = new Date()): Promise<boolean> {
-  const permission = await Notifications.requestPermissionsAsync();
-  if (!permission.granted) return false;
+/**
+ * Whether the person asked for these, kept apart from what iOS happens to be
+ * holding. A week of notifications runs out by itself, and an empty queue on its
+ * own cannot tell "used them all up" from "never turned it on" — which is what
+ * made the toggle go quietly off seven days after it was pressed.
+ */
+const WANTED = 'loxa.daily.v1';
 
+async function scheduleWeek(now: Date): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
 
   for (const { dayIndex, fireAt } of scheduleFrom(now)) {
@@ -29,11 +35,19 @@ export async function enableDaily(now = new Date()): Promise<boolean> {
       trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: fireAt },
     });
   }
+}
 
+export async function enableDaily(now = new Date()): Promise<boolean> {
+  const permission = await Notifications.requestPermissionsAsync();
+  if (!permission.granted) return false;
+
+  await scheduleWeek(now);
+  await AsyncStorage.setItem(WANTED, '1').catch(() => {});
   return true;
 }
 
 export async function disableDaily(): Promise<void> {
+  await AsyncStorage.removeItem(WANTED).catch(() => {});
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
@@ -52,9 +66,18 @@ export async function disableDaily(): Promise<void> {
 export async function isDailyEnabled(): Promise<boolean> {
   const permission = await Notifications.getPermissionsAsync();
   if (!permission.granted) return false;
+  return await wantsDaily();
+}
 
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-  return scheduled.length > 0;
+/**
+ * The flag, or a queue that is already there.
+ *
+ * The queue counts as a yes because every install that turned this on before the
+ * flag existed has one and no flag, and they should keep what they asked for.
+ */
+async function wantsDaily(): Promise<boolean> {
+  if ((await AsyncStorage.getItem(WANTED).catch(() => null)) !== null) return true;
+  return (await Notifications.getAllScheduledNotificationsAsync()).length > 0;
 }
 
 /**
@@ -67,8 +90,25 @@ export async function isDailyEnabled(): Promise<boolean> {
  * somebody who only came to change the language.
  */
 export async function rescheduleDaily(now = new Date()): Promise<void> {
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-  if (scheduled.length === 0) return;
+  if (!(await wantsDaily())) return;
+  await scheduleWeek(now);
+}
 
-  await enableDaily(now);
+/**
+ * Write another week before the last one runs out.
+ *
+ * Called on launch and on coming back to the foreground, which is the only time
+ * this app runs. Reads rather than asks: permission revoked in Settings, or
+ * daily never turned on, is a quiet return — the same rule as `rescheduleDaily`,
+ * so this can never put a prompt in front of somebody who did not ask.
+ */
+export async function topUpDaily(now = new Date()): Promise<void> {
+  const permission = await Notifications.getPermissionsAsync();
+  if (!permission.granted) return;
+  if (!(await wantsDaily())) return;
+
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  if (!needsTopUp(scheduled.length)) return;
+
+  await scheduleWeek(now);
 }

@@ -42,10 +42,10 @@ const en = {
      * reader can be in. Both paywalls print one of them next to the button, so
      * they live here rather than twice over in five languages.
      */
-    subscriptionTermsIntro:
-      '{{price}} for the first week, then {{weekly}} a week. Renews automatically unless cancelled at least 24 hours before the week ends; payment is charged to your Apple ID.',
+    subscriptionPriceIntro: '{{price}} for the first week, then {{weekly}} a week.',
+    subscriptionPrice: '{{weekly}} a week.',
     subscriptionTerms:
-      '{{weekly}} a week. Renews automatically unless cancelled at least 24 hours before the week ends; payment is charged to your Apple ID.',
+      'Renews automatically unless cancelled at least 24 hours before the week ends; payment is charged to your Apple ID. Manage or cancel any time in Settings › Apple ID › Subscriptions.',
   },
 
   entry: {
@@ -57,20 +57,20 @@ const en = {
   },
 
   offer: {
-    badgeIntro: 'First week {{price}}',
+    badgeIntro: 'First week offer',
     badge: '{{count}} photos a week',
     headline: 'Change your hair',
     headlineSecond: 'twenty times a week.',
     perkCredits: '{{count}} photos a week, any style or colour',
     perkOwnFace: 'Your own face — not a stock model',
-    startIntro: 'Start for {{price}}',
+    startIntro: 'Start your first week',
     start: 'Subscribe',
     skip: 'Continue without subscribing',
   },
 
   welcome: {
     /**
-     * The three steps between the carousel and the app.
+     * The four steps between the carousel and the app.
      *
      * The face step says what the phone does and where it stops. It must not
      * claim recognition: nothing here identifies anybody, and the constellation
@@ -85,15 +85,45 @@ const en = {
     faceHeadline: 'We read the face,',
     faceHeadlineItalic: 'never the person.',
     faceBody: 'Your phone finds the face in your photo and measures its proportions — the width of the cheeks, the line of the jaw. That measurement stays on the phone, and the cuts it suits come first in the strip.',
+    notifyHeadline: 'A cut worth trying,',
+    notifyHeadlineItalic: 'once a day.',
+    notifyBody: 'Turn this on and Loxa sends one notification a day, at {{time}} — a look to try, nothing else. You can turn it off in your profile whenever you like.',
     next: 'Next',
     back: 'Back',
     skip: 'Skip for now',
-    done: 'Start trying on',
     take: 'Take photo',
     choose: 'Choose from library',
     change: 'Change photo',
     saved: 'saved to your profile',
     privacyNote: 'nothing here identifies you',
+    sealNote: 'This mark sits on the cuts that suit your face.',
+    notifyNote: 'scheduled on this phone, no server involved',
+    notifyOn: 'Turn on daily style ideas',
+  },
+
+  consent: {
+    /**
+     * The question before a photo leaves the phone. Each line is a claim about
+     * what the Worker and its providers do, and is checked against the privacy
+     * page: change one, change the other, and bump the key's version suffix in
+     * `store/consent.ts` so that everybody who agreed to the old wording is asked
+     * about the new.
+     */
+    goesTo: 'Goes to',
+    kept: 'Kept',
+    never: 'Never sent',
+    agree: 'Agree and continue',
+    decline: 'Not now',
+    renderHeadline: 'Before we restyle',
+    renderHeadlineItalic: 'your photo.',
+    renderGoesTo: 'An image model from Google, which restyles it. If Google is busy, OpenRouter runs the same model instead.',
+    renderKept: 'We do not keep it or use it to train anything. The finished look is held for 30 days, so repeating a request does not cost you twice.',
+    renderNever: 'Your name, or anything that says whose photo it is.',
+    analysisHeadline: 'Before we look at',
+    analysisHeadlineItalic: 'your face.',
+    analysisGoesTo: 'An AI vision model that reads it, reached through opencode. If that is unavailable, OpenRouter runs another.',
+    analysisKept: 'We do not keep the photos or use them to train anything. The answer is kept, for up to seven days.',
+    analysisNever: 'Your name, or anything that says whose photos they are.',
   },
 
   preview: {
@@ -114,6 +144,7 @@ const en = {
   confirm: {
     title: 'Confirm',
     swipeHint: 'swipe to change the cut',
+    ownFaces: 'photos of you, or of someone who agreed',
     yourPhoto: 'Your photo',
   },
 
@@ -130,7 +161,7 @@ const en = {
     titleProfile: 'Profile photo',
     permission: 'Camera',
     permissionBody:
-      'Loxa needs the camera to take the photo it restyles. Nothing is uploaded until you press Try On.',
+      'Loxa needs the camera to take your photo. Nothing is sent anywhere until you ask for a look or for suggestions, and we check with you first.',
     allow: 'Allow camera',
     openSettings: 'Open Settings',
     permissionDenied:
@@ -166,6 +197,7 @@ const en = {
     body: 'This screen stopped before it finished drawing. Trying again usually settles it.',
     renderTitle: 'That one got away',
     renderBody: 'we could not finish it · try again in a moment',
+    renderRejected: 'that photo could not be used · try a clear photo of your own face',
     photoFailed: 'that photo would not open · try another',
   },
 
@@ -215,6 +247,7 @@ const en = {
     title: 'Out of credits',
     untilMonday: 'until Monday.',
     untilTomorrow: 'until tomorrow.',
+    addMore: 'add more to continue.',
     single: 'One more photo',
     singleNote: 'Single generation, no subscription',
     weekly: 'Loxa Weekly',
@@ -233,7 +266,7 @@ const en = {
     creditsLeft: 'Credits left',
     resetsMonday: 'resets Monday',
     resetsTomorrow: 'resets tomorrow',
-    noRollOver: 'no roll-over',
+    noRollOver: 'weekly photos do not roll over',
     planFree: 'Free plan',
     planWeekly: 'Loxa Weekly',
     planFreeNote: 'No weekly credits — {{price}} per photo',
@@ -245,12 +278,14 @@ const en = {
     /** Opens the App Store page rather than the rating sheet: Apple's sheet must never be the answer to a button press. */
     rate: 'Rate Loxa',
     privacy: 'Privacy policy',
+    contact: 'Help & contact',
     terms: 'Terms of use',
     language: 'Language',
     looks: 'Your looks',
     seeAll: 'See all',
     faceShape: 'Face shape',
     faceShapeNote: 'Measured on this phone from your last photo, and never sent anywhere. Cuts that often suit it come first in the strip.',
+    faceShapeNoteAnswer: 'From your last “What suits me”, kept on this phone. The photos were not kept. Cuts that often suit it come first in the strip.',
     faceShapeForget: 'Forget it',
     faceShapeKeep: 'OK',
     suits: 'What suits me',
@@ -279,7 +314,7 @@ const en = {
     title: 'What suits me',
     headline: 'Which cuts suit',
     headlineItalic: 'your face.',
-    note: 'Take or choose a photo of your face. A second from another angle sharpens the answer, and is optional.',
+    note: 'Take or choose a photo of your face. A second from another angle sharpens the answer, and is optional. The photos are read by an AI model — we ask before the first.',
     slotFront: 'Your face, straight on',
     slotAngle: 'Another angle (optional)',
     take: 'Take photo',

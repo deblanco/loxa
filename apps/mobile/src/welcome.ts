@@ -1,5 +1,5 @@
 /**
- * The three things somebody is told before they use the app.
+ * The four things somebody is told before they use the app.
  *
  * Keys rather than sentences, like `format.ts` and `face/verdict.ts`: the
  * screen calls `t` on what this hands back, which is what lets the order and
@@ -7,10 +7,16 @@
  *
  * The order is the argument. What you get comes first because nothing else
  * matters if they do not want it; the photo comes second because it is the one
- * thing that makes the first render one tap; the face explanation comes last
+ * thing that makes the first render one tap; the face explanation comes third
  * because it answers the question the photo step raises — what happens to it.
+ *
+ * The notification ask is last, and that is deliberate: it is the one step that
+ * puts a system prompt on screen, so it comes once they know what the app is
+ * and has done for them, and it is the only one whose "no" leaves nothing
+ * missing. Every step after the first is skippable; this is the one where
+ * skipping is the ordinary answer.
  */
-export const WELCOME_STEPS = ['value', 'photo', 'face'] as const;
+export const WELCOME_STEPS = ['value', 'photo', 'face', 'notify'] as const;
 
 export type WelcomeStep = (typeof WELCOME_STEPS)[number];
 

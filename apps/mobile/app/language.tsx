@@ -49,6 +49,7 @@ export default function LanguagePicker() {
             accessibilityRole="button"
             accessibilityLabel={t('common.back')}
             onPress={() => router.back()}
+            hitSlop={8}
             style={styles.round}
           >
             <Chevron />

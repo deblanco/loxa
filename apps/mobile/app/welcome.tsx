@@ -1,10 +1,12 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chevron } from '@/components/Chevron';
 import { FaceDiagram } from '@/components/FaceDiagram';
+import { NotificationSpecimen } from '@/components/NotificationSpecimen';
+import { SuitsSpecimen } from '@/components/SuitsSpecimen';
 import { StyleReel } from '@/components/StyleReel';
 import { PersonMark } from '@/components/PersonMark';
 import { PhotoPlate } from '@/components/PhotoPlate';
@@ -13,6 +15,9 @@ import { Body, Display, Meta } from '@/components/Text';
 import { reportHandled } from '@/diagnostics';
 import { pickFromLibrary } from '@/photo';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
+import { enableDaily } from '@/notifications';
+import { copyForDay } from '@/notifications/copy';
+import { formatFireTime, scheduleFrom } from '@/notifications/schedule';
 import { useCatalogue } from '@/store/catalogue';
 import { useOnboarding } from '@/store/onboarding';
 import { readProfilePhoto, saveProfilePhoto } from '@/store/profile-photo';
@@ -22,7 +27,7 @@ import { color, radius, space } from '@/theme';
 /**
  * What the app is for, before the app.
  *
- * Three panes on one route rather than three routes, and that is a decision
+ * Four panes on one route rather than four routes, and that is a decision
  * about the flag. The entry screen redirects to preview the instant
  * `loxa.onboarded` turns true, so a flow that wrote it part-way through would
  * teleport somebody out of its own remaining steps. Here it is written once,
@@ -40,7 +45,7 @@ import { color, radius, space } from '@/theme';
  * length.
  */
 export default function Welcome() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const { complete } = useOnboarding();
   const { catalogue } = useCatalogue();
@@ -48,6 +53,16 @@ export default function Welcome() {
   const [step, setStep] = useState<WelcomeStep>(WELCOME_STEPS[0]);
   const [portrait, setPortrait] = useState<string | null>(null);
   const [rejected, setRejected] = useState<FaceVerdict | null>(null);
+  // Held while iOS has its permission prompt up: the system sheet is modal, but
+  // the answer can take a moment to come back, and a second press in that
+  // window would ask twice.
+  const [asking, setAsking] = useState(false);
+
+  // The first notification they would really get — its line and its minute.
+  // Taken once at mount so the sample cannot change while it is being read.
+  const first = useMemo(() => scheduleFrom(new Date())[0], []);
+  const sample = first ? copyForDay(first.dayIndex) : null;
+  const time = first ? formatFireTime(first.fireAt, i18n.language) : '';
 
   // The camera writes the portrait and comes back; this is the only moment this
   // screen can learn it happened. The same pattern the preview header uses.
@@ -81,6 +96,25 @@ export default function Welcome() {
     // the same reason.
     router.dismissAll();
     router.replace('/preview');
+  }
+
+  /**
+   * Ask, then go in — whatever the answer.
+   *
+   * `enableDaily` raises iOS's own prompt and schedules the week if it is
+   * granted. "Don't Allow" is an answer, not an error: onboarding ends either
+   * way, and the profile's toggle reads the truth from iOS afterwards. Nothing
+   * is asked twice and nothing is persisted here.
+   */
+  async function turnOn() {
+    if (asking) return;
+    setAsking(true);
+    try {
+      await enableDaily();
+    } catch (err) {
+      reportHandled(err, 'welcome.enableDaily');
+    }
+    await finish();
   }
 
   function forward() {
@@ -133,6 +167,7 @@ export default function Welcome() {
           accessibilityRole="button"
           accessibilityLabel={t('common.back')}
           onPress={back}
+          hitSlop={8}
           style={styles.round}
         >
           <Chevron />
@@ -145,7 +180,7 @@ export default function Welcome() {
         </View>
 
         {/* Balances the back control so the dots sit centred, and carries no
-            press: a second way out of a three-step walk is clutter. */}
+            press: a second way out of a four-step walk is clutter. */}
         <View style={styles.headerSpacer} />
       </View>
 
@@ -200,14 +235,25 @@ export default function Welcome() {
 
         {step === 'face' ? (
           <View style={styles.diagram}>
-            <FaceDiagram />
+            <FaceDiagram size={140} />
             <Meta variant="note" tone="ink45" sentence>
               {t('welcome.privacyNote')}
             </Meta>
           </View>
         ) : null}
 
-        <Body tone="ink55">{t(copy.body)}</Body>
+        {step === 'notify' && sample ? (
+          <View style={styles.diagram}>
+            <NotificationSpecimen title={t(sample.title)} body={t(sample.body)} time={time} />
+            <Meta variant="note" tone="ink45" sentence>
+              {t('welcome.notifyNote')}
+            </Meta>
+          </View>
+        ) : null}
+
+        <Body tone="ink55">{t(copy.body, { time })}</Body>
+
+        {step === 'face' ? <SuitsSpecimen catalogue={catalogue} caption={t('welcome.sealNote')} /> : null}
       </View>
 
       <View style={[styles.actions, { paddingBottom: insets.bottom + space.s6 }]}>
@@ -217,8 +263,10 @@ export default function Welcome() {
           it says which it is: skipping while there is nothing to keep, going on
           once there is.
         */}
-        {step === 'photo' && !portrait ? null : (
-          <Pill label={last ? t('welcome.done') : t('welcome.next')} onPress={forward} />
+        {last ? (
+          <Pill label={t('welcome.notifyOn')} onPress={() => void turnOn()} disabled={asking} />
+        ) : step === 'photo' && !portrait ? null : (
+          <Pill label={t('welcome.next')} onPress={forward} />
         )}
         {/*
           A button, not a caption.
@@ -230,7 +278,9 @@ export default function Welcome() {
           mandatory is a photo gate on the second screen of a first run, which
           is the kind of thing 4.3(b) was about.
         */}
-        {step === 'photo' && !portrait ? (
+        {last ? (
+          <Pill label={t('welcome.skip')} tone="quiet" onPress={() => void finish()} disabled={asking} />
+        ) : step === 'photo' && !portrait ? (
           <Pill label={t('welcome.skip')} tone="quiet" onPress={forward} />
         ) : null}
       </View>

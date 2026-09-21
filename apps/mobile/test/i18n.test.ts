@@ -81,6 +81,9 @@ describe('the locales', () => {
           locale.language.note,
           locale.welcome.saved,
           locale.welcome.privacyNote,
+          locale.welcome.notifyNote,
+          locale.confirm.ownFaces,
+          locale.error.renderRejected,
         ];
         for (const note of notes) expect(note).toBe(note.toLowerCase());
       });

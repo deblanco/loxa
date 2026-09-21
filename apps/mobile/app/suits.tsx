@@ -16,6 +16,7 @@ import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary } from '@/photo';
 import { readAnalysis, saveAnalysis, type StoredAnalysis } from '@/store/analysis';
 import { useCatalogue } from '@/store/catalogue';
+import { ensureConsent } from '@/consent-prompt';
 import { useCredits } from '@/store/credits';
 import {
   clearSuitsShots,
@@ -121,6 +122,9 @@ export default function Suits() {
       return;
     }
 
+    // A different company's model from the render's, so a different question.
+    if (!(await ensureConsent('analysis'))) return;
+
     setAsking(true);
     setFailed(false);
     setProgress(0);
@@ -164,6 +168,7 @@ export default function Suits() {
           accessibilityRole="button"
           accessibilityLabel={t('common.back')}
           onPress={() => router.back()}
+          hitSlop={8}
           style={styles.round}
         >
           <Chevron />

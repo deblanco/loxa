@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PurchaseSettling } from '@/components/PurchaseSettling';
+import { SubscriptionTerms } from '@/components/SubscriptionTerms';
 import { LegalLinks } from '@/components/LegalLinks';
 import { Pill } from '@/components/Pill';
 import { ResultWall } from '@/components/ResultWall';
@@ -130,7 +131,7 @@ export default function Offer() {
         <View style={styles.headline}>
           <Meta>
             {introPrice
-              ? t('offer.badgeIntro', { price: introPrice })
+              ? t('offer.badgeIntro')
               : t('offer.badge', { count: WEEKLY_CREDITS })}
           </Meta>
           <Display variant="displayM">{t('offer.headline')}</Display>
@@ -153,7 +154,7 @@ export default function Offer() {
             <PurchaseSettling />
           ) : (
             <Pill
-              label={introPrice ? t('offer.startIntro', { price: introPrice }) : t('offer.start')}
+              label={introPrice ? t('offer.startIntro') : t('offer.start')}
               onPress={() => void subscribe()}
             />
           )}
@@ -162,11 +163,7 @@ export default function Offer() {
             App Review asks for the length, the price and the fact that it
             renews, next to the control that starts it.
           */}
-          <Meta variant="note" tone="ink40" sentence style={styles.terms}>
-            {introPrice
-              ? t('common.subscriptionTermsIntro', { price: introPrice, weekly: price })
-              : t('common.subscriptionTerms', { weekly: price })}
-          </Meta>
+          <SubscriptionTerms price={price} introPrice={introPrice} />
 
           {/* A button, like the one on the out-of-credits sheet. A subscriber
               reinstalling meets this screen before anything else asks them to
@@ -224,6 +221,5 @@ const styles = StyleSheet.create({
   },
   perkText: { flex: 1 },
   actions: { gap: space.s2 + 2 },
-  terms: { textAlign: 'center' },
   restore: { alignSelf: 'stretch', height: 44 },
 });

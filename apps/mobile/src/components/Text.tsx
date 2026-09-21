@@ -31,6 +31,7 @@ function sized(variant: Variant): TextStyle {
 export function Display({ variant = 'displayM', tone = 'ink', italic, style, ...rest }: Props) {
   return (
     <RNText
+      maxFontSizeMultiplier={1.2}
       {...rest}
       style={[
         { fontFamily: italic ? font.serifItalic : font.serif, color: color[tone] },
@@ -46,7 +47,13 @@ export function Body({ variant = 'body', tone = 'ink', weight = 'regular', style
   const family =
     weight === 'semibold' ? font.sansSemibold : weight === 'medium' ? font.sansMedium : font.sans;
 
-  return <RNText {...rest} style={[{ fontFamily: family, color: color[tone] }, sized(variant), style]} />;
+  return (
+    <RNText
+      maxFontSizeMultiplier={1.4}
+      {...rest}
+      style={[{ fontFamily: family, color: color[tone] }, sized(variant), style]}
+    />
+  );
 }
 
 /**

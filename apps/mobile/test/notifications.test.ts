@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { DAILY_LINE_COUNT, copyForDay } from '../src/notifications/copy';
-import { DAILY_HOUR, DAILY_MINUTE, SCHEDULED_DAYS, scheduleFrom } from '../src/notifications/schedule';
+import {
+  DAILY_HOUR,
+  DAILY_MINUTE,
+  SCHEDULED_DAYS,
+  TOP_UP_BELOW,
+  formatFireTime,
+  needsTopUp,
+  scheduleFrom,
+} from '../src/notifications/schedule';
 import en from '../src/i18n/locales/en';
 
 /**
@@ -78,3 +86,29 @@ describe('scheduleFrom', () => {
 function copyTitle(dayIndex: number): string {
   return copyForDay(dayIndex).title;
 }
+
+describe('formatFireTime', () => {
+  const evening = new Date(2026, 8, 21, DAILY_HOUR, DAILY_MINUTE);
+
+  it('writes the hour the way each language does', () => {
+    // English is a twelve-hour clock and the rest are not; a hand-built string
+    // would be right in one of them. Matched loosely because the space before
+    // "PM" is a narrow no-break one in current ICU and something else in older.
+    expect(formatFireTime(evening, 'en')).toMatch(/^6:30\s?PM$/i);
+    for (const language of ['es', 'fr', 'de', 'it']) {
+      expect(formatFireTime(evening, language)).toBe('18:30');
+    }
+  });
+});
+
+describe('needsTopUp', () => {
+  it('writes another week before the last one runs out, not after', () => {
+    // One a day is a week of dates written in advance. Waiting for zero leaves a
+    // day with nothing on it between the last one firing and the app next being
+    // opened.
+    expect(needsTopUp(0)).toBe(true);
+    expect(needsTopUp(TOP_UP_BELOW - 1)).toBe(true);
+    expect(needsTopUp(TOP_UP_BELOW)).toBe(false);
+    expect(needsTopUp(SCHEDULED_DAYS)).toBe(false);
+  });
+});

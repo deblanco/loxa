@@ -55,12 +55,12 @@ compressed rather than discursive.
 >
 > WHAT CHANGED SINCE THE 4.3(b) REVIEW
 > - The first photo is free: a new install sees its own face restyled without paying.
-> - An intro explains the app, offers a profile photo (skippable), and says what the phone does with a face.
+> - An intro explains the app and says what the phone does with a face.
+> - Before a photo is first sent, a sheet names who gets it and asks you to agree.
 > - The subscription offer no longer sits in front of the app; it appears once, after that result.
 > - Face shape: Apple Vision estimates it on the device and the cuts that suit it come first, marked "suits you". It never leaves the phone.
-> - "What suits me": one or two photos go to a model that names the cuts suiting the face, with a reason each. Needs a credit balance, spends none.
-> - A gallery of every look (Profile > Your looks), kept with its original to compare, share or delete.
-> - A listing describing these rather than the category.
+> - "What suits me": one or two photos go to a model that names the cuts suiting the face. Needs a credit balance, spends none.
+> - A gallery of every look, kept with its original.
 >
 > 1. SCREEN RECORDING
 > Attached, on a physical iPhone on iOS 26, from launch: the intro, the catalogue, a photo, the free render, the one-time offer, the gallery, and the out-of-credits sheet. Purchase controls show title, length, price, auto-renewal terms and links to the Terms and Privacy Policy.
@@ -70,9 +70,9 @@ compressed rather than discursive.
 >
 > 3. SETUP AND ACCESS
 > No sign-in, demo account, sample files or sandbox setup; purchases use the sandbox account on the device.
-> a. Launch Loxa, tap Get started, pass the three intro cards. The middle offers a profile photo and can be skipped.
+> a. Launch Loxa, tap Get started, pass the four intro cards. The photo and notification cards can be skipped.
 > b. Take a photo or choose one from the library. Cuts that suit the measured shape move to the front, marked "suits you".
-> c. Pick a cut and a colour, tap Try On. The free photo takes about ten seconds.
+> c. Pick a cut and a colour, tap Try On, then Agree on the sheet. About ten seconds. A device that already used its free photo goes straight to step e's sheet.
 > d. Leave the result: the offer appears once. Subscribe, or dismiss it with the X.
 > e. Tap Try On again: the free photo spent, the out-of-credits sheet offers both products.
 > f. Profile > Your looks shows every result; open one to compare, share or delete.
@@ -81,7 +81,7 @@ compressed rather than discursive.
 > 4. EXTERNAL SERVICES
 > - Google Cloud Vertex AI (Gemini image model): the restyled photograph.
 > - OpenRouter: the same Google model when Vertex is rate-limited; also the fallback for "what suits me".
-> - opencode: the vision model behind "what suits me". Keeps nothing, trains on nothing.
+> - opencode: the vision model behind "what suits me". We keep no photo and train on none.
 > - RevenueCat: purchase and subscription checks.
 > - Cloudflare Workers, D1, KV, R2: backend, credit ledger, image catalogue.
 > No analytics or advertising SDK, no advertising identifier, no tracking.
@@ -90,7 +90,7 @@ compressed rather than discursive.
 > None. Prices are the App Store's per storefront. English, Spanish, French, German, Italian, from the device language.
 >
 > 6. REGULATED INDUSTRY OR THIRD-PARTY MATERIAL
-> Neither. The catalogue photographs are generated and owned by us; the only other image is the user's own.
+> Neither. The catalogue photographs are generated; the only other image is the user's own.
 >
 > 7. IN-APP PURCHASE
 > Two products, both reachable without an account:
@@ -136,11 +136,21 @@ these has failed in a way that looks, to a reviewer, exactly like a broken app:
   a subscription nobody bought and puts the paywall out of reach of review.
 - **The description says the first photo is free, once, and what everything
   after it costs** (2.3.2). Nothing may imply more than one free render.
+- **The provider's retention terms are confirmed in writing.** The analysis
+  model's "ZDR through Sep 2026" note has expired (`services/api/wrangler.toml`).
+  The privacy page and the consent sheet now say only what *we* do and point to
+  each provider's own terms, but if the terms are not what you would want to
+  put in front of a reviewer, change the model.
+- **The archive's Privacy Report is read.** The collected-data declarations in
+  `app.json` (`ios.privacyManifests`) were written from Apple's documented type
+  names and could not be validated offline.
 - **The new catalogue manifest is uploaded**, after the Worker deploy, so
   `GET /v1/catalogue` carries `suits`. Without it the "suits you" feature the
   notes describe is invisible.
 - **The screen recording is re-shot** on the new flow: it now starts with the
-  three intro cards, and it should show the profile-photo card being **skipped**
-  at least once. A reviewer who only sees a tester dutifully take a photo learns
+  four intro cards, and it should show the profile-photo card being **skipped**
+  at least once, the notification card too, and the sheet that asks before the
+  first photo is sent being **agreed to** — a reviewer who never sees it may
+  assume the app uploads without asking. A reviewer who only sees a tester dutifully take a photo learns
   that the step is optional from nowhere, and a first-run photo gate is exactly
   the kind of thing this submission is answering.

@@ -12,6 +12,7 @@ import { Pill } from '@/components/Pill';
 import { Body, Meta } from '@/components/Text';
 import { adjacentStyle, clampPair, colorsFor, findColor, findStyle, heroKeys } from '@/catalogue';
 import { useCatalogue } from '@/store/catalogue';
+import { ensureConsent } from '@/consent-prompt';
 import { useCredits } from '@/store/credits';
 import { offerPortrait } from '@/store/portrait-offer';
 import { readProfilePhoto, readProfilePhotoForRender } from '@/store/profile-photo';
@@ -138,6 +139,10 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
           : await readProfilePhotoForRender();
     if (!shot) return;
 
+    // Before anything is armed for the result screen: a "not now" here sends nothing
+    // and leaves the portrait offer where it was.
+    if (!(await ensureConsent('render'))) return;
+
     // Consumed on the result screen, which is reached only once a render has
     // been billed and saved. Only for a fresh shot: offering the portrait as
     // the portrait is a question with one answer.
@@ -168,6 +173,7 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
           accessibilityRole="button"
           accessibilityLabel={t('common.back')}
           onPress={() => router.back()}
+          hitSlop={8}
           style={styles.round}
         >
           <Chevron />
@@ -246,6 +252,11 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
         />
 
         <Pill label={t('preview.tryOn')} cost={1} onPress={onTryOn} />
+        {/* The one thing on this screen about whose face it is. The terms say it at
+            length; this is where it can be read by the person about to send one. */}
+        <Meta variant="note" tone="ink40" sentence style={styles.ownFaces}>
+          {t('confirm.ownFaces')}
+        </Meta>
       </View>
     </View>
   );
@@ -300,6 +311,7 @@ const styles = StyleSheet.create({
   },
   insetPlate: { width: 96, height: 128, borderRadius: radius.tile },
   hint: { textAlign: 'center', paddingTop: space.s3 },
+  ownFaces: { textAlign: 'center' },
   controls: {
     paddingHorizontal: space.gutterScreen,
     paddingTop: space.s3,

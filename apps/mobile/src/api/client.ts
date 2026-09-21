@@ -15,7 +15,9 @@ import {
   type PurchaseSyncResponse,
   type TryOnResponse,
 } from '@loxa/shared';
+import type { ConsentKind } from '@/consent';
 import { isDevPremium } from '@/dev/premium';
+import { hasConsent } from '@/store/consent';
 import { deviceId } from './device-id';
 
 /**
@@ -63,6 +65,24 @@ export class ApiRequestError extends Error {
     super(message);
     this.name = 'ApiRequestError';
   }
+}
+
+/**
+ * Thrown when a photo was about to be sent that nobody has agreed to send.
+ *
+ * The screens ask first (`ensureConsent`), so this is the second lock, not the
+ * first: it is here so that a call site added later, or reached some way the
+ * sheet was not, fails loudly instead of quietly uploading a face.
+ */
+export class ConsentRequiredError extends Error {
+  constructor(readonly kind: ConsentKind) {
+    super(`no consent to send a ${kind} photo`);
+    this.name = 'ConsentRequiredError';
+  }
+}
+
+async function requireConsent(kind: ConsentKind): Promise<void> {
+  if (!(await hasConsent(kind))) throw new ConsentRequiredError(kind);
 }
 
 /** A request, plus the one thing about it that is not fetch's business. */
@@ -136,6 +156,7 @@ export async function tryOn(input: {
   styleId: string;
   colorId: string;
 }): Promise<TryOnResponse> {
+  await requireConsent('render');
   return await request('/v1/tryon', (body) => tryOnResponseSchema.parse(body), {
     method: 'POST',
     body: JSON.stringify(input),
@@ -150,6 +171,7 @@ export async function tryOn(input: {
  * exactly as the confirm screen does.
  */
 export async function analyseFace(photos: string[]): Promise<AnalysisResponse> {
+  await requireConsent('analysis');
   return await request('/v1/analysis', (body) => analysisResponseSchema.parse(body), {
     method: 'POST',
     body: JSON.stringify({ photos }),

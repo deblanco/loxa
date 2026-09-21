@@ -1,4 +1,5 @@
 import { Linking } from 'react-native';
+import { deviceId } from './api/device-id';
 import { reportHandled } from './diagnostics';
 
 /**
@@ -44,4 +45,22 @@ export function openPrivacy(): void {
 
 export function openTerms(): void {
   open(LEGAL_URLS.terms, 'legal.terms');
+}
+
+/** The address on the support page and in the terms. */
+export const CONTACT_EMAIL = 'apps@blankhexadecimal.com';
+
+/**
+ * A blank email to us, with the one thing a request about somebody's data needs.
+ *
+ * There is no account, so the device id is the only handle on what we hold, and
+ * nothing in the app showed it — which made the privacy page's "write to us and
+ * we will delete it" a promise nobody could keep without it. It goes in the body
+ * where the person can read it, and where they can delete it: nothing is sent
+ * until they send the email themselves.
+ */
+export async function openContact(): Promise<void> {
+  const id = await deviceId().catch(() => '');
+  const body = id ? `\n\n—\nDevice id: ${id}` : '';
+  open(`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Loxa')}&body=${encodeURIComponent(body)}`, 'legal.contact');
 }

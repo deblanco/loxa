@@ -32,7 +32,7 @@ export function fakePurchases(): PurchasesPort {
       return [`fake_${Date.now()}`];
     },
     async restore() {
-      return [];
+      return { transactionIds: [], subscribed: false };
     },
     async presentCustomerCenter() {
       // There is no customer to centre on: the simulator's purchases are
