@@ -79,6 +79,8 @@ describe('the locales', () => {
           locale.profile.tapToChangePhoto,
           locale.profile.noRollOver,
           locale.language.note,
+          locale.welcome.saved,
+          locale.welcome.privacyNote,
         ];
         for (const note of notes) expect(note).toBe(note.toLowerCase());
       });

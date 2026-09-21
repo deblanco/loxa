@@ -37,6 +37,27 @@ const it: typeof en = {
     skip: 'Continua senza abbonarti',
   },
 
+  welcome: {
+    valueHeadline: 'Il tuo viso,',
+    valueHeadlineItalic: 'non una modella.',
+    valueBody: '24 tagli e 10 colori, generati sulla foto che ci dai. La tua prima foto è gratis: una, offre la casa.',
+    photoHeadline: 'Comincia con',
+    photoHeadlineItalic: 'una tua foto.',
+    photoBody: 'Salvane una adesso e ogni prova è un tocco solo. Puoi cambiarla quando vuoi, oppure salta e usa una foto più tardi.',
+    faceHeadline: 'Leggiamo il viso,',
+    faceHeadlineItalic: 'mai la persona.',
+    faceBody: 'Il telefono trova il viso nella tua foto e ne misura le proporzioni: la larghezza degli zigomi, la linea della mascella. Quella misura resta sul telefono, e i tagli che le donano vengono prima.',
+    next: 'Avanti',
+    back: 'Indietro',
+    skip: 'Salta per ora',
+    done: 'Inizia a provare',
+    take: 'Scatta una foto',
+    choose: 'Scegli dalla galleria',
+    change: 'Cambia foto',
+    saved: 'salvata nel tuo profilo',
+    privacyNote: 'niente qui ti identifica',
+  },
+
   preview: {
     tryOn: 'Prova',
     takePhotoAndTryOn: 'Scatta la foto e prova',

@@ -114,6 +114,9 @@ export default function RootLayout() {
             the transition background do not flash paper on the way in. */}
         <Stack.Screen name="index" options={{ contentStyle: { backgroundColor: color.night } }} />
         <Stack.Screen name="camera" options={{ contentStyle: { backgroundColor: '#0b0a0a' } }} />
+        {/* Pushed over the night carousel onto paper, so it slides rather than
+            fading: a crossfade between the two backgrounds reads as a flash. */}
+        <Stack.Screen name="welcome" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen
           name="result/[id]"
           options={{ contentStyle: { backgroundColor: color.night } }}

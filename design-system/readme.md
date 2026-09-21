@@ -115,8 +115,6 @@ there is no photo, and on the badge's plate over one there is.
 
 ## Known gaps
 
-- Real footage for the entry carousel. The three clips on the entry screen are
-  still labelled placeholders.
 - A style taxonomy (length / texture / bang) so the strip can filter. The
   catalogue is 24 cuts now, which is what the header always claimed, but there
   is still nothing to filter it by.

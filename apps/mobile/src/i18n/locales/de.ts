@@ -37,6 +37,27 @@ const de: typeof en = {
     skip: 'Ohne Abo fortfahren',
   },
 
+  welcome: {
+    valueHeadline: 'Dein eigenes Gesicht,',
+    valueHeadlineItalic: 'kein Model.',
+    valueBody: '24 Schnitte und 10 Farben, erzeugt auf dem Foto, das du gibst. Dein erstes Foto ist gratis — eines, aufs Haus.',
+    photoHeadline: 'Fang mit',
+    photoHeadlineItalic: 'einem Foto von dir an.',
+    photoBody: 'Speichere jetzt eines, und jedes Ausprobieren ist ein Tippen. Du kannst es jederzeit ändern oder das überspringen und später ein Foto nehmen.',
+    faceHeadline: 'Wir lesen das Gesicht,',
+    faceHeadlineItalic: 'nie die Person.',
+    faceBody: 'Dein Telefon findet das Gesicht auf deinem Foto und misst seine Proportionen: die Breite der Wangen, die Linie des Kiefers. Diese Messung bleibt auf dem Telefon, und die passenden Schnitte stehen vorne.',
+    next: 'Weiter',
+    back: 'Zurück',
+    skip: 'Später',
+    done: 'Loslegen',
+    take: 'Foto machen',
+    choose: 'Aus der Mediathek',
+    change: 'Foto ändern',
+    saved: 'in deinem profil gespeichert',
+    privacyNote: 'nichts davon identifiziert dich',
+  },
+
   preview: {
     tryOn: 'Anprobieren',
     takePhotoAndTryOn: 'Foto machen & anprobieren',

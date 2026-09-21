@@ -37,6 +37,27 @@ const es: typeof en = {
     skip: 'Continuar sin suscribirse',
   },
 
+  welcome: {
+    valueHeadline: 'Tu propia cara,',
+    valueHeadlineItalic: 'no una modelo.',
+    valueBody: '24 cortes y 10 colores, generados sobre la foto que nos des. Tu primera foto es gratis: una, invita la casa.',
+    photoHeadline: 'Empieza con',
+    photoHeadlineItalic: 'una foto tuya.',
+    photoBody: 'Guarda una ahora y cada prueba es un solo toque. Puedes cambiarla cuando quieras, o saltar esto y usar una foto más tarde.',
+    faceHeadline: 'Leemos la cara,',
+    faceHeadlineItalic: 'nunca a la persona.',
+    faceBody: 'Tu teléfono encuentra la cara en tu foto y mide sus proporciones: el ancho de los pómulos, la línea de la mandíbula. Esa medida se queda en el teléfono, y los cortes que le favorecen salen primero.',
+    next: 'Siguiente',
+    back: 'Atrás',
+    skip: 'Saltar por ahora',
+    done: 'Empezar a probar',
+    take: 'Hacer foto',
+    choose: 'Elegir de la galería',
+    change: 'Cambiar foto',
+    saved: 'guardada en tu perfil',
+    privacyNote: 'nada de esto te identifica',
+  },
+
   preview: {
     tryOn: 'Probar',
     takePhotoAndTryOn: 'Hacer foto y probar',

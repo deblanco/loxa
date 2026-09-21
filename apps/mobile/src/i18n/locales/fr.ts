@@ -37,6 +37,27 @@ const fr: typeof en = {
     skip: 'Continuer sans abonnement',
   },
 
+  welcome: {
+    valueHeadline: 'Ton propre visage,',
+    valueHeadlineItalic: 'pas un mannequin.',
+    valueBody: '24 coupes et 10 couleurs, générées sur la photo que tu donnes. Ta première photo est offerte : une, c’est la maison.',
+    photoHeadline: 'Commence par',
+    photoHeadlineItalic: 'une photo de toi.',
+    photoBody: 'Enregistres-en une maintenant et chaque essai tient en un geste. Tu peux la changer quand tu veux, ou passer et utiliser une photo plus tard.',
+    faceHeadline: 'On lit le visage,',
+    faceHeadlineItalic: 'jamais la personne.',
+    faceBody: 'Ton téléphone trouve le visage sur ta photo et mesure ses proportions : la largeur des pommettes, la ligne de la mâchoire. Cette mesure reste sur le téléphone, et les coupes qui lui vont passent en premier.',
+    next: 'Suivant',
+    back: 'Retour',
+    skip: 'Passer pour l’instant',
+    done: 'Commencer',
+    take: 'Prendre une photo',
+    choose: 'Choisir dans la galerie',
+    change: 'Changer la photo',
+    saved: 'enregistrée dans ton profil',
+    privacyNote: 'rien ici ne t’identifie',
+  },
+
   preview: {
     tryOn: 'Essayer',
     takePhotoAndTryOn: 'Prendre une photo et essayer',

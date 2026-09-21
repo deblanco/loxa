@@ -338,6 +338,33 @@
           </div>
         </sc-if>
 
+        <sc-if value="{{ sWelcome }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;inset:0;background:#faf8f5;display:flex;flex-direction:column;padding-top:60px">
+            <!-- Three panes on one screen, not three screens. The flag that ends onboarding is
+                 written once, when the last pane is left: somebody teleported into the app half
+                 way through has been interrupted, not onboarded.
+                 The face pane says what the phone does and where it stops. It must never claim
+                 recognition — nothing here identifies anybody, and the constellation on the
+                 camera is decoration. Keep every line checkable against the privacy page. -->
+            <div style="padding:0 26px 24px;display:flex;align-items:center;justify-content:space-between">
+              <div style="font:400 11px/1.6 ui-monospace,monospace;color:rgba(13,12,11,.45);cursor:pointer">Back</div>
+              <div style="display:flex;gap:7px;align-items:center">
+                <div style="width:16px;height:5px;border-radius:999px;background:#0d0c0b"></div>
+                <div style="width:5px;height:5px;border-radius:999px;background:rgba(13,12,11,.18)"></div>
+                <div style="width:5px;height:5px;border-radius:999px;background:rgba(13,12,11,.18)"></div>
+              </div>
+              <div style="width:44px"></div>
+            </div>
+            <div style="flex:1;padding:0 26px;display:flex;flex-direction:column;gap:20px">
+              <div style="font-family:'Instrument Serif',Georgia,serif;font-size:40px;line-height:1.05;letter-spacing:-.01em">Your own face,<br><span style="font-style:italic">not a model.</span></div>
+              <div style="font-size:14.5px;line-height:1.55;color:rgba(13,12,11,.55)">24 cuts and 10 colours, generated on the photo you give us. Your first photo is free — one, on the house.</div>
+            </div>
+            <div style="padding:0 26px 30px">
+              <div onClick="{{ goPreview }}" style="height:56px;border-radius:999px;background:#0d0c0b;color:#faf8f5;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;cursor:pointer">Next</div>
+            </div>
+          </div>
+        </sc-if>
+
         <sc-if value="{{ sSuits }}" hint-placeholder-val="{{ true }}">
           <div style="position:absolute;inset:0;background:#faf8f5;overflow:auto;padding-top:60px">
             <div style="padding:0 22px 16px;display:flex;align-items:center;justify-content:space-between">
@@ -495,7 +522,7 @@
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;entry&quot;,&quot;offer&quot;,&quot;preview&quot;,&quot;gen&quot;,&quot;result&quot;,&quot;profile&quot;,&quot;camera&quot;],&quot;default&quot;:&quot;entry&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;startCredits&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:13,&quot;min&quot;:0,&quot;max&quot;:20,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;creditCap&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:60,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;weeklyPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$9.99/week&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;introPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$0.99&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;entry&quot;,&quot;welcome&quot;,&quot;preview&quot;,&quot;gen&quot;,&quot;result&quot;,&quot;suits&quot;,&quot;offer&quot;,&quot;profile&quot;,&quot;looks&quot;,&quot;camera&quot;],&quot;default&quot;:&quot;entry&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;startCredits&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:13,&quot;min&quot;:0,&quot;max&quot;:20,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;creditCap&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:60,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;weeklyPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$9.99/week&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;},&quot;introPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;$0.99&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pricing&quot;}}">
 const ROUND_SUITS = new Set(['Long layers','Sleek straight','Long bob','Bixie','Waist length','Locs','High ponytail','Half-up knot']);
 const STYLES = ['Blunt bob','Long layers','Curtain bang','Pixie','Wolf cut','Beach waves','Sleek straight','Braids','Curly shag','Buzz','Long bob','French bob','Bixie','Blunt fringe','Waist length','Blowout','Seventies flick','Mullet','Afro','Locs','Bantu knots','High ponytail','Chignon','Half-up knot'];
 const COLORS = [
@@ -504,7 +531,7 @@ const COLORS = [
   ['Cherry','#7d2230'],['Lilac','#b7a3c8']
 ];
 const MODELS = ['your photo · 2 days ago','model · warm skin','model · deep skin','model · fair skin'];
-const SCREENS = [['entry','Entry'],['preview','Preview'],['gen','Generating'],['result','Result'],['suits','Suits'],['offer','Offer'],['profile','Profile'],['looks','Looks'],['camera','Camera']];
+const SCREENS = [['entry','Entry'],['welcome','Welcome'],['preview','Preview'],['gen','Generating'],['result','Result'],['suits','Suits'],['offer','Offer'],['profile','Profile'],['looks','Looks'],['camera','Camera']];
 const STEPS = ['reading your photo','mapping hairline','painting colour','matching light'];
 
 class Component extends DCLogic {
@@ -552,7 +579,7 @@ class Component extends DCLogic {
     const [colorName] = COLORS[s.color];
     return {
       sEntry: s.screen === 'entry', sOffer: s.screen === 'offer', sPreview: s.screen === 'preview',
-      sGen: s.screen === 'gen', sResult: s.screen === 'result', sProfile: s.screen === 'profile', sLooks: s.screen === 'looks', sSuits: s.screen === 'suits', sCamera: s.screen === 'camera',
+      sGen: s.screen === 'gen', sResult: s.screen === 'result', sProfile: s.screen === 'profile', sLooks: s.screen === 'looks', sSuits: s.screen === 'suits', sWelcome: s.screen === 'welcome', sCamera: s.screen === 'camera',
       showPaywall: s.paywall, toast: s.toast,
       isDark: s.screen === 'entry' || s.screen === 'result' || s.screen === 'camera',
       credits: s.credits, creditCap: cap, creditW: Math.round((s.credits / cap) * 100) + '%',
@@ -633,11 +660,11 @@ class Component extends DCLogic {
         go: this.go(key)
       })),
 
-      goOffer: this.go('offer'), goPreview: this.go('preview'), goProfile: this.go('profile'), goLooks: this.go('looks'), goResult: this.go('result'), goSuits: this.go('suits'), askSuits: this.go('preview'),
+      goOffer: this.go('offer'), goPreview: this.go('preview'), goProfile: this.go('profile'), goLooks: this.go('looks'), goResult: this.go('result'), goSuits: this.go('suits'), goWelcome: this.go('welcome'), askSuits: this.go('preview'),
       goCamera: () => this.setState({ screen: 'camera', camFrom: 'profile', camShot: false }),
       // Entry goes straight into the app on the one free photo. The offer comes
       // once, when the first result is left, and both of its doors return to preview.
-      start: () => this.setState({ screen: 'preview', plan: 'free', credits: 1 }),
+      start: () => this.setState({ screen: 'welcome', plan: 'free', credits: 1 }),
       leaveResult: () => this.setState(st => ({ screen: !st.offerSeen && st.plan === 'free' ? 'offer' : 'preview' })),
       subscribe: () => this.setState({ screen: 'preview', offerSeen: true, plan: 'weekly', credits: this.props.creditCap ?? 20 }),
       continueFree: () => this.setState({ screen: 'preview', offerSeen: true }),

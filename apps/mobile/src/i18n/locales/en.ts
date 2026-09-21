@@ -68,6 +68,34 @@ const en = {
     skip: 'Continue without subscribing',
   },
 
+  welcome: {
+    /**
+     * The three steps between the carousel and the app.
+     *
+     * The face step says what the phone does and where it stops. It must not
+     * claim recognition: nothing here identifies anybody, and the constellation
+     * on the camera is decoration. Keep it checkable against the privacy page.
+     */
+    valueHeadline: 'Your own face,',
+    valueHeadlineItalic: 'not a model.',
+    valueBody: '24 cuts and 10 colours, generated on the photo you give us. Your first photo is free — one, on the house.',
+    photoHeadline: 'Start with',
+    photoHeadlineItalic: 'a photo of you.',
+    photoBody: 'Save one now and every try-on is a single tap. You can change it whenever you like, or skip this and use a photo later.',
+    faceHeadline: 'We read the face,',
+    faceHeadlineItalic: 'never the person.',
+    faceBody: 'Your phone finds the face in your photo and measures its proportions — the width of the cheeks, the line of the jaw. That measurement stays on the phone, and the cuts it suits come first in the strip.',
+    next: 'Next',
+    back: 'Back',
+    skip: 'Skip for now',
+    done: 'Start trying on',
+    take: 'Take photo',
+    choose: 'Choose from library',
+    change: 'Change photo',
+    saved: 'saved to your profile',
+    privacyNote: 'nothing here identifies you',
+  },
+
   preview: {
     tryOn: 'Try On',
     takePhotoAndTryOn: 'Take photo & try on',
