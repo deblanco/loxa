@@ -63,6 +63,12 @@ export function openRouterHairRenderer(config: OpenRouterRendererConfig): HairRe
             n: 1,
             aspect_ratio: ASPECT_RATIO,
             output_format: OUTPUT_FORMAT,
+            // Ask OpenRouter to route only to providers that do not collect or train on
+            // requests. This is the one lever we have on what happens to a face on
+            // the far side of this call, and the privacy page points people to each
+            // provider's own terms rather than asserting them. Checked live against
+            // both models on 2026-09-21: accepted, and still served by Google.
+            provider: { data_collection: 'deny' },
             // The user's photo. OpenRouter takes a data URL here where Vertex
             // takes inlineData; the bytes are identical.
             input_references: [

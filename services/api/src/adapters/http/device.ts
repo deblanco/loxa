@@ -32,3 +32,32 @@ export function deviceIdFrom(c: Context): string | null {
 export function devPremiumFrom(c: Context): boolean {
   return c.req.header('X-Dev-Premium') === '1';
 }
+
+/**
+ * The address this request came from, as the unit the abuse limits count.
+ *
+ * `CF-Connecting-IP` is set by Cloudflare's edge and replaces whatever the
+ * client sent, which is why it can be trusted and `X-Forwarded-For` cannot.
+ * Absent means local development, and the limits skip such a request.
+ *
+ * An IPv6 address is cut to its /64. That is the smallest block one subscriber
+ * is given, so counting whole addresses would let a single household mint
+ * 2^64 "different networks". IPv4 is counted as it is.
+ */
+export function clientNetworkFrom(c: Context): string | null {
+  const ip = c.req.header('CF-Connecting-IP')?.trim().toLowerCase();
+  if (!ip) return null;
+  if (!ip.includes(':') || ip.includes('.')) return ip;
+
+  // Expand the `::`, then keep the first four of the eight groups.
+  const [head = '', tail] = ip.split('::');
+  const before = head ? head.split(':') : [];
+  const after = tail ? tail.split(':') : [];
+  const gap = tail === undefined ? 0 : 8 - before.length - after.length;
+  const groups = [...before, ...Array<string>(Math.max(0, gap)).fill('0'), ...after];
+
+  return groups
+    .slice(0, 4)
+    .map((group) => parseInt(group, 16).toString(16))
+    .join(':');
+}

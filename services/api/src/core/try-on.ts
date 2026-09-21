@@ -1,12 +1,12 @@
-import { findColor, findStyle } from '@loxa/shared';
+import { findColor, findStyle, type PlanId } from '@loxa/shared';
 import type { CreditLedgerPort } from '../ports/credit-ledger';
 import type { EntitlementsPort } from '../ports/entitlements';
 import type { HairRendererPort } from '../ports/hair-renderer';
 import type { RenderCachePort } from '../ports/render-cache';
 import type { UsageStatsPort } from '../ports/usage-stats';
 import { renderCacheKey } from './cache-key';
-import { OutOfCreditsError, UnknownStyleError } from './errors';
-import { available, refundOne, spendOne } from './rules';
+import { CreditContentionError, OutOfCreditsError, UnknownStyleError } from './errors';
+import { available, refundOne, spendOne, type CreditState, type Spend } from './rules';
 
 export interface TryOnDeps {
   ledger: CreditLedgerPort;
@@ -41,11 +41,12 @@ export interface TryOnResult {
  *    re-open a picture they already paid for.
  * 2. **Spend the credit before the model call.** A cap that is checked after
  *    the expensive thing has happened is not a cap. This is the rule the whole
- *    file exists to enforce.
+ *    file exists to enforce. The spend is a compare-and-swap, so two requests
+ *    that both read "one credit left" cannot both take it: see `spend`.
  * 3. **Render.**
  * 4. **Refund on any throw.** The user got nothing; charging for that is theft
- *    with extra steps. The refund writes the row back as it was, which puts the
- *    credit in the pool it actually came from.
+ *    with extra steps. The refund puts the credit back in the pool it actually
+ *    came from, without touching anything else on the row.
  *
  * The style counter is written after each of the two ways this returns, and is
  * the one call here whose failure is swallowed — see `count`.
@@ -75,9 +76,7 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
     return { imageBase64: cached, creditsLeft: available(state, plan, now), cached: true };
   }
 
-  const spent = spendOne(state, plan, now);
-  if (!spent) throw new OutOfCreditsError();
-  await deps.ledger.write(command.deviceId, spent.state);
+  const spent = await spend(deps.ledger, command.deviceId, state, plan, now);
 
   let rendered: { imageBase64: string };
   try {
@@ -92,8 +91,7 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
     // that window is written to this same row: restoring the snapshot would
     // erase a credit the user had already paid for and that `credit_grant`
     // will never hand out a second time.
-    const current = await deps.ledger.read(command.deviceId);
-    await deps.ledger.write(command.deviceId, refundOne(current, spent.pool, now));
+    await refund(deps.ledger, command.deviceId, spent.pool, now);
     throw err;
   }
 
@@ -110,6 +108,64 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
     creditsLeft: available(spent.state, plan, now),
     cached: false,
   };
+}
+
+/**
+ * How many times a spend or a refund may lose the race for the row.
+ *
+ * A phone taps once, so one retry is already unusual; three straight losses is
+ * a caller running requests for one device in parallel on purpose.
+ */
+const LEDGER_ATTEMPTS = 3;
+
+/**
+ * Take one credit, atomically.
+ *
+ * `state` is the row as it was read, and the swap only lands if the row still
+ * holds it. Without that, N parallel requests each read "one credit left", each
+ * compute a spend from it and each write, and one credit buys N renders. On a
+ * lost race the row is read again and the decision is made again from what is
+ * there now, which is how the second request finds the first one's spend and
+ * gets its 402.
+ */
+async function spend(
+  ledger: CreditLedgerPort,
+  deviceId: string,
+  read: CreditState,
+  plan: PlanId,
+  now: Date,
+): Promise<Spend> {
+  let state = read;
+  for (let attempt = 1; ; attempt++) {
+    const spent = spendOne(state, plan, now);
+    if (!spent) throw new OutOfCreditsError();
+    if (await ledger.compareAndWrite(deviceId, state, spent.state)) return spent;
+
+    if (attempt === LEDGER_ATTEMPTS) throw new CreditContentionError();
+    state = await ledger.read(deviceId);
+  }
+}
+
+/**
+ * Give one credit back to `pool`, atomically, once.
+ *
+ * Each attempt re-reads and swaps only against what it read, so a spend or a
+ * purchase that lands meanwhile is kept rather than overwritten, and a lost
+ * race writes nothing — a retry cannot refund twice. If every attempt loses,
+ * the credit stays spent and the failure is logged; the caller still gets the
+ * render error, which is the more useful thing to tell them.
+ */
+async function refund(
+  ledger: CreditLedgerPort,
+  deviceId: string,
+  pool: Spend['pool'],
+  now: Date,
+): Promise<void> {
+  for (let attempt = 1; attempt <= LEDGER_ATTEMPTS; attempt++) {
+    const current = await ledger.read(deviceId);
+    if (await ledger.compareAndWrite(deviceId, current, refundOne(current, pool, now))) return;
+  }
+  console.error('credit not refunded: the row kept changing');
 }
 
 /**

@@ -66,18 +66,70 @@ export function d1CreditLedger(db: D1Database): CreditLedgerPort {
         .run();
     },
 
-    async recordGrant(deviceId, transactionId, at) {
-      // `INSERT OR IGNORE` plus the row count is how a first sighting is told
-      // from a replay, in one statement — a SELECT-then-INSERT would let two
-      // concurrent syncs of the same purchase both see nothing and both grant.
+    async compareAndWrite(deviceId, expected, next) {
+      // One statement, so the compare and the swap cannot be pulled apart. The
+      // upsert's WHERE is what makes it a compare: a row that no longer holds
+      // `expected` is left alone and reports zero changes. `IS` rather than `=`
+      // because `week` and `last_plan` are NULL for a row nobody has spent from.
+      //
+      // A device with no row takes the INSERT arm, which is the first write of
+      // its life. That arm has no compare, and needs none: it is only reached
+      // when the row is absent, which is `EMPTY_STATE`, the one thing `read`
+      // reports for it. Two requests racing to create it collide on the primary
+      // key, and the loser meets the WHERE against a row that is no longer empty.
       const result = await db
         .prepare(
-          'INSERT OR IGNORE INTO credit_grant (transaction_id, device_id, granted_at) VALUES (?, ?, ?)',
+          `INSERT INTO device_credits (device_id, week, week_used, free_used, extra_credits, last_plan)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+           ON CONFLICT(device_id) DO UPDATE SET
+             week = ?2, week_used = ?3, free_used = ?4, extra_credits = ?5, last_plan = ?6
+           WHERE week IS ?7 AND week_used = ?8 AND free_used = ?9
+             AND extra_credits = ?10 AND last_plan IS ?11`,
         )
-        .bind(transactionId, deviceId, at.toISOString())
+        .bind(
+          deviceId,
+          next.week,
+          next.weekUsed,
+          next.freeUsed,
+          next.extraCredits,
+          next.lastPlan ?? null,
+          expected.week,
+          expected.weekUsed,
+          expected.freeUsed,
+          expected.extraCredits,
+          expected.lastPlan ?? null,
+        )
         .run();
 
       return (result.meta.changes ?? 0) > 0;
+    },
+
+    async grantCredit(deviceId, transactionId, at) {
+      // `INSERT OR IGNORE` plus the row count is how a first sighting is told
+      // from a replay, in one statement — a SELECT-then-INSERT would let two
+      // concurrent syncs of the same purchase both see nothing and both grant.
+      //
+      // The credit rides in the same batch, which D1 runs as one transaction on
+      // one connection, so `changes()` in the second statement is the first's
+      // answer: a replay grants nothing, and a first sighting cannot be recorded
+      // without its credit. It is `extra_credits + 1` in SQL rather than a value
+      // computed from a read, which is what lets a spend land in between.
+      const [grant] = await db.batch([
+        db
+          .prepare(
+            'INSERT OR IGNORE INTO credit_grant (transaction_id, device_id, granted_at) VALUES (?, ?, ?)',
+          )
+          .bind(transactionId, deviceId, at.toISOString()),
+        db
+          .prepare(
+            `INSERT INTO device_credits (device_id, extra_credits)
+             SELECT ?1, 1 WHERE changes() > 0
+             ON CONFLICT(device_id) DO UPDATE SET extra_credits = extra_credits + 1`,
+          )
+          .bind(deviceId),
+      ]);
+
+      return (grant?.meta.changes ?? 0) > 0;
     },
   };
 }

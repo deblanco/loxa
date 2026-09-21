@@ -5,18 +5,21 @@ import {
   tryOnRequestSchema,
   type ApiErrorCode,
 } from '@loxa/shared';
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
+import { Hono, type Context } from 'hono';
 import {
+  buildAdmissionDeps,
   buildAnalysisDeps,
   buildCreditsDeps,
   buildDiagnosticsDeps,
+  buildRateLimitDeps,
   buildSyncDeps,
   buildTryOnDeps,
 } from '../../composition';
 import {
   AnalysisQuotaError,
   AnalysisUnusableError,
+  CreditContentionError,
+  NetworkRateError,
   OutOfCreditsError,
   PhotoRejectedError,
   RendererUnavailableError,
@@ -25,11 +28,12 @@ import {
 import { readCatalogue } from '../r2/catalogue';
 import { analyseFace } from '../../core/analyse-face';
 import { getCredits } from '../../core/get-credits';
+import { admitDevice, limitRequests } from '../../core/network-limits';
 import { reportDiagnostics } from '../../core/report-diagnostics';
 import { syncPurchases } from '../../core/sync-purchases';
 import { tryOn } from '../../core/try-on';
 import type { Env } from '../../env';
-import { deviceIdFrom, devPremiumFrom } from './device';
+import { clientNetworkFrom, deviceIdFrom, devPremiumFrom } from './device';
 
 /**
  * The only place in this Worker that knows what an HTTP status code is.
@@ -68,6 +72,15 @@ function fail(code: ApiErrorCode, message: string) {
  */
 const MAX_ANALYSIS_BODY = 6 * 1024 * 1024;
 
+/**
+ * The most a request to the try-on route may declare.
+ *
+ * One photo at the schema's own ceiling of 8 MiB of base64, plus room for the
+ * JSON around it. Same reasoning as the analysis limit: the schema is the real
+ * cap, and this only spares the isolate from parsing what could never pass it.
+ */
+const MAX_TRYON_BODY = 9 * 1024 * 1024;
+
 function translate(err: unknown): Response {
   if (err instanceof UnknownStyleError) return fail('bad_request', err.message);
   if (err instanceof OutOfCreditsError) return fail('out_of_credits', err.message);
@@ -77,21 +90,38 @@ function translate(err: unknown): Response {
   // others: there is nothing the user did and nothing they can do.
   if (err instanceof AnalysisUnusableError) return fail('renderer_unavailable', err.message);
   if (err instanceof AnalysisQuotaError) return fail('rate_limited', err.message);
+  // Both are "wait and try again", and neither is a purchase. A 429 rather
+  // than a 409: the contract's `rate_limited` already means this to the app.
+  if (err instanceof NetworkRateError) return fail('rate_limited', err.message);
+  if (err instanceof CreditContentionError) return fail('rate_limited', err.message);
 
   console.error('unhandled error', err);
   return fail('internal', 'something went wrong');
 }
 
+/**
+ * Refuse a network that is asking faster than any person does, or answer null.
+ *
+ * Before the body is parsed, so a flood costs a counter read rather than
+ * megabytes of JSON. The decision is `core/network-limits.ts`; this only reads
+ * the header and picks the status.
+ */
+async function overRate(c: Context<{ Bindings: Env }>): Promise<Response | null> {
+  try {
+    await limitRequests(clientNetworkFrom(c), buildRateLimitDeps(c.env));
+    return null;
+  } catch (err) {
+    return translate(err);
+  }
+}
+
 export function createApp() {
   const app = new Hono<{ Bindings: Env }>();
 
-  app.use(
-    '*',
-    cors({
-      origin: '*',
-      allowHeaders: ['Content-Type', 'X-Device-Id', 'X-Dev-Premium'],
-    }),
-  );
+  // No CORS. Nothing calls this Worker from a browser: the app is native and
+  // ignores it, and the marketing site makes no request to the API. An open
+  // `*` would invite any web page to call the metered routes from a browser, so
+  // it stays off until something needs it.
 
   // Unversioned on purpose: it is for uptime checks, not for the app, and it
   // must keep answering across every future /v2.
@@ -133,6 +163,7 @@ export function createApp() {
     if (!deviceId) return fail('bad_request', 'missing or malformed X-Device-Id');
 
     try {
+      await admitDevice(deviceId, clientNetworkFrom(c), buildAdmissionDeps(c.env));
       return Response.json(
         await getCredits(deviceId, buildCreditsDeps(c.env, devPremiumFrom(c))),
       );
@@ -145,6 +176,13 @@ export function createApp() {
     const deviceId = deviceIdFrom(c);
     if (!deviceId) return fail('bad_request', 'missing or malformed X-Device-Id');
 
+    // Before the body is parsed, for the reason given at the analysis route.
+    const declared = Number(c.req.header('content-length') ?? 0);
+    if (declared > MAX_TRYON_BODY) return fail('bad_request', 'the photo is too large');
+
+    const limited = await overRate(c);
+    if (limited) return limited;
+
     let body: unknown;
     try {
       body = await c.req.json();
@@ -156,6 +194,7 @@ export function createApp() {
     if (!parsed.success) return fail('bad_request', parsed.error.issues[0]?.message ?? 'invalid body');
 
     try {
+      await admitDevice(deviceId, clientNetworkFrom(c), buildAdmissionDeps(c.env));
       const result = await tryOn(
         { deviceId, ...parsed.data },
         buildTryOnDeps(c.env, devPremiumFrom(c)),
@@ -193,6 +232,9 @@ export function createApp() {
     const declared = Number(c.req.header('content-length') ?? 0);
     if (declared > MAX_ANALYSIS_BODY) return fail('bad_request', 'the photos are too large');
 
+    const limited = await overRate(c);
+    if (limited) return limited;
+
     let body: unknown;
     try {
       body = await c.req.json();
@@ -204,6 +246,7 @@ export function createApp() {
     if (!parsed.success) return fail('bad_request', parsed.error.issues[0]?.message ?? 'invalid body');
 
     try {
+      await admitDevice(deviceId, clientNetworkFrom(c), buildAdmissionDeps(c.env));
       const result = await analyseFace(
         { deviceId, photosBase64: parsed.data.photos },
         buildAnalysisDeps(c.env, devPremiumFrom(c)),

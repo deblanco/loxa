@@ -9,7 +9,12 @@ import { revenueCatEntitlements } from './adapters/entitlements/revenuecat';
 import { stubEntitlements } from './adapters/entitlements/stub';
 import { kvAnalysisCache } from './adapters/kv/analysis-cache';
 import { kvRenderCache } from './adapters/kv/render-cache';
-import { kvAnalysisQuota, kvReportQuota } from './adapters/kv/report-quota';
+import {
+  kvAnalysisQuota,
+  kvNewDeviceQuota,
+  kvReportQuota,
+  kvRequestRate,
+} from './adapters/kv/report-quota';
 import { openRouterFaceAnalyst } from './adapters/openrouter/analyst';
 import { openRouterHairRenderer } from './adapters/openrouter/hair-renderer';
 import { parseServiceAccountKey } from './adapters/vertex/auth';
@@ -17,6 +22,7 @@ import { vertexFaceAnalyst } from './adapters/vertex/analyst';
 import { vertexHairRenderer } from './adapters/vertex/hair-renderer';
 import type { AnalyseFaceDeps } from './core/analyse-face';
 import type { GetCreditsDeps } from './core/get-credits';
+import type { AdmitDeviceDeps, LimitRequestsDeps } from './core/network-limits';
 import type { ReportDiagnosticsDeps } from './core/report-diagnostics';
 import type { SyncPurchasesDeps } from './core/sync-purchases';
 import type { TryOnDeps } from './core/try-on';
@@ -194,4 +200,22 @@ export function buildDiagnosticsDeps(env: Env): ReportDiagnosticsDeps {
     quota: kvReportQuota(env.RESULTS_CACHE),
     now: () => new Date(),
   };
+}
+
+/**
+ * The limits on a client network, which both live on the results-cache
+ * namespace under prefixes of their own — `newdev:` and `rate:` — for the same
+ * reason the others do: a counter that expires by itself is not worth a second
+ * namespace, and neither may spend another feature's allowance.
+ */
+export function buildAdmissionDeps(env: Env): AdmitDeviceDeps {
+  return {
+    ledger: d1CreditLedger(env.DB),
+    quota: kvNewDeviceQuota(env.RESULTS_CACHE),
+    now: () => new Date(),
+  };
+}
+
+export function buildRateLimitDeps(env: Env): LimitRequestsDeps {
+  return { quota: kvRequestRate(env.RESULTS_CACHE), now: () => new Date() };
 }

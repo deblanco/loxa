@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import schema from '../schema.sql?raw';
 import { DAILY_REPORT_LIMIT, reportDiagnostics } from '../src/core/report-diagnostics';
 import { d1Diagnostics } from '../src/adapters/d1/diagnostics';
-import { kvReportQuota } from '../src/adapters/kv/report-quota';
+import { kvNewDeviceQuota, kvReportQuota, kvRequestRate } from '../src/adapters/kv/report-quota';
 import type { DiagnosticReport } from '@loxa/shared';
 
 /**
@@ -235,6 +235,27 @@ describe('the quota counter', () => {
     expect(await quota.consume(DEVICE, 3, limit, new Date('2026-03-01T23:59:00.000Z'))).toBe(3);
     expect(await quota.consume(DEVICE, 1, limit, new Date('2026-03-01T23:59:30.000Z'))).toBe(0);
     expect(await quota.consume(DEVICE, 1, limit, new Date('2026-03-02T00:00:01.000Z'))).toBe(1);
+  });
+
+  it('rolls a request rate over each minute, and a new-device count each day', async () => {
+    const rate = kvRequestRate(env.RESULTS_CACHE);
+    const fresh = kvNewDeviceQuota(env.RESULTS_CACHE);
+
+    expect(await rate.consume('net', 2, 2, new Date('2026-03-01T10:00:10.000Z'))).toBe(2);
+    expect(await rate.consume('net', 1, 2, new Date('2026-03-01T10:00:50.000Z'))).toBe(0);
+    expect(await rate.consume('net', 1, 2, new Date('2026-03-01T10:01:00.000Z'))).toBe(1);
+
+    expect(await fresh.consume('net', 1, 1, new Date('2026-03-01T10:00:00.000Z'))).toBe(1);
+    expect(await fresh.consume('net', 1, 1, new Date('2026-03-01T23:00:00.000Z'))).toBe(0);
+    expect(await fresh.consume('net', 1, 1, new Date('2026-03-02T00:00:00.000Z'))).toBe(1);
+  });
+
+  it('keeps the abuse counters apart from a device`s own', async () => {
+    const at = new Date('2026-03-01T10:00:00.000Z');
+    await kvRequestRate(env.RESULTS_CACHE).consume(DEVICE, 1, 1, at);
+
+    expect(await kvReportQuota(env.RESULTS_CACHE).consume(DEVICE, 1, 1, at)).toBe(1);
+    expect(await kvNewDeviceQuota(env.RESULTS_CACHE).consume(DEVICE, 1, 1, at)).toBe(1);
   });
 
   it('grants what is left rather than nothing when a batch overshoots', async () => {

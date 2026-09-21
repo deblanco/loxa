@@ -43,7 +43,12 @@ export async function getCredits(deviceId: string, deps: GetCreditsDeps): Promis
   ]);
 
   const settled = settle(state, plan, now);
-  if (settled.lastPlan !== state.lastPlan) await deps.ledger.write(deviceId, settled);
+  // A swap, not a write: the row was read a moment ago, and a spend landing
+  // since would be erased by writing this one back over it. Losing the race is
+  // fine — the spend that won wrote `lastPlan` itself, or the next read will.
+  if (settled.lastPlan !== state.lastPlan) {
+    await deps.ledger.compareAndWrite(deviceId, state, settled);
+  }
 
   return {
     creditsLeft: available(state, plan, now),

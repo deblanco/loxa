@@ -40,6 +40,18 @@ export async function analysisCacheKey(
   return `analysis:${await sha256Hex(material)}`;
 }
 
+/**
+ * What a client network is counted under: a hash of its address, never the address.
+ *
+ * The abuse limits key a KV counter on this and nothing else. The privacy
+ * policy promises no identifier is stored beside a report, and a raw IP in a
+ * key — or a device id in the same record as one — would be exactly that, so
+ * the address is hashed here and the device id never reaches the counter.
+ */
+export async function networkKey(network: string): Promise<string> {
+  return sha256Hex(`network ${network}`);
+}
+
 async function sha256Hex(material: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(material));
   return Array.from(new Uint8Array(digest))

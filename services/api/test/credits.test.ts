@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getCredits } from '../src/core/get-credits';
+import type { CreditState } from '../src/core/rules';
 import { syncPurchases } from '../src/core/sync-purchases';
 import { fakeEntitlements, fakeLedger, fixedClock } from './fakes';
 
@@ -78,6 +79,30 @@ describe('getCredits', () => {
   });
 });
 
+describe('getCredits under a race', () => {
+  it('does not write a stale row over a spend that landed after the read', async () => {
+    // It read a plan change and went to record it; a render spent a credit in
+    // between. A plain write would put the pre-spend row back.
+    const ledger = fakeLedger({ week: '2026-W35', weekUsed: 4, lastPlan: 'free' });
+    const racing = {
+      ...ledger.port,
+      async compareAndWrite(deviceId: string, expected: CreditState, next: CreditState) {
+        await ledger.port.write(deviceId, { ...ledger.state, weekUsed: 5 });
+        return ledger.port.compareAndWrite(deviceId, expected, next);
+      },
+    };
+
+    const view = await getCredits('device-1', {
+      ledger: racing,
+      entitlements: fakeEntitlements('weekly'),
+      now: fixedClock,
+    });
+
+    expect(view.plan).toBe('weekly');
+    expect(ledger.state.weekUsed).toBe(5);
+  });
+});
+
 describe('syncPurchases', () => {
   it('grants one credit per purchase the store reports', async () => {
     const ledger = fakeLedger();
@@ -133,5 +158,22 @@ describe('syncPurchases', () => {
 
     expect(result.granted).toBe(3);
     expect(ledger.state.extraCredits).toBe(3);
+  });
+
+  it('grants once when two syncs of one purchase arrive together', async () => {
+    const ledger = fakeLedger();
+    const deps = {
+      ledger: ledger.port,
+      entitlements: fakeEntitlements('free', ['otp_1']),
+      now: fixedClock,
+    };
+
+    const results = await Promise.all([
+      syncPurchases('device-1', deps),
+      syncPurchases('device-1', deps),
+    ]);
+
+    expect(results.reduce((sum, r) => sum + r.granted, 0)).toBe(1);
+    expect(ledger.state.extraCredits).toBe(1);
   });
 });

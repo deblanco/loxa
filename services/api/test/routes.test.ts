@@ -1,6 +1,7 @@
 import { SELF, env } from 'cloudflare:test';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resetTokenCache } from '../src/adapters/vertex/auth';
+import { networkKey } from '../src/core/cache-key';
 import schema from '../schema.sql?raw';
 
 /**
@@ -331,6 +332,45 @@ describe('POST /v1/tryon', () => {
     expect(response.status).toBe(400);
   });
 
+  it('refuses a body that announces itself as too large to parse', async () => {
+    const vertex = interceptVertex(() => imageAnswer());
+
+    const response = await SELF.fetch('https://loxa.test/v1/tryon', {
+      method: 'POST',
+      headers: {
+        'X-Device-Id': DEVICE,
+        'content-type': 'application/json',
+        'content-length': String(10 * 1024 * 1024),
+      },
+      body: JSON.stringify(body()),
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({ code: 'bad_request', message: 'the photo is too large' }),
+    );
+    expect(vertex.calls()).toBe(0);
+  });
+
+  it('lets one credit buy one render when two requests race for it', async () => {
+    // The whole race, through the real Worker and the real database: a free
+    // device, two different photos sent together. One 200, one 402, one render.
+    const vertex = interceptVertex(() => imageAnswer());
+
+    const responses = await Promise.all([
+      post('/v1/tryon', body()),
+      post('/v1/tryon', body({ imageBase64: 'd29ybGQ=' })),
+    ]);
+
+    expect(responses.map((r) => r.status).sort()).toEqual([200, 402]);
+    expect(vertex.calls()).toBe(1);
+
+    const row = await env.DB.prepare('SELECT free_used FROM device_credits WHERE device_id = ?')
+      .bind(DEVICE)
+      .first<{ free_used: number }>();
+    expect(row?.free_used).toBe(1);
+  });
+
   it('refuses a body that is not JSON', async () => {
     const response = await SELF.fetch('https://loxa.test/v1/tryon', {
       method: 'POST',
@@ -487,5 +527,179 @@ describe('POST /v1/analysis', () => {
       body: JSON.stringify(photos),
     });
     expect(response.status).toBe(400);
+  });
+});
+
+describe('CORS', () => {
+  it('is not offered: nothing calls this Worker from a browser', async () => {
+    const response = await SELF.fetch('https://loxa.test/v1/credits', {
+      headers: { 'X-Device-Id': DEVICE, Origin: 'https://example.com' },
+    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull();
+
+    const preflight = await SELF.fetch('https://loxa.test/v1/tryon', {
+      method: 'OPTIONS',
+      headers: { Origin: 'https://example.com', 'Access-Control-Request-Method': 'POST' },
+    });
+    expect(preflight.headers.get('Access-Control-Allow-Origin')).toBeNull();
+  });
+});
+
+describe('limits on a client network', () => {
+  const ip = (address: string) => ({ 'CF-Connecting-IP': address });
+  const credits = (deviceId: string, headers: Record<string, string>) =>
+    SELF.fetch('https://loxa.test/v1/credits', {
+      headers: { 'X-Device-Id': deviceId, ...headers },
+    }).then((r) => r.json() as Promise<{ creditsLeft: number }>);
+  const newId = (n: number) => `device-farm${String(n).padStart(4, '0')}`;
+
+  it('gives the first ten new ids from one address their free credit, and none after', async () => {
+    for (let n = 1; n <= 10; n++) {
+      expect((await credits(newId(n), ip('198.51.100.1'))).creditsLeft).toBe(1);
+    }
+    expect((await credits(newId(11), ip('198.51.100.1'))).creditsLeft).toBe(0);
+    expect((await credits(newId(12), ip('198.51.100.1'))).creditsLeft).toBe(0);
+  });
+
+  it('refuses the render an over-cap id would have had, without calling the model', async () => {
+    const vertex = interceptVertex(() => imageAnswer());
+    for (let n = 1; n <= 10; n++) await credits(newId(n), ip('198.51.100.2'));
+
+    const response = await post('/v1/tryon', body(), {
+      ...ip('198.51.100.2'),
+      'X-Device-Id': newId(11),
+    });
+
+    expect(response.status).toBe(402);
+    expect(vertex.calls()).toBe(0);
+  });
+
+  it('registers a new id the first time it tries on, not only when it asks for credits', async () => {
+    // The farmer never calls /v1/credits: every request is a fresh id straight
+    // at the render route.
+    const vertex = interceptVertex(() => imageAnswer());
+    const address = ip('198.51.100.3');
+
+    for (let n = 1; n <= 10; n++) {
+      // A photo each, or the render cache answers the ones after the first.
+      const photo = body({ imageBase64: btoa(`photo ${n}`) });
+      const response = await post('/v1/tryon', photo, { ...address, 'X-Device-Id': newId(n) });
+      expect(response.status).toBe(200);
+    }
+    const eleventh = await post('/v1/tryon', body({ imageBase64: btoa('photo 11') }), {
+      ...address,
+      'X-Device-Id': newId(11),
+    });
+
+    expect(eleventh.status).toBe(402);
+    expect(vertex.calls()).toBe(10);
+  });
+
+  it('leaves a subscriber on a capped network with their allowance', async () => {
+    for (let n = 1; n <= 10; n++) await credits(newId(n), ip('198.51.100.4'));
+
+    const capped = await credits(newId(11), { ...ip('198.51.100.4'), 'X-Dev-Premium': '1' });
+    expect(capped.creditsLeft).toBe(20);
+  });
+
+  it('counts an id once however often it comes back', async () => {
+    for (let n = 0; n < 15; n++) await credits(newId(1), ip('198.51.100.5'));
+    for (let n = 2; n <= 10; n++) await credits(newId(n), ip('198.51.100.5'));
+
+    expect((await credits(newId(11), ip('198.51.100.5'))).creditsLeft).toBe(0);
+    // Ten distinct ids so far: the first is still what it was.
+    expect((await credits(newId(1), ip('198.51.100.5'))).creditsLeft).toBe(1);
+  });
+
+  it('keeps one address from spending another`s allowance', async () => {
+    for (let n = 1; n <= 11; n++) await credits(newId(n), ip('198.51.100.6'));
+
+    expect((await credits(newId(100), ip('198.51.100.7'))).creditsLeft).toBe(1);
+  });
+
+  it('counts an IPv6 network as its /64, so one household cannot mint ten thousand', async () => {
+    for (let n = 1; n <= 10; n++) {
+      await credits(newId(n), ip(`2001:db8:1:2:${n.toString(16)}::1`));
+    }
+
+    expect((await credits(newId(11), ip('2001:db8:1:2:ffff::1'))).creditsLeft).toBe(0);
+    expect((await credits(newId(12), ip('2001:db8:1:3::1'))).creditsLeft).toBe(1);
+  });
+
+  it('applies no limit to a request with no address', async () => {
+    for (let n = 1; n <= 12; n++) {
+      expect((await credits(newId(n), {})).creditsLeft).toBe(1);
+    }
+  });
+
+  it('stores neither the address nor a device id beside it', async () => {
+    const address = '198.51.100.8';
+    await credits(newId(1), ip(address));
+    await post('/v1/tryon', 'x', ip(address));
+
+    const keys = (await env.RESULTS_CACHE.list()).keys.map((k) => k.name);
+    const counters = keys.filter((k) => k.startsWith('newdev:') || k.startsWith('rate:'));
+    expect(counters).toHaveLength(2);
+
+    for (const name of counters) {
+      expect(name).not.toContain(address);
+      expect(name).not.toContain(newId(1));
+      expect(await env.RESULTS_CACHE.get(name)).toMatch(/^\d+$/);
+    }
+  });
+
+  describe('request rate', () => {
+    const address = '198.51.100.9';
+
+    async function spendMinute() {
+      const minute = new Date().toISOString().slice(0, 16);
+      await env.RESULTS_CACHE.put(`rate:${await networkKey(address)}:${minute}`, '60');
+    }
+
+    it('answers 429 to the sixty-first request in a minute on the try-on route', async () => {
+      const vertex = interceptVertex(() => imageAnswer());
+      await spendMinute();
+
+      const response = await post('/v1/tryon', body(), ip(address));
+      expect(response.status).toBe(429);
+      await expect(response.json()).resolves.toEqual(
+        expect.objectContaining({ code: 'rate_limited' }),
+      );
+      expect(vertex.calls()).toBe(0);
+    });
+
+    it('and on the analysis route, which shares the count', async () => {
+      const vertex = interceptVertex(() => imageAnswer());
+      await spendMinute();
+
+      const response = await post('/v1/analysis', { photos: ['aGVsbG8='] }, ip(address));
+      expect(response.status).toBe(429);
+      expect(vertex.analyses()).toBe(0);
+    });
+
+    it('counts a request whatever becomes of it', async () => {
+      // Rejected bodies count too: the limit is on asking, and it is checked
+      // before the body is parsed.
+      for (let n = 0; n < 3; n++) await post('/v1/tryon', 'x', ip(address));
+
+      const minute = new Date().toISOString().slice(0, 16);
+      await expect(
+        env.RESULTS_CACHE.get(`rate:${await networkKey(address)}:${minute}`),
+      ).resolves.toBe('3');
+    });
+
+    it('does not slow the credits route or another address', async () => {
+      interceptVertex(() => imageAnswer());
+      await spendMinute();
+
+      const credits = await SELF.fetch('https://loxa.test/v1/credits', {
+        headers: { 'X-Device-Id': DEVICE, ...ip(address) },
+      });
+      expect(credits.status).toBe(200);
+
+      const other = await post('/v1/tryon', body(), ip('198.51.100.10'));
+      expect(other.status).toBe(200);
+    });
   });
 });

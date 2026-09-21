@@ -35,9 +35,17 @@ export function fakeLedger(initial: Partial<CreditState> = {}) {
       state = next;
       writes.push(next);
     },
-    async recordGrant(_deviceId, transactionId) {
+    async compareAndWrite(_deviceId, expected, next) {
+      // Field by field, like the SQL: the row has to hold what the caller read.
+      if (!sameState(state, expected)) return false;
+      state = next;
+      writes.push(next);
+      return true;
+    },
+    async grantCredit(_deviceId, transactionId) {
       if (grants.has(transactionId)) return false;
       grants.add(transactionId);
+      state = { ...state, extraCredits: state.extraCredits + 1 };
       return true;
     },
   };
@@ -49,6 +57,16 @@ export function fakeLedger(initial: Partial<CreditState> = {}) {
       return state;
     },
   };
+}
+
+function sameState(a: CreditState, b: CreditState): boolean {
+  return (
+    a.week === b.week &&
+    a.weekUsed === b.weekUsed &&
+    a.freeUsed === b.freeUsed &&
+    a.extraCredits === b.extraCredits &&
+    a.lastPlan === b.lastPlan
+  );
 }
 
 export function fakeEntitlements(plan: PlanId = 'free', purchases: readonly string[] = []) {

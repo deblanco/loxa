@@ -22,7 +22,7 @@ export interface SyncPurchasesResult {
  * `otp...` id for each purchase is, and it is the same id whether this call
  * follows a purchase or a restore.
  *
- * `recordGrant` is keyed on that id, so a device that syncs ten times gets one
+ * `grantCredit` is keyed on that id, so a device that syncs ten times gets one
  * credit per purchase and no more. The app syncs after every purchase and every
  * restore, so seeing the same ids repeatedly is the normal case rather than an
  * attack, and the idempotency is what makes both paths safe to call freely.
@@ -39,12 +39,11 @@ export async function syncPurchases(
   let granted = 0;
 
   for (const purchaseId of await deps.entitlements.photoPurchases(deviceId)) {
-    if (!(await deps.ledger.recordGrant(deviceId, purchaseId, now))) continue;
-
-    // Re-read inside the loop: `recordGrant` and this write are two statements,
-    // and a second request for the same device may have landed between them.
-    const state = await deps.ledger.read(deviceId);
-    await deps.ledger.write(deviceId, { ...state, extraCredits: state.extraCredits + 1 });
+    // The record and the credit are one step in the ledger. This used to read
+    // the row, add one and write it back, and a render spending a credit
+    // between the read and the write was overwritten: the user paid, and the
+    // credit was lost to a race that `credit_grant` could never repeat.
+    if (!(await deps.ledger.grantCredit(deviceId, purchaseId, now))) continue;
     granted += 1;
   }
 

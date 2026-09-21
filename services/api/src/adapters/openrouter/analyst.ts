@@ -47,6 +47,12 @@ export function openRouterFaceAnalyst(config: OpenRouterAnalystConfig): FaceAnal
             // Asked for as JSON as well as described as JSON in the prompt:
             // a model that honours neither still reaches `extractJson`.
             response_format: { type: 'json_object' },
+            // Ask OpenRouter to route only to providers that do not collect or train on
+            // requests. This is the one lever we have on what happens to a face on
+            // the far side of this call, and the privacy page points people to each
+            // provider's own terms rather than asserting them. Checked live against
+            // both models on 2026-09-21: accepted, and still served by Google.
+            provider: { data_collection: 'deny' },
             messages: [
               {
                 role: 'user',

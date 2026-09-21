@@ -42,6 +42,14 @@ describe('openRouterFaceAnalyst', () => {
     expect(calls[0]!.url).toBe('https://openrouter.ai/api/v1/chat/completions');
   });
 
+  it('asks OpenRouter to route only to providers that do not collect data', async () => {
+    // The only lever there is on a face once it has left our Worker.
+    const calls = intercept(() => chat(ANSWER));
+    await openRouterFaceAnalyst(CONFIG).analyse(REQUEST);
+
+    expect(JSON.parse(calls[0]!.body).provider).toEqual({ data_collection: 'deny' });
+  });
+
   it('sends every photo, and none of our prompts', async () => {
     const calls = intercept(() => chat(ANSWER));
     await openRouterFaceAnalyst(CONFIG).analyse({

@@ -73,6 +73,13 @@ export function opencodeFaceAnalyst(config: OpencodeAnalystConfig): FaceAnalystP
           // both on would make a dead endpoint take three timeouts before
           // Google is asked, with the user watching a spinner throughout.
           maxRetries: 0,
+          // Off. Nothing in the Worker reads the SDK's telemetry, and with it on a
+          // failed call leaves a second, unawaited copy of the same rejection
+          // inside the SDK's own dispatcher: ours is caught below, that one is
+          // nobody's, and under the test runner it fails the run with every
+          // test green. In production it would be a logged unhandled rejection
+          // per failed analysis.
+          telemetry: { isEnabled: false },
           messages: [
             {
               role: 'user',

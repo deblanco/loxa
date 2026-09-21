@@ -73,6 +73,15 @@ describe('the happy path', () => {
     expect(body.n).toBe(1);
   });
 
+  it('asks OpenRouter to route only to providers that do not collect data', async () => {
+    // The only lever there is on a face once it has left our Worker. Losing this
+    // silently would put the photo back on whichever provider is cheapest.
+    const requests = intercept(() => image());
+    await renderer().render(request);
+
+    expect(JSON.parse(requests.at(-1)!.body!).provider).toEqual({ data_collection: 'deny' });
+  });
+
   it('sends the photo as a data URL and the prompt as text', async () => {
     const requests = intercept(() => image());
     await renderer().render(request);

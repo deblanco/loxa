@@ -89,3 +89,34 @@ export class AnalysisQuotaError extends Error {
     this.name = 'AnalysisQuotaError';
   }
 }
+
+/**
+ * This device has too many requests in flight against its own balance.
+ *
+ * The ledger swaps a row only if nobody changed it since it was read, and a
+ * spend that loses that race reads again and retries. It reaches this error
+ * only when it has lost several times running, which a phone tapping once does
+ * not do: it is what a script firing parallel renders at one device id looks
+ * like. Nothing was spent and nothing was rendered.
+ */
+export class CreditContentionError extends Error {
+  constructor() {
+    super('too many simultaneous requests for this device');
+    this.name = 'CreditContentionError';
+  }
+}
+
+/**
+ * This network has sent too many requests in the last minute.
+ *
+ * Counted per client network rather than per device, because the device id is
+ * the one thing a client picks for itself — a caller who is over the limit
+ * simply arrives as somebody else. A 429, like `AnalysisQuotaError`: the fix is
+ * a wait, not a purchase.
+ */
+export class NetworkRateError extends Error {
+  constructor() {
+    super('too many requests from this network');
+    this.name = 'NetworkRateError';
+  }
+}
