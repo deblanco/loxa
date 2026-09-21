@@ -3,7 +3,7 @@ import { HAIR_STYLES } from '@loxa/shared';
 import { openRouterFaceAnalyst } from '../src/adapters/openrouter/analyst';
 import { PhotoRejectedError, RendererUnavailableError } from '../src/core/errors';
 
-const CONFIG = { apiKey: 'or-key', model: 'google/gemini-2.5-flash' };
+const CONFIG = { apiKey: 'or-key', model: 'google/gemini-3.8-flash' };
 
 const REQUEST = {
   photosBase64: ['aGVsbG8='],

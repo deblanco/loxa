@@ -93,7 +93,7 @@ OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
 # all, so every Gemini text id 404s there. The analysis fallback is OpenRouter,
 # on the key the render fallback already uses. ANALYSIS_TEXT_MODEL stays unset
 # until this project is granted one.
-OPENROUTER_ANALYSIS_MODEL = "google/gemini-2.5-flash"
+OPENROUTER_ANALYSIS_MODEL = "google/gemini-3.8-flash"
 # The primary. The model must read images and must not train on them: some
 # models on this service are marked "training use", and this app's privacy
 # policy says nobody's photos train anything.
