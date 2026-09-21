@@ -2,6 +2,7 @@ import { SELF, env } from 'cloudflare:test';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resetTokenCache } from '../src/adapters/vertex/auth';
 import { networkKey } from '../src/core/cache-key';
+import { NEW_DEVICES_PER_NETWORK_PER_DAY as LIMIT } from '../src/core/network-limits';
 import schema from '../schema.sql?raw';
 
 /**
@@ -554,21 +555,21 @@ describe('limits on a client network', () => {
     }).then((r) => r.json() as Promise<{ creditsLeft: number }>);
   const newId = (n: number) => `device-farm${String(n).padStart(4, '0')}`;
 
-  it('gives the first ten new ids from one address their free credit, and none after', async () => {
-    for (let n = 1; n <= 10; n++) {
+  it('gives the first new ids from one address their free credit, and none after', async () => {
+    for (let n = 1; n <= LIMIT; n++) {
       expect((await credits(newId(n), ip('198.51.100.1'))).creditsLeft).toBe(1);
     }
-    expect((await credits(newId(11), ip('198.51.100.1'))).creditsLeft).toBe(0);
-    expect((await credits(newId(12), ip('198.51.100.1'))).creditsLeft).toBe(0);
+    expect((await credits(newId(LIMIT + 1), ip('198.51.100.1'))).creditsLeft).toBe(0);
+    expect((await credits(newId(LIMIT + 2), ip('198.51.100.1'))).creditsLeft).toBe(0);
   });
 
   it('refuses the render an over-cap id would have had, without calling the model', async () => {
     const vertex = interceptVertex(() => imageAnswer());
-    for (let n = 1; n <= 10; n++) await credits(newId(n), ip('198.51.100.2'));
+    for (let n = 1; n <= LIMIT; n++) await credits(newId(n), ip('198.51.100.2'));
 
     const response = await post('/v1/tryon', body(), {
       ...ip('198.51.100.2'),
-      'X-Device-Id': newId(11),
+      'X-Device-Id': newId(LIMIT + 1),
     });
 
     expect(response.status).toBe(402);
@@ -581,54 +582,54 @@ describe('limits on a client network', () => {
     const vertex = interceptVertex(() => imageAnswer());
     const address = ip('198.51.100.3');
 
-    for (let n = 1; n <= 10; n++) {
+    for (let n = 1; n <= LIMIT; n++) {
       // A photo each, or the render cache answers the ones after the first.
       const photo = body({ imageBase64: btoa(`photo ${n}`) });
       const response = await post('/v1/tryon', photo, { ...address, 'X-Device-Id': newId(n) });
       expect(response.status).toBe(200);
     }
-    const eleventh = await post('/v1/tryon', body({ imageBase64: btoa('photo 11') }), {
+    const eleventh = await post('/v1/tryon', body({ imageBase64: btoa(`photo ${LIMIT + 1}`) }), {
       ...address,
-      'X-Device-Id': newId(11),
+      'X-Device-Id': newId(LIMIT + 1),
     });
 
     expect(eleventh.status).toBe(402);
-    expect(vertex.calls()).toBe(10);
+    expect(vertex.calls()).toBe(LIMIT);
   });
 
   it('leaves a subscriber on a capped network with their allowance', async () => {
-    for (let n = 1; n <= 10; n++) await credits(newId(n), ip('198.51.100.4'));
+    for (let n = 1; n <= LIMIT; n++) await credits(newId(n), ip('198.51.100.4'));
 
-    const capped = await credits(newId(11), { ...ip('198.51.100.4'), 'X-Dev-Premium': '1' });
+    const capped = await credits(newId(LIMIT + 1), { ...ip('198.51.100.4'), 'X-Dev-Premium': '1' });
     expect(capped.creditsLeft).toBe(20);
   });
 
   it('counts an id once however often it comes back', async () => {
     for (let n = 0; n < 15; n++) await credits(newId(1), ip('198.51.100.5'));
-    for (let n = 2; n <= 10; n++) await credits(newId(n), ip('198.51.100.5'));
+    for (let n = 2; n <= LIMIT; n++) await credits(newId(n), ip('198.51.100.5'));
 
-    expect((await credits(newId(11), ip('198.51.100.5'))).creditsLeft).toBe(0);
-    // Ten distinct ids so far: the first is still what it was.
+    expect((await credits(newId(LIMIT + 1), ip('198.51.100.5'))).creditsLeft).toBe(0);
+    // The limit's worth of distinct ids so far: the first is still what it was.
     expect((await credits(newId(1), ip('198.51.100.5'))).creditsLeft).toBe(1);
   });
 
   it('keeps one address from spending another`s allowance', async () => {
-    for (let n = 1; n <= 11; n++) await credits(newId(n), ip('198.51.100.6'));
+    for (let n = 1; n <= LIMIT + 1; n++) await credits(newId(n), ip('198.51.100.6'));
 
     expect((await credits(newId(100), ip('198.51.100.7'))).creditsLeft).toBe(1);
   });
 
-  it('counts an IPv6 network as its /64, so one household cannot mint ten thousand', async () => {
-    for (let n = 1; n <= 10; n++) {
+  it('counts an IPv6 network as its /64, so one household cannot mint thousands', async () => {
+    for (let n = 1; n <= LIMIT; n++) {
       await credits(newId(n), ip(`2001:db8:1:2:${n.toString(16)}::1`));
     }
 
-    expect((await credits(newId(11), ip('2001:db8:1:2:ffff::1'))).creditsLeft).toBe(0);
-    expect((await credits(newId(12), ip('2001:db8:1:3::1'))).creditsLeft).toBe(1);
+    expect((await credits(newId(LIMIT + 1), ip('2001:db8:1:2:ffff::1'))).creditsLeft).toBe(0);
+    expect((await credits(newId(LIMIT + 2), ip('2001:db8:1:3::1'))).creditsLeft).toBe(1);
   });
 
   it('applies no limit to a request with no address', async () => {
-    for (let n = 1; n <= 12; n++) {
+    for (let n = 1; n <= LIMIT + 2; n++) {
       expect((await credits(newId(n), {})).creditsLeft).toBe(1);
     }
   });

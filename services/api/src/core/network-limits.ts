@@ -24,12 +24,20 @@ import { rollForward } from './rules';
 /**
  * New device ids one network may bring in a day.
  *
- * Ten is a household, or an office that installed the app on the same
- * afternoon. It is far below what farming free photos needs, and the cost of
- * being wrong is small and one-sided: the eleventh person on a network loses
- * the free photo, not the app.
+ * Thirty, which is a guess and is meant to be a generous one. A household or an
+ * office that installed the app the same afternoon is a handful; what the number
+ * has to survive is a *mobile carrier*, which puts thousands of phones behind one
+ * address, so a busy city on a launch day can put a few dozen genuinely new
+ * people on one network. It is still small against what farming free photos
+ * needs — thirty is about a dollar a day per network at the price of a render —
+ * and the cost of being wrong is small and one-sided: the thirty-first person on
+ * a network loses the free photo, not the app.
+ *
+ * Not derived from any traffic. The counters it is read against record how many
+ * new ids each network really sees, so it can be tuned from data once there is
+ * some.
  */
-export const NEW_DEVICES_PER_NETWORK_PER_DAY = 10;
+export const NEW_DEVICES_PER_NETWORK_PER_DAY = 30;
 
 /**
  * Renders and analyses one network may ask for in a minute.
@@ -73,7 +81,7 @@ export interface LimitRequestsDeps {
  * The row is written with a swap against what was read, so of several
  * simultaneous first requests for one id exactly one registers it and the rest
  * find it done. The loser has counted a second slot for the same id, which
- * costs the network one of its ten in a rare race and is not worth a lock.
+ * costs the network one of its slots in a rare race and is not worth a lock.
  *
  * The network is hashed, and the device id never reaches the counter: the
  * privacy policy promises no identifier is stored beside another.
