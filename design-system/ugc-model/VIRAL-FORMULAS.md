@@ -54,6 +54,13 @@ Rules:
 - Never names the app it promotes. No link in bio to it. No affiliation.
 - Never a founder, never an expert, never "we". Always a peer.
 
+> **Compliance warning — read before running this.** A persona that "never names the
+> app… no affiliation" and promotes it is undisclosed promotion by a fake peer. That is
+> against the spirit of App Review 5.6 (developer code of conduct), against the ad-disclosure
+> rules of TikTok and Instagram, and in the EU and UK against consumer-protection law. Run it
+> disclosed (a plainly Loxa-owned account, or a paid partnership label) or not at all. The
+> persona faces (`hf_*.jpg`) are AI-generated and would have to be labelled as such.
+
 **Loxa's version:** `@hair.tryon.hoarder` — *"changed my hair 40 times before
 cutting it once"*. Same shape: flaw, labour, no product.
 

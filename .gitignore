@@ -42,3 +42,12 @@ screenshots/store/.art/
 
 # full-resolution UGC persona renders; the committed .jpg mirrors are what the slides use
 design-system/ugc-model/_fullres/
+
+# Pairing identity that go-ios writes into whatever directory it is run from.
+# Holds a private key; it has no business in a commit.
+selfIdentity.plist
+
+# Apple signing material.
+*.p8
+*.p12
+*.mobileprovision
