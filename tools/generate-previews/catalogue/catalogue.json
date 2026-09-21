@@ -362,8 +362,7 @@
       "id": "wolf-cut",
       "name": "Wolf cut",
       "tiles": [
-        "styles/wolf-cut/tile-0-r2.jpg",
-        "styles/wolf-cut/tile-1-r2.jpg"
+        "styles/wolf-cut/tile-0-r2.jpg"
       ],
       "suits": [
         "oval",
@@ -371,78 +370,67 @@
         "long"
       ],
       "models": [
-        "models/east-asian-18-24.jpg",
-        "models/latina-13-17.jpg"
+        "models/east-asian-18-24.jpg"
       ],
       "colors": [
         {
           "id": "jet-black",
           "heroes": [
-            "styles/wolf-cut/jet-black/0.jpg",
-            "styles/wolf-cut/jet-black/1.jpg"
+            "styles/wolf-cut/jet-black/0.jpg"
           ]
         },
         {
           "id": "espresso",
           "heroes": [
-            "styles/wolf-cut/espresso/0.jpg",
-            "styles/wolf-cut/espresso/1.jpg"
+            "styles/wolf-cut/espresso/0.jpg"
           ]
         },
         {
           "id": "chestnut",
           "heroes": [
-            "styles/wolf-cut/chestnut/0.jpg",
-            "styles/wolf-cut/chestnut/1.jpg"
+            "styles/wolf-cut/chestnut/0.jpg"
           ]
         },
         {
           "id": "caramel",
           "heroes": [
-            "styles/wolf-cut/caramel/0.jpg",
-            "styles/wolf-cut/caramel/1.jpg"
+            "styles/wolf-cut/caramel/0.jpg"
           ]
         },
         {
           "id": "honey-blonde",
           "heroes": [
-            "styles/wolf-cut/honey-blonde/0.jpg",
-            "styles/wolf-cut/honey-blonde/1.jpg"
+            "styles/wolf-cut/honey-blonde/0.jpg"
           ]
         },
         {
           "id": "platinum",
           "heroes": [
-            "styles/wolf-cut/platinum/0.jpg",
-            "styles/wolf-cut/platinum/1.jpg"
+            "styles/wolf-cut/platinum/0.jpg"
           ]
         },
         {
           "id": "ash-grey",
           "heroes": [
-            "styles/wolf-cut/ash-grey/0.jpg",
-            "styles/wolf-cut/ash-grey/1.jpg"
+            "styles/wolf-cut/ash-grey/0.jpg"
           ]
         },
         {
           "id": "copper",
           "heroes": [
-            "styles/wolf-cut/copper/0.jpg",
-            "styles/wolf-cut/copper/1.jpg"
+            "styles/wolf-cut/copper/0.jpg"
           ]
         },
         {
           "id": "cherry",
           "heroes": [
-            "styles/wolf-cut/cherry/0.jpg",
-            "styles/wolf-cut/cherry/1.jpg"
+            "styles/wolf-cut/cherry/0.jpg"
           ]
         },
         {
           "id": "lilac",
           "heroes": [
-            "styles/wolf-cut/lilac/0.jpg",
-            "styles/wolf-cut/lilac/1.jpg"
+            "styles/wolf-cut/lilac/0.jpg"
           ]
         }
       ]
@@ -985,7 +973,6 @@
       "id": "french-bob",
       "name": "French bob",
       "tiles": [
-        "styles/french-bob/tile-0-r2.jpg",
         "styles/french-bob/tile-1-r2.jpg"
       ],
       "suits": [
@@ -994,77 +981,66 @@
         "long"
       ],
       "models": [
-        "models/white-13-17.jpg",
         "models/east-asian-45-54.jpg"
       ],
       "colors": [
         {
           "id": "jet-black",
           "heroes": [
-            "styles/french-bob/jet-black/0.jpg",
             "styles/french-bob/jet-black/1.jpg"
           ]
         },
         {
           "id": "espresso",
           "heroes": [
-            "styles/french-bob/espresso/0.jpg",
             "styles/french-bob/espresso/1.jpg"
           ]
         },
         {
           "id": "chestnut",
           "heroes": [
-            "styles/french-bob/chestnut/0.jpg",
             "styles/french-bob/chestnut/1.jpg"
           ]
         },
         {
           "id": "caramel",
           "heroes": [
-            "styles/french-bob/caramel/0.jpg",
             "styles/french-bob/caramel/1.jpg"
           ]
         },
         {
           "id": "honey-blonde",
           "heroes": [
-            "styles/french-bob/honey-blonde/0.jpg",
             "styles/french-bob/honey-blonde/1.jpg"
           ]
         },
         {
           "id": "platinum",
           "heroes": [
-            "styles/french-bob/platinum/0.jpg",
             "styles/french-bob/platinum/1.jpg"
           ]
         },
         {
           "id": "ash-grey",
           "heroes": [
-            "styles/french-bob/ash-grey/0.jpg",
             "styles/french-bob/ash-grey/1.jpg"
           ]
         },
         {
           "id": "copper",
           "heroes": [
-            "styles/french-bob/copper/0.jpg",
             "styles/french-bob/copper/1.jpg"
           ]
         },
         {
           "id": "cherry",
           "heroes": [
-            "styles/french-bob/cherry/0.jpg",
             "styles/french-bob/cherry/1.jpg"
           ]
         },
         {
           "id": "lilac",
           "heroes": [
-            "styles/french-bob/lilac/0.jpg",
             "styles/french-bob/lilac/1.jpg"
           ]
         }
@@ -1786,7 +1762,6 @@
       "id": "bantu-knots",
       "name": "Bantu knots",
       "tiles": [
-        "styles/bantu-knots/tile-0-r2.jpg",
         "styles/bantu-knots/tile-1-r2.jpg"
       ],
       "suits": [
@@ -1794,77 +1769,66 @@
         "heart"
       ],
       "models": [
-        "models/black-13-17.jpg",
         "models/black-35-44.jpg"
       ],
       "colors": [
         {
           "id": "jet-black",
           "heroes": [
-            "styles/bantu-knots/jet-black/0.jpg",
             "styles/bantu-knots/jet-black/1.jpg"
           ]
         },
         {
           "id": "espresso",
           "heroes": [
-            "styles/bantu-knots/espresso/0.jpg",
             "styles/bantu-knots/espresso/1.jpg"
           ]
         },
         {
           "id": "chestnut",
           "heroes": [
-            "styles/bantu-knots/chestnut/0.jpg",
             "styles/bantu-knots/chestnut/1.jpg"
           ]
         },
         {
           "id": "caramel",
           "heroes": [
-            "styles/bantu-knots/caramel/0.jpg",
             "styles/bantu-knots/caramel/1.jpg"
           ]
         },
         {
           "id": "honey-blonde",
           "heroes": [
-            "styles/bantu-knots/honey-blonde/0.jpg",
             "styles/bantu-knots/honey-blonde/1.jpg"
           ]
         },
         {
           "id": "platinum",
           "heroes": [
-            "styles/bantu-knots/platinum/0.jpg",
             "styles/bantu-knots/platinum/1.jpg"
           ]
         },
         {
           "id": "ash-grey",
           "heroes": [
-            "styles/bantu-knots/ash-grey/0.jpg",
             "styles/bantu-knots/ash-grey/1.jpg"
           ]
         },
         {
           "id": "copper",
           "heroes": [
-            "styles/bantu-knots/copper/0.jpg",
             "styles/bantu-knots/copper/1.jpg"
           ]
         },
         {
           "id": "cherry",
           "heroes": [
-            "styles/bantu-knots/cherry/0.jpg",
             "styles/bantu-knots/cherry/1.jpg"
           ]
         },
         {
           "id": "lilac",
           "heroes": [
-            "styles/bantu-knots/lilac/0.jpg",
             "styles/bantu-knots/lilac/1.jpg"
           ]
         }
@@ -2519,81 +2483,41 @@
       "top": 0.2135,
       "bottom": 0.6535
     },
-    "styles/wolf-cut/jet-black/1.jpg": {
-      "top": 0.1854,
-      "bottom": 0.6254
-    },
     "styles/wolf-cut/espresso/0.jpg": {
       "top": 0.1826,
       "bottom": 0.6226
-    },
-    "styles/wolf-cut/espresso/1.jpg": {
-      "top": 0.2303,
-      "bottom": 0.6703
     },
     "styles/wolf-cut/chestnut/0.jpg": {
       "top": 0.1601,
       "bottom": 0.6001
     },
-    "styles/wolf-cut/chestnut/1.jpg": {
-      "top": 0.2051,
-      "bottom": 0.6451
-    },
     "styles/wolf-cut/caramel/0.jpg": {
       "top": 0.1629,
       "bottom": 0.6029
-    },
-    "styles/wolf-cut/caramel/1.jpg": {
-      "top": 0.2079,
-      "bottom": 0.6479
     },
     "styles/wolf-cut/honey-blonde/0.jpg": {
       "top": 0.1826,
       "bottom": 0.6226
     },
-    "styles/wolf-cut/honey-blonde/1.jpg": {
-      "top": 0.2135,
-      "bottom": 0.6535
-    },
     "styles/wolf-cut/platinum/0.jpg": {
       "top": 0.191,
       "bottom": 0.631
-    },
-    "styles/wolf-cut/platinum/1.jpg": {
-      "top": 0.177,
-      "bottom": 0.617
     },
     "styles/wolf-cut/ash-grey/0.jpg": {
       "top": 0.2022,
       "bottom": 0.6422
     },
-    "styles/wolf-cut/ash-grey/1.jpg": {
-      "top": 0.1685,
-      "bottom": 0.6085
-    },
     "styles/wolf-cut/copper/0.jpg": {
       "top": 0.2022,
       "bottom": 0.6422
-    },
-    "styles/wolf-cut/copper/1.jpg": {
-      "top": 0.2444,
-      "bottom": 0.6844
     },
     "styles/wolf-cut/cherry/0.jpg": {
       "top": 0.191,
       "bottom": 0.631
     },
-    "styles/wolf-cut/cherry/1.jpg": {
-      "top": 0.2079,
-      "bottom": 0.6479
-    },
     "styles/wolf-cut/lilac/0.jpg": {
       "top": 0.1826,
       "bottom": 0.6226
-    },
-    "styles/wolf-cut/lilac/1.jpg": {
-      "top": 0.1854,
-      "bottom": 0.6254
     },
     "styles/beach-waves/jet-black/0.jpg": {
       "top": 0.1629,
@@ -3075,81 +2999,41 @@
       "top": 0.1882,
       "bottom": 0.6282
     },
-    "styles/french-bob/jet-black/0.jpg": {
-      "top": 0.1966,
-      "bottom": 0.6366
-    },
     "styles/french-bob/jet-black/1.jpg": {
       "top": 0.1882,
       "bottom": 0.6282
-    },
-    "styles/french-bob/espresso/0.jpg": {
-      "top": 0.2444,
-      "bottom": 0.6844
     },
     "styles/french-bob/espresso/1.jpg": {
       "top": 0.2107,
       "bottom": 0.6507
     },
-    "styles/french-bob/chestnut/0.jpg": {
-      "top": 0.2416,
-      "bottom": 0.6816
-    },
     "styles/french-bob/chestnut/1.jpg": {
       "top": 0.1994,
       "bottom": 0.6394
-    },
-    "styles/french-bob/caramel/0.jpg": {
-      "top": 0.2528,
-      "bottom": 0.6928
     },
     "styles/french-bob/caramel/1.jpg": {
       "top": 0.1854,
       "bottom": 0.6254
     },
-    "styles/french-bob/honey-blonde/0.jpg": {
-      "top": 0.2022,
-      "bottom": 0.6422
-    },
     "styles/french-bob/honey-blonde/1.jpg": {
       "top": 0.2303,
       "bottom": 0.6703
-    },
-    "styles/french-bob/platinum/0.jpg": {
-      "top": 0.2135,
-      "bottom": 0.6535
     },
     "styles/french-bob/platinum/1.jpg": {
       "top": 0.1966,
       "bottom": 0.6366
     },
-    "styles/french-bob/ash-grey/0.jpg": {
-      "top": 0.1854,
-      "bottom": 0.6254
-    },
     "styles/french-bob/ash-grey/1.jpg": {
       "top": 0.1067,
       "bottom": 0.5467
-    },
-    "styles/french-bob/copper/0.jpg": {
-      "top": 0.2051,
-      "bottom": 0.6451
     },
     "styles/french-bob/copper/1.jpg": {
       "top": 0.1573,
       "bottom": 0.5973
     },
-    "styles/french-bob/cherry/0.jpg": {
-      "top": 0.236,
-      "bottom": 0.676
-    },
     "styles/french-bob/cherry/1.jpg": {
       "top": 0.1348,
       "bottom": 0.5748
-    },
-    "styles/french-bob/lilac/0.jpg": {
-      "top": 0.1994,
-      "bottom": 0.6394
     },
     "styles/french-bob/lilac/1.jpg": {
       "top": 0.118,
@@ -3795,81 +3679,41 @@
       "top": 0.1994,
       "bottom": 0.6394
     },
-    "styles/bantu-knots/jet-black/0.jpg": {
-      "top": 0.1994,
-      "bottom": 0.6394
-    },
     "styles/bantu-knots/jet-black/1.jpg": {
       "top": 0.2107,
       "bottom": 0.6507
-    },
-    "styles/bantu-knots/espresso/0.jpg": {
-      "top": 0.2303,
-      "bottom": 0.6703
     },
     "styles/bantu-knots/espresso/1.jpg": {
       "top": 0.1685,
       "bottom": 0.6085
     },
-    "styles/bantu-knots/chestnut/0.jpg": {
-      "top": 0.1882,
-      "bottom": 0.6282
-    },
     "styles/bantu-knots/chestnut/1.jpg": {
       "top": 0.1376,
       "bottom": 0.5776
-    },
-    "styles/bantu-knots/caramel/0.jpg": {
-      "top": 0.1685,
-      "bottom": 0.6085
     },
     "styles/bantu-knots/caramel/1.jpg": {
       "top": 0.1742,
       "bottom": 0.6142
     },
-    "styles/bantu-knots/honey-blonde/0.jpg": {
-      "top": 0.2163,
-      "bottom": 0.6563
-    },
     "styles/bantu-knots/honey-blonde/1.jpg": {
       "top": 0.236,
       "bottom": 0.676
-    },
-    "styles/bantu-knots/platinum/0.jpg": {
-      "top": 0.1938,
-      "bottom": 0.6338
     },
     "styles/bantu-knots/platinum/1.jpg": {
       "top": 0.2022,
       "bottom": 0.6422
     },
-    "styles/bantu-knots/ash-grey/0.jpg": {
-      "top": 0.1798,
-      "bottom": 0.6198
-    },
     "styles/bantu-knots/ash-grey/1.jpg": {
       "top": 0.1433,
       "bottom": 0.5833
-    },
-    "styles/bantu-knots/copper/0.jpg": {
-      "top": 0.1657,
-      "bottom": 0.6057
     },
     "styles/bantu-knots/copper/1.jpg": {
       "top": 0.2079,
       "bottom": 0.6479
     },
-    "styles/bantu-knots/cherry/0.jpg": {
-      "top": 0.177,
-      "bottom": 0.617
-    },
     "styles/bantu-knots/cherry/1.jpg": {
       "top": 0.1545,
       "bottom": 0.5945
-    },
-    "styles/bantu-knots/lilac/0.jpg": {
-      "top": 0.2163,
-      "bottom": 0.6563
     },
     "styles/bantu-knots/lilac/1.jpg": {
       "top": 0.1404,

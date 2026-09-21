@@ -87,6 +87,15 @@ agree with it.
 
 ## The manifest
 
+**Three bases are withdrawn** — `white-13-17`, `latina-13-17` and `black-13-17` — because
+they read as ambiguous rather than clearly adult. `manifest.ts` (`WITHDRAWN_MODELS`) leaves
+their slot out of a cut's `heroes`, `tiles` and `models`, so wolf-cut, french-bob and
+bantu-knots each publish one model. The files stay on disk, in `roster.json` and in the
+bucket: clients hold a manifest for a day, and deleting an object would show them broken
+art. Not listing it is the whole withdrawal. Re-run `manifest.ts --write` and then
+`upload.sh` to publish it.
+
+
 `manifest.ts` walks the same tree `upload.sh` uploads, so the two cannot
 disagree about what exists. It publishes only styles with rendered art, and
 validates against `catalogueResponseSchema` before writing — the last place a

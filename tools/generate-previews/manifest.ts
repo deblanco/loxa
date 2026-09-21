@@ -27,6 +27,7 @@ import {
   tileKey,
   type CatalogueResponse,
   type CatalogueStyle,
+  type PreviewSlot,
 } from '@loxa/shared';
 
 const OUT_DIR = join(import.meta.dir, 'catalogue');
@@ -43,6 +44,35 @@ function loadRoster(): Record<string, [string, string]> {
 }
 
 const roster = loadRoster();
+
+/**
+ * Base photographs that are no longer published.
+ *
+ * The three `13-17` files read as ambiguous rather than clearly adult — the
+ * roster's own note says the band in a filename is an unreliable label — and the
+ * terms bar children's photos. An app that offers to restyle *anybody's* face
+ * should not lead with faces that might be a child's, and 1.x / 5.x reviewers
+ * would reasonably ask.
+ *
+ * **Withdrawn from the manifest, never deleted from the bucket.** Clients hold a
+ * manifest for a day, so deleting an object shows broken art to everybody who
+ * still has the old one; not listing it costs nothing and reaches everyone once
+ * their copy expires. The files stay on disk and in `roster.json`, which is the
+ * generator's record of what was rendered.
+ */
+const WITHDRAWN_MODELS: ReadonlySet<string> = new Set(['white-13-17', 'latina-13-17', 'black-13-17']);
+
+/**
+ * The slots of a cut that are published: every slot whose model is not withdrawn.
+ *
+ * A slot is a position in the roster's pair, so `heroes`, `tiles` and `models`
+ * are all filtered by this one list and stay aligned with each other — the app
+ * pages a plate through the heroes and shows the model that wore them.
+ */
+function publishedSlots(styleId: string): PreviewSlot[] {
+  const pair = roster[styleId];
+  return PREVIEW_SLOTS.filter((slot) => !WITHDRAWN_MODELS.has(pair?.[slot] ?? ''));
+}
 
 /** The manifest's own key in the bucket, and the file name on disk. */
 export const CATALOGUE_FILE = 'catalogue.json';
@@ -105,7 +135,9 @@ export async function buildManifest(): Promise<CatalogueResponse> {
 
   for (const style of HAIR_STYLES) {
     const colors = HAIR_COLORS.flatMap((color) => {
-      const heroes = PREVIEW_SLOTS.map((slot) => heroKey(style.id, color.id, slot)).filter(exists);
+      const heroes = publishedSlots(style.id)
+        .map((slot) => heroKey(style.id, color.id, slot))
+        .filter(exists);
       // One rendered model is enough to show the pair; the plate pages through
       // whatever is there. Zero is not a colour, it is an absence.
       return heroes.length > 0 ? [{ id: color.id, heroes }] : [];
@@ -120,12 +152,17 @@ export async function buildManifest(): Promise<CatalogueResponse> {
       name: style.name,
       // Usually empty, and that is fine: 45 of the 48 tiles have never been
       // rendered. The strip falls back to a hero rather than dropping the cut.
-      tiles: PREVIEW_SLOTS.map((slot) => tileKey(style.id, slot)).filter(exists),
+      tiles: publishedSlots(style.id)
+        .map((slot) => tileKey(style.id, slot))
+        .filter(exists),
       suits: [...style.suits],
       // The faces behind the renders, in slot order, and only the ones whose
       // file is actually in the bucket — the same rule the tiles follow. A
       // "before" that 404s is worse than no before.
-      models: roster[style.id]?.map(modelKey).filter(exists) ?? [],
+      models: publishedSlots(style.id)
+        .map((slot) => roster[style.id]?.[slot])
+        .flatMap((model) => (model ? [modelKey(model)] : []))
+        .filter(exists),
       colors,
     });
   }
