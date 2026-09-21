@@ -12,7 +12,7 @@
  * It reads the same tree `upload.sh` uploads, so the two cannot disagree about
  * what is there: both look at the files.
  */
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import sharp from 'sharp';
 import {
@@ -23,12 +23,26 @@ import {
   PREVIEW_SLOTS,
   catalogueResponseSchema,
   heroKey,
+  modelKey,
   tileKey,
   type CatalogueResponse,
   type CatalogueStyle,
 } from '@loxa/shared';
 
 const OUT_DIR = join(import.meta.dir, 'catalogue');
+
+/**
+ * Which two models wear each cut, read from the same file the generator used.
+ *
+ * The pairing is a rendering decision and lives in `roster.json`; the manifest
+ * only publishes it so the app can show what a face looked like before.
+ */
+function loadRoster(): Record<string, [string, string]> {
+  const raw: unknown = JSON.parse(readFileSync(join(import.meta.dir, 'roster.json'), 'utf8'));
+  return (raw as { styles: Record<string, [string, string]> }).styles;
+}
+
+const roster = loadRoster();
 
 /** The manifest's own key in the bucket, and the file name on disk. */
 export const CATALOGUE_FILE = 'catalogue.json';
@@ -108,6 +122,10 @@ export async function buildManifest(): Promise<CatalogueResponse> {
       // rendered. The strip falls back to a hero rather than dropping the cut.
       tiles: PREVIEW_SLOTS.map((slot) => tileKey(style.id, slot)).filter(exists),
       suits: [...style.suits],
+      // The faces behind the renders, in slot order, and only the ones whose
+      // file is actually in the bucket — the same rule the tiles follow. A
+      // "before" that 404s is worse than no before.
+      models: roster[style.id]?.map(modelKey).filter(exists) ?? [],
       colors,
     });
   }

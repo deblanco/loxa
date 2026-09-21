@@ -66,3 +66,17 @@ export function tileKey(styleId: string, slot: PreviewSlot): string {
 export function heroKey(styleId: string, colorId: string, slot: PreviewSlot): string {
   return `styles/${styleId}/${colorId}/${slot}.jpg`;
 }
+
+/**
+ * The photograph a model was restyled *from*.
+ *
+ * Every other key in this file is a render. This one is the base the generator
+ * was given — the same face, with the hair it arrived with — which is the only
+ * picture in the bucket that can be shown as a "before".
+ *
+ * Named by the model rather than by the cut, because one model wears several:
+ * twenty files for two hundred and forty renders.
+ */
+export function modelKey(model: string): string {
+  return `models/${model}.jpg`;
+}

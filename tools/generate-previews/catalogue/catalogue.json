@@ -13,6 +13,10 @@
         "heart",
         "long"
       ],
+      "models": [
+        "models/white-25-34.jpg",
+        "models/east-asian-18-24.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -98,6 +102,10 @@
         "round",
         "square",
         "heart"
+      ],
+      "models": [
+        "models/latina-25-34.jpg",
+        "models/white-35-44.jpg"
       ],
       "colors": [
         {
@@ -185,6 +193,10 @@
         "heart",
         "long"
       ],
+      "models": [
+        "models/east-asian-18-24-2.jpg",
+        "models/middle-eastern-25-34.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -268,6 +280,10 @@
       "suits": [
         "oval",
         "heart"
+      ],
+      "models": [
+        "models/white-55-64.jpg",
+        "models/south-asian-18-24.jpg"
       ],
       "colors": [
         {
@@ -353,6 +369,10 @@
         "oval",
         "square",
         "long"
+      ],
+      "models": [
+        "models/east-asian-18-24.jpg",
+        "models/latina-13-17.jpg"
       ],
       "colors": [
         {
@@ -440,6 +460,10 @@
         "heart",
         "long"
       ],
+      "models": [
+        "models/latina-35-44.jpg",
+        "models/white-25-34.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -525,6 +549,10 @@
         "round",
         "heart"
       ],
+      "models": [
+        "models/east-asian-45-54.jpg",
+        "models/south-asian-45-54.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -608,6 +636,10 @@
       "suits": [
         "oval",
         "heart"
+      ],
+      "models": [
+        "models/black-18-24.jpg",
+        "models/black-35-44.jpg"
       ],
       "colors": [
         {
@@ -695,6 +727,10 @@
         "heart",
         "long"
       ],
+      "models": [
+        "models/middle-eastern-35-44.jpg",
+        "models/latina-25-34.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -777,6 +813,10 @@
       ],
       "suits": [
         "oval"
+      ],
+      "models": [
+        "models/southeast-asian-45-54.jpg",
+        "models/black-18-24.jpg"
       ],
       "colors": [
         {
@@ -864,6 +904,10 @@
         "square",
         "heart"
       ],
+      "models": [
+        "models/white-35-44.jpg",
+        "models/east-asian-18-24-2.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -948,6 +992,10 @@
         "oval",
         "heart",
         "long"
+      ],
+      "models": [
+        "models/white-13-17.jpg",
+        "models/east-asian-45-54.jpg"
       ],
       "colors": [
         {
@@ -1034,6 +1082,10 @@
         "round",
         "heart"
       ],
+      "models": [
+        "models/southeast-asian-45-54.jpg",
+        "models/white-55-64.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1118,6 +1170,10 @@
         "oval",
         "heart",
         "long"
+      ],
+      "models": [
+        "models/east-asian-18-24.jpg",
+        "models/south-asian-18-24.jpg"
       ],
       "colors": [
         {
@@ -1204,6 +1260,10 @@
         "round",
         "square"
       ],
+      "models": [
+        "models/south-asian-45-54.jpg",
+        "models/latina-35-44.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1288,6 +1348,10 @@
         "oval",
         "square",
         "long"
+      ],
+      "models": [
+        "models/middle-eastern-25-34.jpg",
+        "models/white-25-34.jpg"
       ],
       "colors": [
         {
@@ -1375,6 +1439,10 @@
         "heart",
         "long"
       ],
+      "models": [
+        "models/white-35-44.jpg",
+        "models/latina-18-24-street.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1458,6 +1526,10 @@
       "suits": [
         "oval",
         "square"
+      ],
+      "models": [
+        "models/east-asian-18-24-2.jpg",
+        "models/middle-eastern-35-44.jpg"
       ],
       "colors": [
         {
@@ -1544,6 +1616,10 @@
         "heart",
         "long"
       ],
+      "models": [
+        "models/black-35-44.jpg",
+        "models/black-18-24.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1629,6 +1705,10 @@
         "round",
         "square"
       ],
+      "models": [
+        "models/black-18-24.jpg",
+        "models/black-35-44.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1712,6 +1792,10 @@
       "suits": [
         "oval",
         "heart"
+      ],
+      "models": [
+        "models/black-13-17.jpg",
+        "models/black-35-44.jpg"
       ],
       "colors": [
         {
@@ -1798,6 +1882,10 @@
         "round",
         "heart"
       ],
+      "models": [
+        "models/south-asian-18-24.jpg",
+        "models/east-asian-45-54.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1883,6 +1971,10 @@
         "square",
         "heart"
       ],
+      "models": [
+        "models/white-55-64.jpg",
+        "models/middle-eastern-25-34.jpg"
+      ],
       "colors": [
         {
           "id": "jet-black",
@@ -1967,6 +2059,10 @@
         "oval",
         "round",
         "heart"
+      ],
+      "models": [
+        "models/latina-25-34.jpg",
+        "models/south-asian-45-54.jpg"
       ],
       "colors": [
         {

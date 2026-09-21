@@ -156,6 +156,14 @@ export const catalogueStyleSchema = z.object({
    * existed still validates, and the strip simply shows no "suits you" marks.
    */
   suits: z.array(faceShapeSchema).optional(),
+  /**
+   * The photograph each model slot was restyled from, in slot order.
+   *
+   * The only "before" the bucket holds: every other key is a render. Optional,
+   * because a manifest built before these were uploaded still validates and
+   * the screens that want a before simply do not draw one.
+   */
+  models: z.array(previewKeySchema).optional(),
   /** The colours rendered for this style, in catalogue order. Never empty. */
   colors: z
     .array(

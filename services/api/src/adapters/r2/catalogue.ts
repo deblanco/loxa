@@ -46,6 +46,10 @@ export function shippedCatalogue(): CatalogueResponse {
       name: style.name,
       tiles: PREVIEW_SLOTS.map((slot) => tileKey(style.id, slot)),
       suits: [...style.suits],
+      // No `models` here. The shipped fallback is derived from the compiled
+      // catalogue, which knows the cuts and not which face wore them — that
+      // pairing lives with the generator. A manifest is what carries a before.
+
       colors: HAIR_COLORS.map((color) => ({
         id: color.id,
         heroes: PREVIEW_SLOTS.map((slot) => heroKey(style.id, color.id, slot)),
