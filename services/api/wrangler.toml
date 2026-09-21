@@ -94,13 +94,21 @@ OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
 # on the key the render fallback already uses. ANALYSIS_TEXT_MODEL stays unset
 # until this project is granted one.
 OPENROUTER_ANALYSIS_MODEL = "google/gemini-2.5-flash"
-# The primary. The model must be a **vision** model with zero data retention:
-# some models on this service are marked "training use", and this app's privacy
-# policy says nobody's photos train anything. Measured: the vision model answers
-# in about ten seconds, against twenty-three for the reasoning one.
+# The primary. The model must read images and must not train on them: some
+# models on this service are marked "training use", and this app's privacy
+# policy says nobody's photos train anything.
+#
+# `deepseek-v4.1-flash` is not listed with vision in the provider's table but
+# does accept images — verified against the live endpoint, reasoning about the
+# actual photograph — and answers in about seven seconds.
+#
+# **Its retention note reads "ZDR through Sep 2026", which has now arrived.**
+# Re-check what replaces it before the next submission: if zero retention
+# lapses, this model is disclosing users' faces to somebody who keeps them, and
+# the privacy policy has to change or the model does.
 #   wrangler secret put CODEX_TOKEN
 CODEX_BASE_URL = "https://opencode.ai/zen/go/v1"
-CODEX_MODEL = "deepseek-v4-flash-vision-exp"
+CODEX_MODEL = "deepseek-v4.1-flash"
 
 # --- Entitlements -----------------------------------------------------------
 # The weekly subscription is verified server-side, against RevenueCat API v2,
