@@ -89,7 +89,7 @@ const de: typeof en = {
 
   camera: {
     title: 'Foto für diesen Look',
-    titleProfile: 'Neues Profilfoto',
+    titleProfile: 'Profilfoto',
     permission: 'Kamera',
     permissionBody:
       'Loxa braucht die Kamera für das Foto, das umgestylt wird. Nichts wird hochgeladen, bis du auf Anprobieren tippst.',

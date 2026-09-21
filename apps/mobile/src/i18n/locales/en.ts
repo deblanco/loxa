@@ -127,7 +127,7 @@ const en = {
 
   camera: {
     title: 'Photo for this look',
-    titleProfile: 'New profile photo',
+    titleProfile: 'Profile photo',
     permission: 'Camera',
     permissionBody:
       'Loxa needs the camera to take the photo it restyles. Nothing is uploaded until you press Try On.',

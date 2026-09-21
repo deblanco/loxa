@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Chevron } from '@/components/Chevron';
 import { FaceDiagram } from '@/components/FaceDiagram';
 import { PersonMark } from '@/components/PersonMark';
 import { PhotoPlate } from '@/components/PhotoPlate';
@@ -122,15 +123,16 @@ export default function Welcome() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top + space.s4 }]}>
       <View style={styles.header}>
+        {/* The profile's back control, verbatim: a 34pt ringed chevron. Back
+            is back everywhere in this app, and a word here where a chevron
+            lives two screens later is two vocabularies for one idea. */}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('welcome.back')}
+          accessibilityLabel={t('common.back')}
           onPress={back}
-          hitSlop={space.s3}
+          style={styles.round}
         >
-          <Meta variant="note" tone="ink45" sentence>
-            {t('welcome.back')}
-          </Meta>
+          <Chevron />
         </Pressable>
 
         <View style={styles.dots}>
@@ -155,21 +157,25 @@ export default function Welcome() {
         {step === 'photo' ? (
           <View style={styles.portrait}>
             <PhotoPlate uri={portrait} placeholder={<PersonMark />} style={styles.avatar} />
+            {/*
+              The two ways to get a photo, as buttons, because getting one is
+              the whole job of this step. As mono captions they read as labels
+              under a picture — the plate above is not pressable and they were
+              the only things on the screen that were.
+
+              Stacked rather than side by side: "Choose from library" does not
+              fit half a phone in German, and a truncated button is worse than
+              a taller column.
+            */}
             <View style={styles.portraitActions}>
-              <Pressable
-                accessibilityRole="button"
+              {/* Filled, because on this step it is *the* action — the same
+                  black pill Try On gets on the screen this leads to. The
+                  library is the alternative to it, not its equal. */}
+              <Pill
+                label={portrait ? t('welcome.change') : t('welcome.take')}
                 onPress={() => router.push('/camera?from=profile')}
-                hitSlop={space.s2}
-              >
-                <Meta variant="note" tone="ink" sentence>
-                  {portrait ? t('welcome.change') : t('welcome.take')}
-                </Meta>
-              </Pressable>
-              <Pressable accessibilityRole="button" onPress={() => void fromLibrary()} hitSlop={space.s2}>
-                <Meta variant="note" tone="ink45" sentence>
-                  {t('welcome.choose')}
-                </Meta>
-              </Pressable>
+              />
+              <Pill label={t('welcome.choose')} tone="quiet" onPress={() => void fromLibrary()} />
             </View>
             {portrait ? (
               <Meta variant="note" tone="ink45" sentence>
@@ -197,7 +203,15 @@ export default function Welcome() {
       </View>
 
       <View style={[styles.actions, { paddingBottom: insets.bottom + space.s6 }]}>
-        <Pill label={last ? t('welcome.done') : t('welcome.next')} onPress={forward} />
+        {/*
+          On the photo step with nothing chosen yet, "Next" and "Skip" would be
+          two buttons doing one thing. The footer is the way past instead, and
+          it says which it is: skipping while there is nothing to keep, going on
+          once there is.
+        */}
+        {step === 'photo' && !portrait ? null : (
+          <Pill label={last ? t('welcome.done') : t('welcome.next')} onPress={forward} />
+        )}
         {/*
           A button, not a caption.
 
@@ -225,7 +239,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerSpacer: { width: 44 },
+  headerSpacer: { width: 34, height: 34 },
+  round: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: color.ink12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dots: { flexDirection: 'row', gap: 7, alignItems: 'center' },
   dot: { width: 5, height: 5, borderRadius: radius.pill, backgroundColor: color.ink18 },
   dotOn: { width: 16, backgroundColor: color.ink },
@@ -233,7 +256,7 @@ const styles = StyleSheet.create({
   lead: { gap: space.s1 },
   portrait: { alignItems: 'center', gap: space.s3 },
   avatar: { width: 128, height: 128, borderRadius: radius.pill },
-  portraitActions: { flexDirection: 'row', gap: space.s5 },
+  portraitActions: { alignSelf: 'stretch', gap: space.s2 + 2 },
   diagram: { alignItems: 'center', gap: space.s4 },
   actions: { paddingHorizontal: space.gutterHero, gap: space.s4 },
   centred: { textAlign: 'center' },
