@@ -13,6 +13,7 @@ import { Body, Meta } from '@/components/Text';
 import { adjacentStyle, clampPair, colorsFor, findColor, findStyle, heroKeys } from '@/catalogue';
 import { useCatalogue } from '@/store/catalogue';
 import { ensureConsent } from '@/consent-prompt';
+import { putRenderShot, renderShot } from '@/store/render-shot';
 import { useCredits } from '@/store/credits';
 import { offerPortrait } from '@/store/portrait-offer';
 import { readProfilePhoto, readProfilePhotoForRender } from '@/store/profile-photo';
@@ -26,8 +27,6 @@ import { color, radius, space } from '@/theme';
  * signature that satisfies it.
  */
 type Params = {
-  photoUri?: string;
-  photoBase64?: string;
   styleId: string;
   colorId: string;
   source?: string;
@@ -69,10 +68,13 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
   const insets = useSafeAreaInsets();
   const { credits } = useCredits();
 
-  // The shot travels through the router, exactly as it did to the preview
-  // screen: one value, used once, on the way to one place. The portrait is on
-  // disk instead, and is read here rather than sent.
-  const fromCamera = params.source !== 'saved';
+  // Where the photo is. `saved` means the profile portrait, which is on disk and
+  // read here. Anything else means a photo somebody has just taken, or just had
+  // read, which is held in memory (`render-shot.ts`) rather than sent through the
+  // router: it is 700KB of base64, and it used to arrive here as a route
+  // parameter and go missing.
+  const fromSaved = params.source === 'saved';
+  const [held] = useState(() => (fromSaved ? null : renderShot()));
 
   const [pair, setPair] = useState(() =>
     clampPair(catalogue, params.styleId, params.colorId),
@@ -81,9 +83,11 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
   const [portrait, setPortrait] = useState<string | null>(null);
   const pager = useRef<ScrollView>(null);
 
+  // Always read, not only for `saved`: with nothing held, the portrait is what
+  // Try On falls back to, and the inset should show the photo it will use.
   useEffect(() => {
-    if (!fromCamera) void readProfilePhoto().then(setPortrait);
-  }, [fromCamera]);
+    void readProfilePhoto().then(setPortrait);
+  }, []);
 
   // A background refresh can withdraw the cut being confirmed while it is on
   // screen. Same rule as the swipe below, arriving from the other direction.
@@ -96,7 +100,7 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
 
   const style = findStyle(catalogue, pair.styleId);
   const colorName = findColor(catalogue, pair.colorId)?.name ?? '';
-  const own = fromCamera ? params.photoUri : portrait;
+  const own = held?.uri ?? portrait ?? undefined;
   const hero = heroKeys(catalogue, pair.styleId, pair.colorId)[0];
   const heroUri = hero ? assetUrl(hero) : undefined;
 
@@ -131,13 +135,15 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
       return;
     }
 
-    const shot =
-      fromCamera && params.photoUri && params.photoBase64
-        ? { uri: params.photoUri, base64: params.photoBase64 }
-        : fromCamera
-          ? null
-          : await readProfilePhotoForRender();
-    if (!shot) return;
+    const shot = held ?? (await readProfilePhotoForRender());
+
+    // Never a silent nothing. A Try On with no photo behind it used to return
+    // here and leave somebody pressing a button that did nothing; it now asks
+    // for the photo, which is the only thing missing.
+    if (!shot) {
+      router.push({ pathname: '/camera', params: { styleId: pair.styleId, colorId: pair.colorId } });
+      return;
+    }
 
     // Before anything is armed for the result screen: a "not now" here sends nothing
     // and leaves the portrait offer where it was.
@@ -146,12 +152,12 @@ function ConfirmReady({ catalogue, params }: { catalogue: CatalogueResponse; par
     // Consumed on the result screen, which is reached only once a render has
     // been billed and saved. Only for a fresh shot: offering the portrait as
     // the portrait is a question with one answer.
-    if (fromCamera) offerPortrait(shot);
+    if (held) offerPortrait(held);
 
+    putRenderShot(shot);
     router.push({
       pathname: '/generating',
       params: {
-        base64: shot.base64,
         // The same shot, for the result screen's corner and its compare. It
         // travels rather than being written down: it is wanted on exactly one
         // screen, for exactly as long as the render it belongs to.

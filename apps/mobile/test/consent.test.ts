@@ -32,6 +32,18 @@ describe('the consent questions', () => {
     );
   });
 
+  it('says "our partners" on the sheet and never names the providers', () => {
+    // The privacy page names every provider and the sheet links to it. On the
+    // sheet itself they are "our partners": a company a person has never heard of
+    // is noise in the one paragraph being read as a contract, and it changes when
+    // the provider does. Google stays, because the image model is Google's.
+    for (const locale of [en, es, fr, de, it_]) {
+      for (const key of ['renderGoesTo', 'analysisGoesTo'] as const) {
+        expect(locale.consent[key]).not.toMatch(/openrouter|opencode/i);
+      }
+    }
+  });
+
   it('gives the two questions different words', () => {
     // They name different recipients, so identical text would be wrong for one.
     expect(en.consent.renderGoesTo).not.toBe(en.consent.analysisGoesTo);

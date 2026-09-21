@@ -37,6 +37,7 @@ import { boundsOf, landmarksOf } from '@/face/detected';
 import { reportHandled } from '@/diagnostics';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary, prepare, type PreparedPhoto } from '@/photo';
+import { putRenderShot } from '@/store/render-shot';
 import { saveProfilePhoto } from '@/store/profile-photo';
 import { putSuitsShot } from '@/store/suits-shots';
 import { FaceTracker } from 'face-track';
@@ -316,10 +317,11 @@ export default function Camera() {
     // Replace rather than push: this screen has done its job, and leaving it
     // in the stack would put a live viewfinder behind the confirm screen and a
     // second camera between confirm and the preview underneath it.
-    router.replace({
-      pathname: '/confirm',
-      params: { photoUri: photo.uri, photoBase64: photo.base64, styleId, colorId },
-    });
+    //
+    // The photo is held, not sent through the router: it is 700KB of base64, and
+    // Confirm used to receive it as a route parameter and lose it.
+    putRenderShot(photo);
+    router.replace({ pathname: '/confirm', params: { styleId, colorId } });
   }
 
   if (!hasPermission) {

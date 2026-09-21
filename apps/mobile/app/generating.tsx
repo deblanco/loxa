@@ -9,6 +9,7 @@ import { PhotoPlate } from '@/components/PhotoPlate';
 import { Pill } from '@/components/Pill';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Body, Display, Meta } from '@/components/Text';
+import { clearRenderShot, renderShot } from '@/store/render-shot';
 import { humaniseId } from '@/store/look-record';
 import { saveLook } from '@/store/results';
 import { noteRender } from '@/store/review';
@@ -45,14 +46,16 @@ export default function Generating() {
   // `sourceUri` is only in transit: nothing on this screen reads it, and it is
   // deliberately not a render dependency — it is the result screen's copy of
   // the photograph that went in.
-  const { base64, sourceUri, styleId, colorId, styleName, colorName } = useLocalSearchParams<{
-    base64: string;
+  const { sourceUri, styleId, colorId, styleName, colorName } = useLocalSearchParams<{
     sourceUri?: string;
     styleId: string;
     colorId: string;
     styleName?: string;
     colorName?: string;
   }>();
+
+  // The photograph, from memory rather than the router: see `render-shot.ts`.
+  const [base64] = useState(() => renderShot()?.base64 ?? null);
 
   const [progress, setProgress] = useState(0);
   const [failed, setFailed] = useState(false);
@@ -86,6 +89,14 @@ export default function Generating() {
     let cancelled = false;
 
     async function render() {
+      // Confirm always puts one here before it navigates. Reaching this without
+      // one means the screen was opened some other way, and that is worth
+      // hearing about rather than a spinner that never resolves.
+      if (!base64) {
+        reportHandled(new Error('generating opened with no photograph'), 'generating.noShot');
+        setFailed(true);
+        return;
+      }
       try {
         const result = await tryOn({ imageBase64: base64, styleId, colorId });
         const look = await saveLook({
@@ -102,6 +113,8 @@ export default function Generating() {
         // also the only place where a look is genuinely new — counting on the
         // result screen would count it again every time it was reopened.
         void noteRender();
+        // Spent: a later Try On must not be able to pick up this photo.
+        clearRenderShot();
 
         if (cancelled) return;
 

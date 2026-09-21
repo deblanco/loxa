@@ -31,6 +31,7 @@ export default defineConfig({
         'src/selection.ts',
         'src/welcome.ts',
         'src/consent.ts',
+        'src/store/render-shot.ts',
         'src/purchases/outcome.ts',
         'src/catalogue.ts',
         'src/catalogue-cache.ts',

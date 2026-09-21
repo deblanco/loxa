@@ -14,6 +14,7 @@ import { reportHandled } from '@/diagnostics';
 import { faceShapeKey } from '@/face/shape';
 import { verdictLine, type FaceVerdict } from '@/face/verdict';
 import { pickFromLibrary } from '@/photo';
+import { putRenderShot } from '@/store/render-shot';
 import { readAnalysis, saveAnalysis, type StoredAnalysis } from '@/store/analysis';
 import { useCatalogue } from '@/store/catalogue';
 import { ensureConsent } from '@/consent-prompt';
@@ -134,7 +135,12 @@ export default function Suits() {
       setAnswer(stored);
       await saveAnalysis(result);
       // The photographs have done their work. Nothing here keeps them, and
-      // neither does the Worker.
+      // neither does the Worker. The front one is the exception, and only in
+      // memory: somebody who asks which cuts suit them and presses Try On on one
+      // means their own face, the one they just gave, and not to be sent back to
+      // the camera. The render asks its own permission first.
+      const front = suitsShots()[0];
+      if (front) putRenderShot(front);
       clearSuitsShots();
       setShots(suitsShots());
     } catch (err) {
@@ -155,9 +161,8 @@ export default function Suits() {
     const colorId = style?.colors[0]?.id ?? catalogue?.defaults.colorId;
     if (!colorId) return;
 
-    // `source` unset means the saved photo, which is what the confirm screen
-    // reads when it was not handed one. The analysis photos are gone by now,
-    // deliberately: they were sent to be read, not to be rendered.
+    // No `source`: Confirm uses the photo held for it — the front one just
+    // analysed — and falls back to the saved portrait, then to the camera.
     router.push({ pathname: '/confirm', params: { styleId, colorId } });
   }
 
