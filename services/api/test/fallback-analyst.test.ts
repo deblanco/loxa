@@ -73,7 +73,7 @@ describe('unavailableAnalyst', () => {
 });
 
 describe('faceAnalystFor', () => {
-  const codex = { CODEX_BASE_URL: 'https://codex.test/v1', CODEX_MODEL: 'm', CODEX_TOKEN: 't' };
+  const codex = { OPENCODE_BASE_URL: 'https://opencode.test/v1', OPENCODE_MODEL: 'm', OPENCODE_TOKEN: 't' };
 
   it('uses both when both are configured', () => {
     // Proved by behaviour rather than by identity: with both present, a
@@ -84,7 +84,7 @@ describe('faceAnalystFor', () => {
   it('takes the self-hosted endpoint only when all three parts of it are set', async () => {
     // A base URL with no token is a 401 on the one path nobody exercises until
     // it is needed, so a half-configured endpoint is treated as no endpoint.
-    const half = faceAnalystFor({ ...env, CODEX_BASE_URL: codex.CODEX_BASE_URL });
+    const half = faceAnalystFor({ ...env, OPENCODE_BASE_URL: codex.OPENCODE_BASE_URL });
     expect(half).toBeDefined();
   });
 

@@ -106,9 +106,9 @@ OPENROUTER_ANALYSIS_MODEL = "google/gemini-2.5-flash"
 # Re-check what replaces it before the next submission: if zero retention
 # lapses, this model is disclosing users' faces to somebody who keeps them, and
 # the privacy policy has to change or the model does.
-#   wrangler secret put CODEX_TOKEN
-CODEX_BASE_URL = "https://opencode.ai/zen/go/v1"
-CODEX_MODEL = "deepseek-v4.1-flash"
+#   wrangler secret put OPENCODE_TOKEN
+OPENCODE_BASE_URL = "https://opencode.ai/zen/go/v1"
+OPENCODE_MODEL = "deepseek-v4.1-flash"
 
 # --- Entitlements -----------------------------------------------------------
 # The weekly subscription is verified server-side, against RevenueCat API v2,

@@ -38,15 +38,15 @@ import { buildSuitabilityPrompt } from '../suitability-prompt';
  * few hundred text tokens with no verdict attached. A box in somebody's house
  * answering badly is precisely the "ask Google instead" case.
  */
-export interface CodexAnalystConfig {
+export interface OpencodeAnalystConfig {
   baseUrl: string;
   model: string;
   token: string;
 }
 
-export function codexFaceAnalyst(config: CodexAnalystConfig): FaceAnalystPort {
+export function opencodeFaceAnalyst(config: OpencodeAnalystConfig): FaceAnalystPort {
   const provider = createOpenAICompatible({
-    name: 'codex',
+    name: 'opencode',
     baseURL: config.baseUrl,
     apiKey: config.token,
     fetch: (...args) => globalThis.fetch(...args),
@@ -91,12 +91,12 @@ export function codexFaceAnalyst(config: CodexAnalystConfig): FaceAnalystPort {
         // Everything the SDK throws is treated as the provider's problem:
         // a bad key, a stopped container and a rate limit are all "this box is
         // not answering", and the fallback is one Google call away.
-        throw new RendererUnavailableError(`codex endpoint: ${describe(err)}`, true);
+        throw new RendererUnavailableError(`opencode endpoint: ${describe(err)}`, true);
       }
 
       const draft = readDraft(extractJson(text));
       if (!draft) {
-        throw new RendererUnavailableError('codex endpoint answered with something that is not an analysis', true);
+        throw new RendererUnavailableError('opencode endpoint answered with something that is not an analysis', true);
       }
 
       return draft;

@@ -65,12 +65,12 @@ export interface Env {
    *
    * Unset is supported: Gemini answers every analysis instead, which costs
    * latency and the text quota rather than correctness. `wrangler secret put
-   * CODEX_TOKEN`, or .dev.vars locally — it is a Worker secret and never
+   * OPENCODE_TOKEN`, or .dev.vars locally — it is a Worker secret and never
    * reaches the app.
    */
-  CODEX_BASE_URL?: string;
-  CODEX_MODEL?: string;
-  CODEX_TOKEN?: string;
+  OPENCODE_BASE_URL?: string;
+  OPENCODE_MODEL?: string;
+  OPENCODE_TOKEN?: string;
 
   /**
    * The OpenRouter slug for the model that reads a face, on the same key the
@@ -83,7 +83,7 @@ export interface Env {
    * one does not move the margin arithmetic.
    *
    * Unset means the self-hosted endpoint has no fallback, which is supported.
-   * **Unset together with the CODEX_* three is not**: with no provider at all
+   * **Unset together with the OPENCODE_* three is not**: with no provider at all
    * the analysis route answers 502 for everybody. That is where the parallel
    * with OPENROUTER_API_KEY ends — that key costs availability, and these
    * together cost the feature.

@@ -15,7 +15,7 @@ import type { FaceAnalystPort } from '../ports/face-analyst';
  * validation happens in core, after this composite has returned.
  *
  * The primary here is the endpoint we run ourselves, so "transient" covers more
- * than it does for the renderer — see `adapters/codex/analyst.ts`. A box that
+ * than it does for the renderer — see `adapters/opencode/analyst.ts`. A box that
  * is down, mis-keyed or answering prose is all the same thing from here: ask
  * Google instead.
  */

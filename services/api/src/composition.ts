@@ -1,7 +1,7 @@
 import { d1CreditLedger } from './adapters/d1/credit-ledger';
 import { d1Diagnostics } from './adapters/d1/diagnostics';
 import { d1UsageStats } from './adapters/d1/usage-stats';
-import { codexFaceAnalyst } from './adapters/codex/analyst';
+import { opencodeFaceAnalyst } from './adapters/opencode/analyst';
 import { devEntitlements } from './adapters/entitlements/dev';
 import { fallbackAnalyst, unavailableAnalyst } from './adapters/fallback-analyst';
 import { fallbackRenderer } from './adapters/fallback-renderer';
@@ -105,11 +105,11 @@ export function rendererFor(env: Env): HairRendererPort {
  */
 export function faceAnalystFor(env: Env): FaceAnalystPort {
   const codex =
-    env.CODEX_BASE_URL && env.CODEX_MODEL && env.CODEX_TOKEN
-      ? codexFaceAnalyst({
-          baseUrl: env.CODEX_BASE_URL,
-          model: env.CODEX_MODEL,
-          token: env.CODEX_TOKEN,
+    env.OPENCODE_BASE_URL && env.OPENCODE_MODEL && env.OPENCODE_TOKEN
+      ? opencodeFaceAnalyst({
+          baseUrl: env.OPENCODE_BASE_URL,
+          model: env.OPENCODE_MODEL,
+          token: env.OPENCODE_TOKEN,
         })
       : null;
 

@@ -27,9 +27,9 @@ export default defineConfig({
           // .dev.vars is loaded here too, so a developer with their own
           // endpoint configured would otherwise wire a second provider into
           // every route test — and into a host the interceptor does not allow.
-          CODEX_BASE_URL: '',
-          CODEX_MODEL: '',
-          CODEX_TOKEN: '',
+          OPENCODE_BASE_URL: '',
+          OPENCODE_MODEL: '',
+          OPENCODE_TOKEN: '',
           // A real but worthless RSA pair: the adapter signs a JWT on every
           // render, so a placeholder would fail inside crypto.subtle rather
           // than at the intercepted call, and the auth path would go untested.

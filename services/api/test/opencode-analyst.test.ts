@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HAIR_STYLES } from '@loxa/shared';
-import { codexFaceAnalyst } from '../src/adapters/codex/analyst';
+import { opencodeFaceAnalyst } from '../src/adapters/opencode/analyst';
 import { RendererUnavailableError } from '../src/core/errors';
 
-const CONFIG = { baseUrl: 'https://codex.test/v1', model: 'codex-vision', token: 'secret-token' };
+const CONFIG = { baseUrl: 'https://opencode.test/v1', model: 'codex-vision', token: 'secret-token' };
 
 const REQUEST = {
   photosBase64: ['aGVsbG8='],
@@ -45,18 +45,18 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('codexFaceAnalyst', () => {
+describe('opencodeFaceAnalyst', () => {
   it('reads an answer, and sends the photo and the token with it', async () => {
     const { calls } = intercept(Response.json(reply(ANSWER)));
 
-    const draft = await codexFaceAnalyst(CONFIG).analyse(REQUEST);
+    const draft = await opencodeFaceAnalyst(CONFIG).analyse(REQUEST);
     expect(draft).toEqual({
       faceShape: 'oval',
       cuts: [{ styleId: 'blunt-bob', reason: 'A level line answers a soft jaw.' }],
     });
 
     const sent = calls[0]!;
-    expect(sent.url.startsWith('https://codex.test/v1')).toBe(true);
+    expect(sent.url.startsWith('https://opencode.test/v1')).toBe(true);
     expect(sent.headers.get('authorization')).toBe('Bearer secret-token');
     // The endpoint refuses a request with no session id.
     expect(sent.headers.get('x-opencode-session')).toBeTruthy();
@@ -66,7 +66,7 @@ describe('codexFaceAnalyst', () => {
   it('gives each call its own session, so nobody can link one user to themselves', async () => {
     // A factory, not one Response: a body can only be read once.
     const { calls } = intercept(() => Response.json(reply(ANSWER)));
-    const analyst = codexFaceAnalyst(CONFIG);
+    const analyst = opencodeFaceAnalyst(CONFIG);
     await analyst.analyse(REQUEST);
     await analyst.analyse(REQUEST);
 
@@ -80,7 +80,7 @@ describe('codexFaceAnalyst', () => {
     // for a render stays in this Worker, and that is as true of somebody
     // else's box as it is of the app.
     const { calls } = intercept(Response.json(reply(ANSWER)));
-    await codexFaceAnalyst(CONFIG).analyse(REQUEST);
+    await opencodeFaceAnalyst(CONFIG).analyse(REQUEST);
 
     for (const style of HAIR_STYLES) {
       expect(calls[0]!.body).not.toContain(style.prompt);
@@ -92,7 +92,7 @@ describe('codexFaceAnalyst', () => {
     // still answered, and throwing that away would fail for a reason nobody
     // can see.
     intercept(Response.json(reply('```json\n' + ANSWER + '\n```')));
-    await expect(codexFaceAnalyst(CONFIG).analyse(REQUEST)).resolves.toMatchObject({
+    await expect(opencodeFaceAnalyst(CONFIG).analyse(REQUEST)).resolves.toMatchObject({
       faceShape: 'oval',
     });
   });
@@ -100,7 +100,7 @@ describe('codexFaceAnalyst', () => {
   it('treats prose as a reason to ask somebody else', async () => {
     intercept(Response.json(reply('I am afraid I cannot help with that.')));
 
-    const error = await codexFaceAnalyst(CONFIG).analyse(REQUEST).catch((err: unknown) => err);
+    const error = await opencodeFaceAnalyst(CONFIG).analyse(REQUEST).catch((err: unknown) => err);
     expect(error).toBeInstanceOf(RendererUnavailableError);
     expect((error as RendererUnavailableError).transient).toBe(true);
   });
@@ -108,7 +108,7 @@ describe('codexFaceAnalyst', () => {
   it('treats a dead endpoint as a reason to ask somebody else', async () => {
     intercept(new Response('gateway down', { status: 502 }));
 
-    const error = await codexFaceAnalyst(CONFIG).analyse(REQUEST).catch((err: unknown) => err);
+    const error = await opencodeFaceAnalyst(CONFIG).analyse(REQUEST).catch((err: unknown) => err);
     expect(error).toBeInstanceOf(RendererUnavailableError);
     expect((error as RendererUnavailableError).transient).toBe(true);
   });
@@ -119,7 +119,7 @@ describe('codexFaceAnalyst', () => {
     // exactly the case it exists for.
     intercept(new Response('no', { status: 401 }));
 
-    const error = await codexFaceAnalyst(CONFIG).analyse(REQUEST).catch((err: unknown) => err);
+    const error = await opencodeFaceAnalyst(CONFIG).analyse(REQUEST).catch((err: unknown) => err);
     expect((error as RendererUnavailableError).transient).toBe(true);
   });
 
@@ -128,7 +128,7 @@ describe('codexFaceAnalyst', () => {
       throw new TypeError('network error');
     });
 
-    const error = await codexFaceAnalyst(CONFIG).analyse(REQUEST).catch((err: unknown) => err);
+    const error = await opencodeFaceAnalyst(CONFIG).analyse(REQUEST).catch((err: unknown) => err);
     expect(error).toBeInstanceOf(RendererUnavailableError);
     expect((error as RendererUnavailableError).transient).toBe(true);
   });

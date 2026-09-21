@@ -212,10 +212,10 @@ face shape, the cuts from our catalogue that suit it, and a sentence for each.
 It is a different model from the renderer's, and a different company's.
 
 - **The primary is a vision model reached through opencode**, via the Vercel AI
-  SDK (`adapters/codex/analyst.ts`). The model id must be one that **reads
+  SDK (`adapters/opencode/analyst.ts`). The model id must be one that **reads
   images and does not train on them** — the catalogue marks some of its models
   "training use", and this app's privacy policy says nobody's photos train
-  anything. `CODEX_BASE_URL`, `CODEX_MODEL` and `CODEX_TOKEN` move together or
+  anything. `OPENCODE_BASE_URL`, `OPENCODE_MODEL` and `OPENCODE_TOKEN` move together or
   not at all.
 - **The fallback is OpenRouter's chat endpoint**, not Vertex. Measured:
   `loxa-506814` is entitled to the image model and to no text model at all, so
