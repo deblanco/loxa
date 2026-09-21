@@ -74,15 +74,28 @@ export function SuitsTile({
           <Link key={`${from}-${to}`} from={from} to={to} />
         ))}
 
+        {/*
+          From the top of the tile, not from above it.
+
+          The timing is `loxa-scan` in `design-system/tokens/motion.css`, which
+          the camera's sweep already animates: start at zero and fade in over
+          the first eighth, hold, fade out at the end. Translating in from
+          off-screen instead would spend the first fifth of every cycle on a
+          band nobody can see, and the tile is only eighty-four points tall.
+        */}
         <Animated.View
           style={[
             styles.sweep,
             {
+              opacity: sweep.interpolate({
+                inputRange: [0, 0.12, 0.88, 1],
+                outputRange: [0, 1, 1, 0],
+              }),
               transform: [
                 {
                   translateY: sweep.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [-SWEEP, THUMB_HEIGHT],
+                    outputRange: [0, THUMB_HEIGHT - SWEEP],
                   }),
                 },
               ],
@@ -122,8 +135,11 @@ function Landmark({ landmark, sweep }: { landmark: keyof typeof IDLE_LANDMARKS; 
         {
           left: point.x * THUMB_WIDTH - DOT / 2,
           top: point.y * THUMB_HEIGHT - DOT / 2,
+          // Lit when the band is over it. The band now travels the tile's own
+          // height rather than a screen's, so a landmark's row and the sweep's
+          // progress are the same number.
           opacity: sweep.interpolate({
-            inputRange: [Math.max(0, at - 0.22), at, Math.min(1, at + 0.22)],
+            inputRange: [Math.max(0, at - 0.28), at, Math.min(1, at + 0.28)],
             outputRange: [0.38, 1, 0.38],
             extrapolate: 'clamp',
           }),
