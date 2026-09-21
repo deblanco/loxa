@@ -168,17 +168,17 @@ export default function Offer() {
               : t('common.subscriptionTerms', { weekly: price })}
           </Meta>
 
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => void restore()}
+          {/* A button, like the one on the out-of-credits sheet. A subscriber
+              reinstalling meets this screen before anything else asks them to
+              pay, and the way back to what they already own should not be the
+              quietest thing on it. */}
+          <Pill
+            label={notice ?? t('common.restore')}
+            tone="quiet"
             disabled={restoring || settling}
-            hitSlop={space.s2}
+            onPress={() => void restore()}
             style={styles.restore}
-          >
-            <Meta variant="note" tone="ink40" sentence>
-              {notice ?? t('common.restore')}
-            </Meta>
-          </Pressable>
+          />
 
           <LegalLinks />
         </View>
@@ -225,5 +225,5 @@ const styles = StyleSheet.create({
   perkText: { flex: 1 },
   actions: { gap: space.s2 + 2 },
   terms: { textAlign: 'center' },
-  restore: { alignSelf: 'center', paddingVertical: space.s2 },
+  restore: { alignSelf: 'stretch', height: 44 },
 });

@@ -6,6 +6,7 @@ import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { syncPurchases } from '@/api/client';
 import { LegalLinks } from '@/components/LegalLinks';
+import { Pill } from '@/components/Pill';
 import { PurchaseSettling } from '@/components/PurchaseSettling';
 import { ResultWall } from '@/components/ResultWall';
 import { Body, Display, Meta } from '@/components/Text';
@@ -236,25 +237,27 @@ export default function Paywall() {
           </Meta>
         )}
 
+        {/*
+          Both are buttons, and on a sheet that is asking for money that
+          matters more than anywhere else: the way out and the way back to
+          something already paid for were the two quietest things on it, set
+          in the type used for captions everywhere else in the app.
+        */}
         <View style={styles.footer}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.back()}
+          <Pill
+            label={t('paywall.notNow')}
+            tone="quiet"
             disabled={settling}
-            hitSlop={space.s2}
-          >
-            <Body tone="ink45">{t('paywall.notNow')}</Body>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            onPress={restore}
+            onPress={() => router.back()}
+            style={styles.footerButton}
+          />
+          <Pill
+            label={notice ?? t('common.restore')}
+            tone="quiet"
             disabled={restoring || settling}
-            hitSlop={space.s2}
-          >
-            <Meta variant="note" tone="ink40" sentence>
-              {notice ?? t('common.restore')}
-            </Meta>
-          </Pressable>
+            onPress={restore}
+            style={styles.footerButton}
+          />
         </View>
 
         <LegalLinks />
@@ -311,7 +314,9 @@ const styles = StyleSheet.create({
     marginTop: space.s3,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: space.s2 + 2,
+    gap: space.s2,
   },
+  // Equal halves: neither declining nor restoring is the sheet's main act,
+  // and one wider than the other would say it was.
+  footerButton: { flex: 1, height: 44 },
 });

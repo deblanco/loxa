@@ -333,9 +333,11 @@ function Answer({
                 <Body weight="medium" style={styles.cutName}>
                   {style.name}
                 </Body>
+                {/* Filled: it is the action every row is building towards,
+                    and the same black the Try On button wears on the screen
+                    it leads to. */}
                 <Pill
                   label={t('suits.tryOn')}
-                  tone="quiet"
                   onPress={() => onTryOn(cut.styleId)}
                   style={styles.tryOn}
                 />
