@@ -393,6 +393,7 @@ function PreviewReady({ catalogue: served }: { catalogue: CatalogueResponse }) {
           catalogue={catalogue}
           shape={shape}
           onAsk={() => router.push('/suits')}
+          portrait={portrait}
           selectedId={selection.styleId}
           onSelect={(styleId) => {
             chosen.current = true;

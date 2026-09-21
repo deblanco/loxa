@@ -8,6 +8,7 @@ import { faceShapeKey } from '../face/shape';
 import { color, radius, space } from '../theme';
 import { PhotoPlate } from './PhotoPlate';
 import { SuitsSeal } from './SuitsSeal';
+import { SuitsTile } from './SuitsTile';
 import { Body, Meta } from './Text';
 
 /**
@@ -43,12 +44,14 @@ interface Props {
   onSelect: (id: string) => void;
   /**
    * Opens "what suits me". When given, the strip grows a leading tile that is
-   * not a cut — see the note on `styles.ask`.
+   * not a cut — see `SuitsTile`.
    */
   onAsk?: () => void;
+  /** The user's portrait, for that tile to sit behind its wand. */
+  portrait?: string | null;
 }
 
-export function StyleStrip({ catalogue, shape, selectedId, onSelect, onAsk }: Props) {
+export function StyleStrip({ catalogue, shape, selectedId, onSelect, onAsk, portrait }: Props) {
   const { t } = useTranslation();
   const [seed] = useState(() => Math.floor(Math.random() * 1000));
 
@@ -79,19 +82,15 @@ export function StyleStrip({ catalogue, shape, selectedId, onSelect, onAsk }: Pr
           here", and the camera screen already learned that lesson the hard way.
         */}
         {onAsk ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityHint={t('suits.tileHint')}
+          <SuitsTile
+            label={t('suits.tile')}
+            hint={t('suits.tileHint')}
+            // Their own face when there is one, and a catalogue face when
+            // there is not — blurred either way, so the tile is never an
+            // empty square.
+            uri={portrait ?? assetUrl(tileFor(catalogue, catalogue.defaults.styleId, seed))}
             onPress={onAsk}
-            style={styles.tile}
-          >
-            <View style={styles.ask}>
-              <SuitsSeal />
-            </View>
-            <Body variant="tile" style={styles.name}>
-              {t('suits.tile')}
-            </Body>
-          </Pressable>
+          />
         ) : null}
 
         {catalogue.styles.map((style) => {
@@ -148,15 +147,6 @@ const styles = StyleSheet.create({
     paddingBottom: space.s2,
   },
   strip: { paddingHorizontal: space.gutterScreen, gap: space.s3 },
-  // The tile's own footprint, in ink, so it reads as the one control in a row
-  // of photographs rather than as a cut whose picture failed to load.
-  ask: {
-    height: THUMB_HEIGHT,
-    borderRadius: radius.tile,
-    backgroundColor: color.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   tile: { width: 70 },
   thumb: { height: THUMB_HEIGHT, borderRadius: radius.tile, borderWidth: 1 },
   tick: {
