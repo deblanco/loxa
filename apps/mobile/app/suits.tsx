@@ -17,6 +17,7 @@ import { pickFromLibrary } from '@/photo';
 import { readAnalysis, saveAnalysis, type StoredAnalysis } from '@/store/analysis';
 import { useCatalogue } from '@/store/catalogue';
 import { ensureConsent } from '@/consent-prompt';
+import { putRenderShot } from '@/store/render-shot';
 import { useCredits } from '@/store/credits';
 import {
   clearSuitsShots,
@@ -110,8 +111,8 @@ export default function Suits() {
   }
 
   async function ask() {
-    const photos = suitsPhotos();
-    if (photos.length === 0) return;
+    const held = suitsShots().filter((shot) => shot !== null);
+    if (held.length === 0) return;
 
     // The same gate the confirm screen uses, and for the same reason: null is
     // still loading and goes through, because guessing "no" puts a paywall in
@@ -129,18 +130,20 @@ export default function Suits() {
     setFailed(false);
     setProgress(0);
     try {
-      const result = await analyseFace(photos);
+      // Shrunk here, after the gate and the consent: the smaller copies are for
+      // the wire and nothing else holds them.
+      const result = await analyseFace(await suitsPhotos());
       const stored = { faceShape: result.faceShape, cuts: result.cuts, at: new Date().toISOString() };
       setAnswer(stored);
       await saveAnalysis(result);
-      // The photographs have done their work. Nothing here keeps them, and
-      // neither does the Worker.
-      //
-      // They are not carried into a render either, though it would save a trip
-      // to the camera: these were prepared to be *read* and are 640 on the long
-      // edge (`photo.ts`, `READ_EDGE`). A render is conditioned on the
-      // photograph it is given, so rendering from one of these would quietly
-      // hand back a coarser face than the app promises.
+      // The photographs have done their work, and neither we nor the Worker
+      // keep them. The front one is held in memory for one more step: somebody
+      // who has just handed over their face and presses Try On on a suggested
+      // cut means *that* face, and should not be sent back to the camera for it.
+      // It is the full-size photograph — only the copy that was sent to be read
+      // was small — so the render is conditioned on what the app promises.
+      const front = suitsShots()[0];
+      if (front) putRenderShot(front);
       clearSuitsShots();
       setShots(suitsShots());
     } catch (err) {
@@ -161,8 +164,8 @@ export default function Suits() {
     const colorId = style?.colors[0]?.id ?? catalogue?.defaults.colorId;
     if (!colorId) return;
 
-    // No `source`: Confirm uses the saved portrait if there is one, and asks for
-    // a photo if there is not. It no longer silently does nothing either way.
+    // No `source`: Confirm uses the photograph just analysed, falls back to the
+    // saved portrait, and asks for one if there is neither.
     router.push({ pathname: '/confirm', params: { styleId, colorId } });
   }
 

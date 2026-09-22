@@ -1,4 +1,4 @@
-import type { PreparedPhoto } from '@/photo';
+import { shrinkForReading, type PreparedPhoto } from '@/photo';
 
 /**
  * The one or two photographs an analysis is about, between the camera and the
@@ -24,11 +24,15 @@ export function suitsShots(): (PreparedPhoto | null)[] {
   return [shots[0] ?? null, shots[1] ?? null];
 }
 
-/** Both slots, in order, for the request. */
-export function suitsPhotos(): string[] {
-  return suitsShots()
-    .filter((shot): shot is PreparedPhoto => shot !== null)
-    .map((shot) => shot.base64);
+/**
+ * Both slots, in order, as the request should carry them: smaller.
+ *
+ * The shrinking happens here rather than at capture, so what is held stays the
+ * full-size photograph a render can be made from. See `shrinkForReading`.
+ */
+export async function suitsPhotos(): Promise<string[]> {
+  const shots = suitsShots().filter((shot): shot is PreparedPhoto => shot !== null);
+  return await Promise.all(shots.map(shrinkForReading));
 }
 
 export function clearSuitsShots(): void {
