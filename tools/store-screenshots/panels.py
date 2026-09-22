@@ -46,6 +46,7 @@ PANELS = [
         # capture are not the reader's, and two sets on one screen read as a
         # mistake — 150 clears the dynamic island as well as the text.
         top=150,
+        win=760,
     ),
     dict(
         n="02",
@@ -54,6 +55,7 @@ PANELS = [
         head="It reads your face",
         headItalic="on the phone.",
         top=150,
+        win=700,
     ),
     dict(
         n="03",
@@ -62,6 +64,7 @@ PANELS = [
         head="Then it says which cuts",
         headItalic="suit you, and why.",
         top=150,
+        win=760,
     ),
     dict(
         n="04",
@@ -70,6 +73,7 @@ PANELS = [
         head="It hands back",
         headItalic="your own face.",
         top=150,
+        win=686,
     ),
     dict(
         n="05",
@@ -78,6 +82,7 @@ PANELS = [
         head="Same face.",
         headItalic="Any cut, any colour.",
         top=150,
+        win=686,
     ),
 ]
 
@@ -91,7 +96,7 @@ html,body{width:%(W)spx;height:%(H)spx;overflow:hidden}
 body{background:%(bg)s;-webkit-font-smoothing:antialiased}
 .wrap{position:relative;width:%(W)spx;height:%(H)spx}
 h1{position:absolute;top:118px;left:0;right:0;text-align:center;
-   font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:112px;line-height:1.02;
+   font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:134px;line-height:1.02;
    letter-spacing:-0.02em;color:#0d0c0b}
 h1 i{display:block;opacity:.66}
 /* The capture is anchored to the bottom of the panel and cut off there: the
@@ -101,10 +106,15 @@ h1 i{display:block;opacity:.66}
 
    The arithmetic, so the next person can move it safely: at 1128 wide a
    1320 x 2868 capture is 2450 tall, less the 150 cropped off the status bar,
-   so 2300 is visible. The window is 2868 - `top`, and whatever the image has
-   left over spills past the bottom edge and is clipped. Raising `top` shows
-   more of the screen; lowering it crops more off the bottom. */
-.shot{position:absolute;left:50%%;transform:translateX(-50%%);top:760px;bottom:0;width:1128px;
+   so 2300 is visible. The window is 2868 - `win`, and whatever the image has
+   left over spills past the bottom edge and is clipped. Raising `win` shows
+   more of the screen; lowering it crops more off the bottom.
+
+   `win` is per panel because the cut has to land somewhere deliberate. A crop
+   through the middle of a button reads as a rendering fault rather than a
+   choice, so each panel is set to end on empty space, a label, or below the
+   last control — never across one. */
+.shot{position:absolute;left:50%%;transform:translateX(-50%%);top:%(win)spx;bottom:0;width:1128px;
    border-radius:64px 64px 0 0;overflow:hidden;
    box-shadow:0 48px 110px rgba(13,12,11,.22),0 6px 24px rgba(13,12,11,.10)}
 .shot img{display:block;width:100%%;margin-top:-%(top)spx}
