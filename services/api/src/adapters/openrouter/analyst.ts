@@ -30,6 +30,9 @@ interface ChatResponse {
   error?: { code?: number | string; message?: string };
 }
 
+/** See the comment on the signal below. */
+const FALLBACK_DEADLINE_MS = 25_000;
+
 export function openRouterFaceAnalyst(config: OpenRouterAnalystConfig): FaceAnalystPort {
   return {
     async analyse(request) {
@@ -38,6 +41,10 @@ export function openRouterFaceAnalyst(config: OpenRouterAnalystConfig): FaceAnal
       try {
         response = await fetch(ENDPOINT, {
           method: 'POST',
+          // The last provider there is, so this deadline is longer than the
+          // primary's: nothing follows it, and giving up early would turn a slow
+          // answer into no answer. It exists so the pair cannot hang together.
+          signal: AbortSignal.timeout(FALLBACK_DEADLINE_MS),
           headers: {
             authorization: `Bearer ${config.apiKey}`,
             'content-type': 'application/json',

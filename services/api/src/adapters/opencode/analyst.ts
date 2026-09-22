@@ -42,7 +42,26 @@ export interface OpencodeAnalystConfig {
   baseUrl: string;
   model: string;
   token: string;
+  /** Overrides `PRIMARY_DEADLINE_MS`. Tests set it small; nothing else sets it. */
+  deadlineMs?: number;
 }
+
+/**
+ * How long the primary gets before the fallback is asked instead.
+ *
+ * This model's latency is not a number so much as a spread: measured against
+ * production on three consecutive calls with the same photograph, 3.5s, 20.1s
+ * and 8.9s. The fallback, by contrast, came back in 5.2s, 6.8s and 5.3s.
+ *
+ * So the deadline is set *above* the slow-but-genuine case rather than at the
+ * quick one. A deadline of eight seconds looked reasonable and made things
+ * worse: it fired on about half of all calls and spent the whole eight seconds
+ * before the fallback had even started, turning a 9s answer into a 14s one.
+ * What it is for is the call that is never coming back — the thirty-five second
+ * one that a person sat and watched — not for beating a provider that is merely
+ * having a slow day.
+ */
+export const PRIMARY_DEADLINE_MS = 22_000;
 
 export function opencodeFaceAnalyst(config: OpencodeAnalystConfig): FaceAnalystPort {
   const provider = createOpenAICompatible({
@@ -73,6 +92,14 @@ export function opencodeFaceAnalyst(config: OpencodeAnalystConfig): FaceAnalystP
           // both on would make a dead endpoint take three timeouts before
           // Google is asked, with the user watching a spinner throughout.
           maxRetries: 0,
+          // A deadline, because the fallback is no use if nothing ever gives up
+          // on the primary. Measured against production: this model answers in
+          // about three seconds and the fallback in about four, but the same
+          // request has taken thirty-five — and with no signal here the Worker
+          // simply waited, while somebody watched a progress bar. Past the
+          // deadline the request is abandoned and Google is asked instead, which
+          // is what the fallback was built for.
+          abortSignal: AbortSignal.timeout(config.deadlineMs ?? PRIMARY_DEADLINE_MS),
           // Off. Nothing in the Worker reads the SDK's telemetry, and with it on a
           // failed call leaves a second, unawaited copy of the same rejection
           // inside the SDK's own dispatcher: ours is caught below, that one is

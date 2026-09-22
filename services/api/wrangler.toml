@@ -94,21 +94,25 @@ OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image"
 # on the key the render fallback already uses. ANALYSIS_TEXT_MODEL stays unset
 # until this project is granted one.
 OPENROUTER_ANALYSIS_MODEL = "google/gemini-3.8-flash"
-# The primary. The model must read images and must not train on them: some
-# models on this service are marked "training use", and this app's privacy
-# policy says nobody's photos train anything.
+# The primary. The model must read images and must not train on them, because
+# this app's privacy policy says nobody's photos train anything.
 #
-# `deepseek-v4.1-flash` is not listed with vision in the provider's table but
-# does accept images — verified against the live endpoint, reasoning about the
-# actual photograph — and answers in about seven seconds.
+# **The `-free` models are the ones that train.** The provider's own list names
+# them one by one — "MiMo-V2.6-Flash Free", "MiMo-V2.5 Free", "Big Pickle",
+# the Nemotron trials, the Muse Spark contributor — each with a line saying the
+# data may be used to improve the model. Everything else, this one included,
+# carries zero retention and no training. So the `-free` suffix is not a cheaper
+# tier of the same thing; it is a different bargain, and picking one here would
+# quietly contradict the policy and the consent sheet.
 #
-# **Its retention note reads "ZDR through Sep 2026", which has now arrived.**
-# Re-check what replaces it before the next submission: if zero retention
-# lapses, this model is disclosing users' faces to somebody who keeps them, and
-# the privacy policy has to change or the model does.
+# `mimo-v2.6-flash` reads images and answers with valid JSON — verified against
+# the live endpoint on three photographs, correct face shapes and six usable
+# cuts each. Its latency is a spread rather than a number: 9s, 20s and 40s on
+# those three calls, which is why `PRIMARY_DEADLINE_MS` exists and why the
+# OpenRouter fallback behind it matters more than it looks.
 #   wrangler secret put OPENCODE_TOKEN
 OPENCODE_BASE_URL = "https://opencode.ai/zen/go/v1"
-OPENCODE_MODEL = "deepseek-v4.1-flash"
+OPENCODE_MODEL = "mimo-v2.6-flash"
 
 # --- Entitlements -----------------------------------------------------------
 # The weekly subscription is verified server-side, against RevenueCat API v2,

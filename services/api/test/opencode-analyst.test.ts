@@ -133,3 +133,36 @@ describe('opencodeFaceAnalyst', () => {
     expect((error as RendererUnavailableError).transient).toBe(true);
   });
 });
+
+describe('the deadline on the primary', () => {
+  it('gives up on a provider that never answers, and says another may try', async () => {
+    // The fallback is no use if nothing ever gives up on the primary. Before
+    // this, a provider that took thirty-five seconds was simply waited for,
+    // with somebody watching a progress bar the whole time.
+    vi.stubGlobal('fetch', (_input: RequestInfo | URL, init?: RequestInit) => {
+      return new Promise<Response>((_resolve, reject) => {
+        const signal = init?.signal;
+        if (!signal) throw new Error('the request carried no abort signal');
+        signal.addEventListener('abort', () => reject(signal.reason as Error));
+      });
+    });
+
+    const failure = await opencodeFaceAnalyst({ ...CONFIG, deadlineMs: 50 })
+      .analyse(REQUEST)
+      .catch((err: unknown) => err);
+
+    expect(failure).toBeInstanceOf(RendererUnavailableError);
+    // Transient, so `fallbackAnalyst` asks the other provider rather than
+    // handing the user an error.
+    expect((failure as RendererUnavailableError).transient).toBe(true);
+  });
+
+  it('does not abort a provider that answers in time', async () => {
+    const intercepted = intercept(() => Response.json(reply(ANSWER)));
+
+    await expect(opencodeFaceAnalyst(CONFIG).analyse(REQUEST)).resolves.toMatchObject({
+      faceShape: 'oval',
+    });
+    expect(intercepted.calls).toHaveLength(1);
+  });
+});
