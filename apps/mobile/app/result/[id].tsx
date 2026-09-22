@@ -411,7 +411,12 @@ const styles = StyleSheet.create({
     right: space.s6,
     padding: space.s3,
     borderRadius: radius.card,
-    backgroundColor: color.paper16,
+    // A scrim, not a tint. This card sits on the render itself, and at 16% paper
+    // it was a pale wash over a photograph that is often pale too: the question
+    // and "Not now" disappeared into a light background, which is most of them.
+    // The one thing on this screen that asks a question has to be readable over
+    // any picture, so it gets the token meant for exactly that.
+    backgroundColor: color.scrimStrong,
     gap: space.s3,
   },
   offerHead: { flexDirection: 'row', alignItems: 'center', gap: space.s3 },
