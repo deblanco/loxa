@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PhotoRejectedError, RendererUnavailableError } from '../src/core/errors';
+import { RENDER_TIMEOUT_MS } from '../src/ports/hair-renderer';
 import { parseServiceAccountKey, resetTokenCache } from '../src/adapters/vertex/auth';
 import { vertexHairRenderer } from '../src/adapters/vertex/hair-renderer';
 import { TEST_SA_KEY } from './service-account';
@@ -131,6 +132,29 @@ describe('the failures that are ours', () => {
     const err = await thrownBy(renderer());
     expect(err).toBeInstanceOf(RendererUnavailableError);
     expect((err as RendererUnavailableError).transient).toBe(true);
+  });
+
+  it('gives up after the render timeout, and says another provider could try', async () => {
+    // A provider that never answers must not outlast the phone's own wait: the
+    // credit is spent, and a Worker still waiting when the app gives up may
+    // never reach the refund.
+    const timeout = vi
+      .spyOn(AbortSignal, 'timeout')
+      .mockReturnValue(AbortSignal.abort(new DOMException('timed out', 'TimeoutError')));
+    vi.stubGlobal('fetch', async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      if (url.startsWith('https://oauth2.test/token')) {
+        return Response.json({ access_token: 'test-token', expires_in: 3600 });
+      }
+      init?.signal?.throwIfAborted();
+      throw new Error('vertex answered after all');
+    });
+
+    const err = await thrownBy(renderer());
+    expect(timeout).toHaveBeenCalledWith(RENDER_TIMEOUT_MS);
+    expect(err).toBeInstanceOf(RendererUnavailableError);
+    expect((err as RendererUnavailableError).transient).toBe(true);
+    timeout.mockRestore();
   });
 
   it('marks the per-minute quota transient', async () => {

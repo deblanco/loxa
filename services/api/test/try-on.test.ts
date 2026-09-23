@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { renderCacheKey } from '../src/core/cache-key';
 import {
   CreditContentionError,
+  EntitlementsUnavailableError,
   OutOfCreditsError,
   RendererUnavailableError,
   UnknownStyleError,
@@ -210,6 +211,46 @@ describe('tryOn', () => {
 
     const key = await renderCacheKey(COMMAND.imageBase64, COMMAND.styleId, COMMAND.colorId);
     expect(cache.store.get(key)).toBe('RENDERED');
+  });
+
+  it('still returns the picture, and keeps one credit spent, when the cache write throws', async () => {
+    // Past the refund: a throw here used to keep the credit and drop the render.
+    const { deps: d, ledger, renderer } = deps({
+      cache: {
+        async get() {
+          return null;
+        },
+        async put() {
+          throw new Error('KV unavailable');
+        },
+      },
+    });
+
+    await expect(tryOn(COMMAND, d)).resolves.toEqual(
+      expect.objectContaining({ imageBase64: 'RENDERED', cached: false, creditsLeft: 20 }),
+    );
+    expect(renderer.calls).toHaveLength(1);
+    expect(ledger.state.weekUsed).toBe(1);
+  });
+
+  it('spends nothing and renders nothing when the store cannot say what the device has', async () => {
+    // Guessing "free" would take a subscriber's bought credit instead of their
+    // allowance, and record a lapse that refills the week once the store is back.
+    const { deps: d, ledger, renderer } = deps({
+      entitlements: {
+        async planFor() {
+          throw new EntitlementsUnavailableError('RevenueCat answered 503');
+        },
+        async photoPurchases() {
+          return [];
+        },
+      },
+    });
+
+    await expect(tryOn(COMMAND, d)).rejects.toThrow(EntitlementsUnavailableError);
+    expect(renderer.calls).toHaveLength(0);
+    expect(ledger.state.weekUsed).toBe(0);
+    expect(ledger.state.lastPlan).toBeNull();
   });
 
   it('does not cache a failed render', async () => {

@@ -1,6 +1,7 @@
 import { SINGLE_PHOTO_PRODUCT_ID, WEEKLY_ENTITLEMENT, WEEKLY_PRODUCT_ID } from '@loxa/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { devEntitlements } from '../src/adapters/entitlements/dev';
+import { EntitlementsUnavailableError } from '../src/core/errors';
 import { revenueCatEntitlements } from '../src/adapters/entitlements/revenuecat';
 import { stubEntitlements } from '../src/adapters/entitlements/stub';
 
@@ -57,22 +58,52 @@ describe('revenueCatEntitlements.planFor', () => {
     await expect(revenueCatEntitlements(config).planFor(DEVICE)).resolves.toBe('free');
   });
 
-  it('fails closed on a 403', async () => {
-    // What a v1 key gets from the v2 endpoint. It must not read as "subscriber".
-    interceptRevenueCat({ status: 403 });
+  it('answers free for a customer RevenueCat has never seen', async () => {
+    // Every device before its first purchase. A 404 is an answer, not an outage.
+    interceptRevenueCat({ status: 404 });
     await expect(revenueCatEntitlements(config).planFor(DEVICE)).resolves.toBe('free');
+  });
+
+  it('fails closed on a 403, as unknown rather than as free', async () => {
+    // What a v1 key gets from the v2 endpoint. It must not read as "subscriber",
+    // and it must not read as "free" either: core would charge a subscriber's
+    // bought credit in place of their allowance.
+    interceptRevenueCat({ status: 403 });
+    await expect(revenueCatEntitlements(config).planFor(DEVICE)).rejects.toThrow(
+      EntitlementsUnavailableError,
+    );
+  });
+
+  it('fails closed on a rate limit or an outage', async () => {
+    for (const status of [429, 500, 503]) {
+      interceptRevenueCat({ status });
+      await expect(revenueCatEntitlements(config).planFor(DEVICE)).rejects.toThrow(
+        EntitlementsUnavailableError,
+      );
+    }
   });
 
   it('fails closed when the network is down', async () => {
     vi.stubGlobal('fetch', async () => {
       throw new Error('ECONNREFUSED');
     });
-    await expect(revenueCatEntitlements(config).planFor(DEVICE)).resolves.toBe('free');
+    await expect(revenueCatEntitlements(config).planFor(DEVICE)).rejects.toThrow(
+      EntitlementsUnavailableError,
+    );
   });
 
   it('fails closed on a shape it does not recognise', async () => {
     interceptRevenueCat({ entitlements: { unexpected: true } });
-    await expect(revenueCatEntitlements(config).planFor(DEVICE)).resolves.toBe('free');
+    await expect(revenueCatEntitlements(config).planFor(DEVICE)).rejects.toThrow(
+      EntitlementsUnavailableError,
+    );
+  });
+
+  it('fails closed on a body that is not JSON', async () => {
+    vi.stubGlobal('fetch', async () => new Response('<html>', { status: 200 }));
+    await expect(revenueCatEntitlements(config).planFor(DEVICE)).rejects.toThrow(
+      EntitlementsUnavailableError,
+    );
   });
 
   it('escapes the device id into the path', async () => {
@@ -145,9 +176,18 @@ describe('revenueCatEntitlements.photoPurchases', () => {
     await expect(revenueCatEntitlements(config).photoPurchases(DEVICE)).resolves.toEqual(['otp_2']);
   });
 
-  it('fails closed when the store cannot be reached', async () => {
-    interceptRevenueCat({ status: 500 });
+  it('reports nothing bought for a customer RevenueCat has never seen', async () => {
+    interceptRevenueCat({ status: 404 });
     await expect(revenueCatEntitlements(config).photoPurchases(DEVICE)).resolves.toEqual([]);
+  });
+
+  it('fails closed when the store cannot be reached, as unknown rather than as none', async () => {
+    // "Nothing bought" would be a silent `granted: 0` to somebody who just paid;
+    // a throw is a failed sync the app knows to try again.
+    interceptRevenueCat({ status: 500 });
+    await expect(revenueCatEntitlements(config).photoPurchases(DEVICE)).rejects.toThrow(
+      EntitlementsUnavailableError,
+    );
   });
 });
 

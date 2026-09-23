@@ -1,5 +1,5 @@
 import { PhotoRejectedError, RendererUnavailableError } from '../../core/errors';
-import type { HairRendererPort } from '../../ports/hair-renderer';
+import { RENDER_TIMEOUT_MS, type HairRendererPort } from '../../ports/hair-renderer';
 import { buildHairPrompt } from '../hair-prompt';
 
 /**
@@ -53,6 +53,7 @@ export function openRouterHairRenderer(config: OpenRouterRendererConfig): HairRe
       try {
         response = await fetch(ENDPOINT, {
           method: 'POST',
+          signal: AbortSignal.timeout(RENDER_TIMEOUT_MS),
           headers: {
             authorization: `Bearer ${config.apiKey}`,
             'content-type': 'application/json',

@@ -1,6 +1,13 @@
 import type { PlanId } from '@loxa/shared';
 
-/** What the store says this device is entitled to. */
+/**
+ * What the store says this device is entitled to.
+ *
+ * Both methods throw `EntitlementsUnavailableError` when the store cannot be
+ * asked. They never answer "free" or "nothing bought" for a failure: core
+ * spends from different pools depending on the plan, so a guessed plan is a
+ * wrong charge, not a safe default.
+ */
 export interface EntitlementsPort {
   planFor(deviceId: string): Promise<PlanId>;
   /**

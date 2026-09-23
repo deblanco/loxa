@@ -1,8 +1,20 @@
 import { describe, expect, it } from 'vitest';
+import { EntitlementsUnavailableError } from '../src/core/errors';
 import { getCredits } from '../src/core/get-credits';
 import type { CreditState } from '../src/core/rules';
 import { syncPurchases } from '../src/core/sync-purchases';
 import { fakeEntitlements, fakeLedger, fixedClock } from './fakes';
+
+/** A store that is down for one of its two questions, and answers the other. */
+function storeDown(down: 'planFor' | 'photoPurchases', purchases: readonly string[] = []) {
+  const fail = async (): Promise<never> => {
+    throw new EntitlementsUnavailableError('RevenueCat answered 503');
+  };
+  return {
+    planFor: down === 'planFor' ? fail : async () => 'free' as const,
+    photoPurchases: down === 'photoPurchases' ? fail : async () => purchases,
+  };
+}
 
 describe('getCredits', () => {
   it('describes a fresh subscriber', async () => {
@@ -79,6 +91,20 @@ describe('getCredits', () => {
   });
 });
 
+describe('getCredits when the store is down', () => {
+  it('fails rather than recording a subscriber as lapsed', async () => {
+    // Writing `lastPlan: free` here is what used to refill a subscriber's week
+    // the moment the store came back.
+    const ledger = fakeLedger({ week: '2026-W35', weekUsed: 12, lastPlan: 'weekly' });
+
+    await expect(
+      getCredits('device-1', { ledger: ledger.port, entitlements: storeDown('planFor'), now: fixedClock }),
+    ).rejects.toThrow(EntitlementsUnavailableError);
+    expect(ledger.writes).toHaveLength(0);
+    expect(ledger.state.lastPlan).toBe('weekly');
+  });
+});
+
 describe('getCredits under a race', () => {
   it('does not write a stale row over a spend that landed after the read', async () => {
     // It read a plan change and went to record it; a render spent a credit in
@@ -127,6 +153,39 @@ describe('syncPurchases', () => {
 
     expect(result.granted).toBe(0);
     expect(ledger.state.extraCredits).toBe(0);
+  });
+
+  it('grants nothing when the store cannot list purchases, and says so', async () => {
+    const ledger = fakeLedger();
+    await expect(
+      syncPurchases('device-1', {
+        ledger: ledger.port,
+        entitlements: storeDown('photoPurchases'),
+        now: fixedClock,
+      }),
+    ).rejects.toThrow(EntitlementsUnavailableError);
+    expect(ledger.state.extraCredits).toBe(0);
+  });
+
+  it('asks for the plan before granting, so a failure leaves nothing half-done', async () => {
+    // Asked after the grants, a store outage would 502 a sync whose credits had
+    // landed; the app would retry into `granted: 0` and never learn it worked.
+    const ledger = fakeLedger();
+    await expect(
+      syncPurchases('device-1', {
+        ledger: ledger.port,
+        entitlements: storeDown('planFor', ['otp_1']),
+        now: fixedClock,
+      }),
+    ).rejects.toThrow(EntitlementsUnavailableError);
+    expect(ledger.state.extraCredits).toBe(0);
+
+    const retried = await syncPurchases('device-1', {
+      ledger: ledger.port,
+      entitlements: fakeEntitlements('free', ['otp_1']),
+      now: fixedClock,
+    });
+    expect(retried.granted).toBe(1);
   });
 
   it('grants once across repeated syncs', async () => {

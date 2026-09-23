@@ -1,5 +1,5 @@
 import { PhotoRejectedError, RendererUnavailableError } from '../../core/errors';
-import type { HairRendererPort } from '../../ports/hair-renderer';
+import { RENDER_TIMEOUT_MS, type HairRendererPort } from '../../ports/hair-renderer';
 import { buildHairPrompt } from '../hair-prompt';
 import { accessToken, type ServiceAccountCredentials } from './auth';
 
@@ -69,6 +69,7 @@ export function vertexHairRenderer(config: VertexRendererConfig): HairRendererPo
       try {
         response = await fetch(endpoint, {
           method: 'POST',
+          signal: AbortSignal.timeout(RENDER_TIMEOUT_MS),
           headers: {
             authorization: `Bearer ${token}`,
             'content-type': 'application/json',
@@ -92,8 +93,9 @@ export function vertexHairRenderer(config: VertexRendererConfig): HairRendererPo
           }),
         });
       } catch (err) {
-        // Transient: the host was not reached at all, so nothing about this
-        // request has been judged yet. Another provider may well answer it.
+        // Transient: the host was not reached at all, or did not answer inside
+        // `RENDER_TIMEOUT_MS`, so nothing about this request has been judged
+        // yet. Another provider may well answer it.
         throw new RendererUnavailableError(
           err instanceof Error ? err.message : 'the image model could not be reached',
           true,

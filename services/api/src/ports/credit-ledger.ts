@@ -30,9 +30,10 @@ export interface CreditLedgerPort {
    * Honour a consumable purchase, once: record the transaction and add the
    * credit to `extraCredits` as one step.
    *
-   * Returns true only the first time an id is seen. The app re-syncs its
-   * purchases on every launch and after every restore, so the same id arrives
-   * many times and must be worth one credit in total.
+   * Returns true only the first time an id is seen. The app syncs after every
+   * purchase and every restore, and again on launch and on foreground while a
+   * purchase has not yet settled, so the same id arrives many times and must be
+   * worth one credit in total.
    *
    * The credit is added in the store rather than computed from a read, so a
    * spend landing at the same moment cannot cost the user the credit they just

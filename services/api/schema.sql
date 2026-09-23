@@ -43,9 +43,9 @@ CREATE TABLE IF NOT EXISTS device_credits (
 -- One row per consumable purchase we have already honoured.
 --
 -- Keyed on RevenueCat's transaction id, which is what makes the grant
--- idempotent: the app re-syncs its purchases on every launch and after every
--- restore, so the same id arrives many times and must be worth one credit in
--- total. `INSERT OR IGNORE` plus `changes()` is how the Worker tells a first
+-- idempotent: the app syncs after every purchase and every restore, and again
+-- on launch while a purchase has not settled, so the same id arrives many times
+-- and must be worth one credit in total. `INSERT OR IGNORE` plus `changes()` is how the Worker tells a first
 -- sighting from a replay.
 CREATE TABLE IF NOT EXISTS credit_grant (
   transaction_id TEXT PRIMARY KEY,

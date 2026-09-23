@@ -19,6 +19,7 @@ import {
   AnalysisQuotaError,
   AnalysisUnusableError,
   CreditContentionError,
+  EntitlementsUnavailableError,
   NetworkRateError,
   OutOfCreditsError,
   PhotoRejectedError,
@@ -94,6 +95,11 @@ function translate(err: unknown): Response {
   // than a 409: the contract's `rate_limited` already means this to the app.
   if (err instanceof NetworkRateError) return fail('rate_limited', err.message);
   if (err instanceof CreditContentionError) return fail('rate_limited', err.message);
+  // The store is down, not the request. A 502 like a model outage: nothing was
+  // spent or granted, and trying again is the whole of the fix.
+  if (err instanceof EntitlementsUnavailableError) {
+    return fail('renderer_unavailable', err.message);
+  }
 
   console.error('unhandled error', err);
   return fail('internal', 'something went wrong');

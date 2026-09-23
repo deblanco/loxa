@@ -95,9 +95,10 @@ export async function tryOn(command: TryOnCommand, deps: TryOnDeps): Promise<Try
     throw err;
   }
 
-  // Written after the credit, and not awaited for correctness of the answer:
-  // a cache miss costs a re-render, a lost image costs the user their picture.
-  await deps.cache.put(key, rendered.imageBase64);
+  // Written after the credit, and never allowed to fail the answer: a cache
+  // miss costs a re-render, a lost image costs the user their picture. This is
+  // past the refund, so a throw here would keep the credit and drop the render.
+  await remember(deps, key, rendered.imageBase64);
 
   // After the render succeeded, never at the spend: a refunded failure that
   // counted would inflate whichever style the model happened to be down for.
@@ -166,6 +167,20 @@ async function refund(
     if (await ledger.compareAndWrite(deviceId, current, refundOne(current, pool, now))) return;
   }
   console.error('credit not refunded: the row kept changing');
+}
+
+/**
+ * Cache the render, and never fail because of it.
+ *
+ * Same reasoning as `count`: the credit is spent and the picture exists, so a
+ * KV write that throws must cost a future cache hit, not this answer.
+ */
+async function remember(deps: TryOnDeps, key: string, imageBase64: string): Promise<void> {
+  try {
+    await deps.cache.put(key, imageBase64);
+  } catch (err) {
+    console.error('render not cached', err);
+  }
 }
 
 /**

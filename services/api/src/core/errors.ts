@@ -61,6 +61,22 @@ export class RendererUnavailableError extends Error {
 }
 
 /**
+ * The store could not say what this device is entitled to.
+ *
+ * Not the same as "free". Reading an outage as "not a subscriber" used to
+ * charge a subscriber's bought credit instead of their weekly allowance, and
+ * recorded the lapse in `lastPlan` — so the store coming back looked like a new
+ * subscription and refilled the week. Nothing is spent, granted or written
+ * while the answer is unknown; the request fails and the app tries again.
+ */
+export class EntitlementsUnavailableError extends Error {
+  constructor(reason: string) {
+    super(reason);
+    this.name = 'EntitlementsUnavailableError';
+  }
+}
+
+/**
  * A provider answered, and what it said was unusable.
  *
  * Not the same as a provider being down: the call succeeded and was billed,

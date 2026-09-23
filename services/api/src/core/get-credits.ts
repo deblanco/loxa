@@ -51,7 +51,7 @@ export async function getCredits(deviceId: string, deps: GetCreditsDeps): Promis
   }
 
   return {
-    creditsLeft: available(state, plan, now),
+    creditsLeft: available(settled, plan, now),
     cap: weeklyAllowance(plan),
     plan,
     resetsAt: nextWeeklyReset(now).toISOString(),

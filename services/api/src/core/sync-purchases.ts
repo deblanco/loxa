@@ -36,6 +36,12 @@ export async function syncPurchases(
   deps: SyncPurchasesDeps,
 ): Promise<SyncPurchasesResult> {
   const now = deps.now();
+
+  // Before any grant, not after: if the store is down this is where it shows,
+  // and it shows with nothing granted. Asked afterwards, a failure would 502 a
+  // sync whose credits had already landed, and the app — told it failed — would
+  // retry into `granted: 0` and never learn the purchase was honoured.
+  const plan = await deps.entitlements.planFor(deviceId);
   let granted = 0;
 
   for (const purchaseId of await deps.entitlements.photoPurchases(deviceId)) {
@@ -47,10 +53,7 @@ export async function syncPurchases(
     granted += 1;
   }
 
-  const [state, plan] = await Promise.all([
-    deps.ledger.read(deviceId),
-    deps.entitlements.planFor(deviceId),
-  ]);
+  const state = await deps.ledger.read(deviceId);
 
   return { granted, creditsLeft: available(state, plan, now) };
 }
