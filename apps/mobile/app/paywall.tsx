@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { syncPurchases } from '@/api/client';
 import { LegalLinks } from '@/components/LegalLinks';
 import { Pill } from '@/components/Pill';
 import { PurchaseSettling } from '@/components/PurchaseSettling';
@@ -15,6 +14,7 @@ import { reportHandled } from '@/diagnostics';
 import { paywallResetLabel } from '@/format';
 import { purchases, restoreAndSync, usePricing } from '@/purchases';
 import { useCredits } from '@/store/credits';
+import { rememberPurchase, settlePendingPurchase } from '@/store/pending-purchase';
 import { color, motion, radius, space } from '@/theme';
 
 /**
@@ -87,9 +87,20 @@ export default function Paywall() {
       if (!transactionIds) return;
 
       setSettling(true);
-      await syncPurchases(transactionIds);
+      // Written down before the sync, so a purchase RevenueCat has not listed
+      // yet — or a sync that never comes back — is asked about again on the
+      // next launch instead of waiting for somebody to find Restore.
+      await rememberPurchase(transactionIds);
+      const granted = await settlePendingPurchase(3);
       await refresh();
-      router.back();
+      if (granted) {
+        router.back();
+        return;
+      }
+      // Paid, and not a credit yet. The launch and foreground retries will
+      // settle it; this is the one moment the user is looking, so say so.
+      reportHandled(new Error('purchase not granted after three syncs'), 'buySinglePhoto.unsettled');
+      setNotice(t('common.restoreFailed'));
     } catch (err) {
       reportHandled(err, 'buySinglePhoto');
       setNotice(t('common.restoreFailed'));

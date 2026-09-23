@@ -30,15 +30,20 @@ import { deviceId } from './device-id';
 
 const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8787';
 
-/**
- * Thirty seconds.
- *
- * A render is a single synchronous call to an image model, and the ones that
- * are going to succeed come back well inside this. Past it, something is wrong
- * and the user is staring at a progress bar that will never finish — better to
- * say so and let them try again, since the credit was refunded server-side.
- */
+/** Thirty seconds, for everything that is not a model call. */
 const REQUEST_TIMEOUT_MS = 30_000;
+
+/**
+ * Ninety seconds, for a render.
+ *
+ * Longer than the Worker can take, by construction: each image provider is cut
+ * off at `RENDER_TIMEOUT_MS` (35s, `services/api/src/ports/hair-renderer.ts`),
+ * and there are two of them. The credit is spent before the model is called, so
+ * the phone giving up first is the one ordering that can lose it — the Worker
+ * may never reach the refund. Waiting past the Worker's own limit means every
+ * failure arrives as an answer, refunded.
+ */
+const RENDER_TIMEOUT_MS = 90_000;
 
 /**
  * Longer, for the analysis.
@@ -160,6 +165,7 @@ export async function tryOn(input: {
   return await request('/v1/tryon', (body) => tryOnResponseSchema.parse(body), {
     method: 'POST',
     body: JSON.stringify(input),
+    timeoutMs: RENDER_TIMEOUT_MS,
   });
 }
 
@@ -182,7 +188,10 @@ export async function analyseFace(photos: string[]): Promise<AnalysisResponse> {
 export async function syncPurchases(transactionIds: string[]): Promise<PurchaseSyncResponse> {
   return await request('/v1/purchases/sync', (body) => purchaseSyncResponseSchema.parse(body), {
     method: 'POST',
-    body: JSON.stringify({ transactionIds }),
+    // The Worker ignores the ids and asks the store itself; the contract caps
+    // them at fifty, and somebody with more than fifty photos bought would
+    // otherwise be refused every sync. The newest are the ones worth sending.
+    body: JSON.stringify({ transactionIds: transactionIds.slice(-50) }),
   });
 }
 

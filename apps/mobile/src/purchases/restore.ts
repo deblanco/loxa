@@ -1,5 +1,6 @@
 import { syncPurchases } from '@/api/client';
 import { reportHandled } from '@/diagnostics';
+import { forgetPurchase } from '@/store/pending-purchase';
 import { purchases } from './index';
 import { restoreVerdict } from './outcome';
 
@@ -30,6 +31,10 @@ export async function restoreAndSync(): Promise<RestoreOutcome> {
     const verdict = restoreVerdict(found);
     if (verdict === 'sync') {
       await syncPurchases(found.transactionIds);
+      // The Worker has just enumerated every purchase the store lists and
+      // granted each one it had not, so a purchase still waiting to settle has
+      // had its answer. Restore is also the way back if it had not.
+      await forgetPurchase();
       return 'restored';
     }
     return verdict;

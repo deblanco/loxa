@@ -33,6 +33,7 @@ export default defineConfig({
         'src/consent.ts',
         'src/store/render-shot.ts',
         'src/purchases/outcome.ts',
+        'src/purchases/settle.ts',
         'src/catalogue.ts',
         'src/catalogue-cache.ts',
         'src/diagnostics/breadcrumbs.ts',

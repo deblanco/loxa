@@ -98,6 +98,11 @@ const KEYS = [
    * flushed on the next launch and attributed to this one.
    */
   'loxa.diagnostics.v1',
+  /**
+   * A $0.99 purchase not yet granted. A fresh install bought nothing, and a
+   * leftover would sync the previous identity's purchase ids on first launch.
+   */
+  'loxa.pendingPurchase.v1',
 ];
 
 /** The keychain entry, which outlives everything else including the app itself. */

@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 import type { CreditsResponse } from '@loxa/shared';
 import { fetchCredits } from '../api/client';
+import { settlePendingPurchase } from './pending-purchase';
 
 /**
  * The credit balance, as the app sees it.
@@ -53,6 +54,19 @@ export function refreshCredits(): Promise<void> {
   return inflight;
 }
 
+/**
+ * Settle a purchase still waiting to be granted, then refresh.
+ *
+ * On launch, on foreground and on the poll. Nothing pending is one storage read
+ * and no request, so this is the ordinary refresh for everybody who has not
+ * just paid. A sync that fails is left for the next time round.
+ */
+function settleThenRefresh(): Promise<void> {
+  return settlePendingPurchase()
+    .catch(() => false)
+    .then(() => refreshCredits());
+}
+
 /** The new balance a spend or a sync just returned, without a second round trip. */
 export function setCreditsLeft(creditsLeft: number): void {
   if (!state.credits) return;
@@ -80,13 +94,13 @@ function onAppStateChange(status: AppStateStatus): void {
   // balance may have moved while we were not running, and waiting out the rest
   // of an interval to notice would show a stale number at exactly the moment
   // the user went to change it.
-  if (status === 'active') void refreshCredits();
+  if (status === 'active') void settleThenRefresh();
 }
 
 function startPolling(): void {
   if (timer) return;
   timer = setInterval(() => {
-    if (AppState.currentState === 'active') void refreshCredits();
+    if (AppState.currentState === 'active') void settleThenRefresh();
   }, POLL_MS);
   appStateSub = AppState.addEventListener('change', onAppStateChange);
 }
@@ -115,7 +129,7 @@ export function useCredits() {
   );
 
   useEffect(() => {
-    void refreshCredits();
+    void settleThenRefresh();
   }, []);
 
   return {
