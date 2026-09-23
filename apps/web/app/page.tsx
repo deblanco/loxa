@@ -6,8 +6,8 @@ import {
   WEEKLY_CREDITS,
   WEEKLY_PRICE_LABEL,
 } from "@loxa/shared";
-import { Hatch } from "@/components/Hatch";
 import { PhoneFrame } from "@/components/PhoneFrame";
+import { RootToTip } from "@/components/RootToTip";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -23,7 +23,8 @@ import { SiteHeader } from "@/components/SiteHeader";
  * only ever gets noticed by a reviewer.
  *
  * Every picture is real: a screenshot of the app, the render it produced one
- * credit apart, and two captures of the face-reading screens. The styles are
+ * credit apart (shown as one frame by `RootToTip`, the page's only motion), and
+ * two captures of the face-reading screens. The styles are
  * counted rather than shown, because a grid of them is the app's job and a page
  * of placeholders was worse than no grid at all.
  *
@@ -96,29 +97,7 @@ export default function Home() {
         </section>
 
         {/* The transformation, which is the entire pitch */}
-        <section className="mx-auto max-w-5xl px-s6 pb-s14">
-          <div className="grid gap-s4 sm:grid-cols-2">
-            <figure>
-              <Hatch
-                photo="/before.jpg"
-                className="aspect-[2/3] rounded-card"
-              />
-              <figcaption className="pt-s3 font-mono text-[10px] tracking-[0.14em] text-[var(--ink-45)] uppercase">
-                Before
-              </figcaption>
-            </figure>
-            <figure>
-              <Hatch
-                photo="/after-curtain-bang-honey-blonde.jpg"
-                className="aspect-[2/3] rounded-card"
-                dark
-              />
-              <figcaption className="pt-s3 font-mono text-[10px] tracking-[0.14em] text-[var(--ink-45)] uppercase">
-                After · one credit
-              </figcaption>
-            </figure>
-          </div>
-        </section>
+        <RootToTip />
 
         {/*
           The face reading — the thing no other app in the category does, so it
