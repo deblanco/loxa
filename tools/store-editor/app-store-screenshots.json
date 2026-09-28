@@ -1,0 +1,1322 @@
+{
+  "schemaVersion": 2,
+  "appName": "Loxa",
+  "themeId": "glossy-3d-kbeauty-creator",
+  "fontId": "template-default",
+  "connectedCanvas": false,
+  "locales": [
+    "en"
+  ],
+  "locale": "en",
+  "device": "iphone",
+  "orientation": "portrait",
+  "appIcon": "/app-icon.png",
+  "slidesByDevice": {
+    "iphone": [
+      {
+        "id": "hero",
+        "layout": "device-bottom",
+        "label": {
+          "en": "See any cut on you first"
+        },
+        "headline": {
+          "en": "Your face,\nbefore the\n[scissors]"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/preview.png",
+        "transforms": {
+          "caption": {
+            "x": 84,
+            "y": 250,
+            "width": 1160,
+            "height": 760,
+            "rotation": 0,
+            "zIndex": 4
+          },
+          "device": {
+            "x": 250,
+            "y": 1110,
+            "width": 980,
+            "height": 1996,
+            "rotation": 4,
+            "zIndex": 3
+          }
+        },
+        "textElements": [
+          {
+            "id": "brand",
+            "text": {
+              "en": "Loxa"
+            },
+            "transform": {
+              "x": 70,
+              "y": 80,
+              "width": 360,
+              "height": 130,
+              "rotation": -2,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "tag"
+          },
+          {
+            "id": "h1",
+            "text": {
+              "en": "#BOB"
+            },
+            "transform": {
+              "x": 900,
+              "y": 1180,
+              "width": 300,
+              "height": 130,
+              "rotation": -6,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h2",
+            "text": {
+              "en": "#PIXIE"
+            },
+            "transform": {
+              "x": 930,
+              "y": 1380,
+              "width": 330,
+              "height": 130,
+              "rotation": 5,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h3",
+            "text": {
+              "en": "#FIRST PHOTO FREE"
+            },
+            "transform": {
+              "x": 40,
+              "y": 2560,
+              "width": 620,
+              "height": 130,
+              "rotation": -8,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          }
+        ],
+        "imageElements": [
+          {
+            "id": "ghost",
+            "src": "/decor/ghost.svg",
+            "transform": {
+              "x": -30,
+              "y": 2010,
+              "width": 460,
+              "height": 506,
+              "rotation": -6,
+              "zIndex": 8
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s1",
+            "src": "/decor/sparkle-yellow.svg",
+            "transform": {
+              "x": 1150,
+              "y": 170,
+              "width": 90,
+              "height": 90,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s2",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 1080,
+              "y": 820,
+              "width": 70,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s3",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 60,
+              "y": 1080,
+              "width": 60,
+              "height": 60,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "heart",
+            "src": "/decor/heart.svg",
+            "transform": {
+              "x": 1060,
+              "y": 2400,
+              "width": 220,
+              "height": 220,
+              "rotation": 12,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          }
+        ]
+      },
+      {
+        "id": "cuts",
+        "layout": "device-bottom",
+        "label": {
+          "en": "Every one on your own face"
+        },
+        "headline": {
+          "en": "[24] cuts,\n10 colours"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/result-bob.png",
+        "transforms": {
+          "caption": {
+            "x": 84,
+            "y": 250,
+            "width": 1160,
+            "height": 760,
+            "rotation": 0,
+            "zIndex": 4
+          },
+          "device": {
+            "x": 190,
+            "y": 1070,
+            "width": 980,
+            "height": 1996,
+            "rotation": -4,
+            "zIndex": 3
+          }
+        },
+        "textElements": [
+          {
+            "id": "brand",
+            "text": {
+              "en": "Loxa"
+            },
+            "transform": {
+              "x": 70,
+              "y": 80,
+              "width": 360,
+              "height": 130,
+              "rotation": -2,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "tag"
+          },
+          {
+            "id": "h1",
+            "text": {
+              "en": "#CARAMEL"
+            },
+            "transform": {
+              "x": 40,
+              "y": 1250,
+              "width": 400,
+              "height": 130,
+              "rotation": -8,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h2",
+            "text": {
+              "en": "#PLATINUM"
+            },
+            "transform": {
+              "x": 870,
+              "y": 2300,
+              "width": 430,
+              "height": 130,
+              "rotation": 7,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h3",
+            "text": {
+              "en": "#WOLF CUT"
+            },
+            "transform": {
+              "x": 30,
+              "y": 2640,
+              "width": 420,
+              "height": 130,
+              "rotation": 5,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          }
+        ],
+        "imageElements": [
+          {
+            "id": "star",
+            "src": "/decor/star.svg",
+            "transform": {
+              "x": 1080,
+              "y": 980,
+              "width": 200,
+              "height": 200,
+              "rotation": 14,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s1",
+            "src": "/decor/sparkle-yellow.svg",
+            "transform": {
+              "x": 1150,
+              "y": 160,
+              "width": 90,
+              "height": 90,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s2",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 90,
+              "y": 1000,
+              "width": 70,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s3",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 1180,
+              "y": 1700,
+              "width": 60,
+              "height": 60,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          }
+        ],
+        "typography": {
+          "headlineScale": 1.25
+        }
+      },
+      {
+        "id": "suits",
+        "layout": "device-bottom",
+        "label": {
+          "en": "Your face shape, read,\nwith a reason for every cut"
+        },
+        "headline": {
+          "en": "What [suits]\nyour face?"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/suits.png",
+        "transforms": {
+          "caption": {
+            "x": 84,
+            "y": 250,
+            "width": 1160,
+            "height": 760,
+            "rotation": 0,
+            "zIndex": 4
+          },
+          "device": {
+            "x": 170,
+            "y": 1110,
+            "width": 980,
+            "height": 1996,
+            "rotation": 0,
+            "zIndex": 3
+          }
+        },
+        "textElements": [
+          {
+            "id": "brand",
+            "text": {
+              "en": "Loxa"
+            },
+            "transform": {
+              "x": 70,
+              "y": 80,
+              "width": 360,
+              "height": 130,
+              "rotation": -2,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "tag"
+          },
+          {
+            "id": "h1",
+            "text": {
+              "en": "#OVAL"
+            },
+            "transform": {
+              "x": 950,
+              "y": 1150,
+              "width": 290,
+              "height": 130,
+              "rotation": 8,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h2",
+            "text": {
+              "en": "#HEART"
+            },
+            "transform": {
+              "x": 20,
+              "y": 1020,
+              "width": 320,
+              "height": 130,
+              "rotation": -6,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h3",
+            "text": {
+              "en": "#SQUARE"
+            },
+            "transform": {
+              "x": 930,
+              "y": 2350,
+              "width": 350,
+              "height": 130,
+              "rotation": -5,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          }
+        ],
+        "imageElements": [
+          {
+            "id": "ghost",
+            "src": "/decor/ghost.svg",
+            "transform": {
+              "x": 960,
+              "y": 1560,
+              "width": 360,
+              "height": 396,
+              "rotation": 8,
+              "zIndex": 8
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s1",
+            "src": "/decor/sparkle-yellow.svg",
+            "transform": {
+              "x": 1150,
+              "y": 170,
+              "width": 90,
+              "height": 90,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s2",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 70,
+              "y": 1060,
+              "width": 70,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          }
+        ]
+      },
+      {
+        "id": "blonde",
+        "layout": "device-bottom",
+        "label": {
+          "en": "Long layers, honey blonde,\non your own face"
+        },
+        "headline": {
+          "en": "Try [blonde]\nbefore the dye"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/result-3.png",
+        "transforms": {
+          "caption": {
+            "x": 84,
+            "y": 250,
+            "width": 1160,
+            "height": 760,
+            "rotation": 0,
+            "zIndex": 4
+          },
+          "device": {
+            "x": 200,
+            "y": 1090,
+            "width": 980,
+            "height": 1996,
+            "rotation": 4,
+            "zIndex": 3
+          }
+        },
+        "textElements": [
+          {
+            "id": "brand",
+            "text": {
+              "en": "Loxa"
+            },
+            "transform": {
+              "x": 70,
+              "y": 80,
+              "width": 360,
+              "height": 130,
+              "rotation": -2,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "tag"
+          },
+          {
+            "id": "h1",
+            "text": {
+              "en": "#HONEY BLONDE"
+            },
+            "transform": {
+              "x": 20,
+              "y": 1350,
+              "width": 560,
+              "height": 130,
+              "rotation": -7,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h2",
+            "text": {
+              "en": "#LONG LAYERS"
+            },
+            "transform": {
+              "x": 800,
+              "y": 2250,
+              "width": 500,
+              "height": 130,
+              "rotation": 6,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          }
+        ],
+        "imageElements": [
+          {
+            "id": "heart",
+            "src": "/decor/heart.svg",
+            "transform": {
+              "x": 1040,
+              "y": 1060,
+              "width": 240,
+              "height": 240,
+              "rotation": 10,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s1",
+            "src": "/decor/sparkle-yellow.svg",
+            "transform": {
+              "x": 1150,
+              "y": 170,
+              "width": 90,
+              "height": 90,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s2",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 60,
+              "y": 2600,
+              "width": 70,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "star",
+            "src": "/decor/star.svg",
+            "transform": {
+              "x": 60,
+              "y": 2380,
+              "width": 170,
+              "height": 170,
+              "rotation": -12,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          }
+        ]
+      },
+      {
+        "id": "compare",
+        "layout": "device-bottom",
+        "label": {
+          "en": "Your real photo, one touch away"
+        },
+        "headline": {
+          "en": "Hold to see\nthe [before]"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/compare.png",
+        "transforms": {
+          "caption": {
+            "x": 84,
+            "y": 250,
+            "width": 1160,
+            "height": 760,
+            "rotation": 0,
+            "zIndex": 4
+          },
+          "device": {
+            "x": 200,
+            "y": 1090,
+            "width": 980,
+            "height": 1996,
+            "rotation": 4,
+            "zIndex": 3
+          }
+        },
+        "textElements": [
+          {
+            "id": "brand",
+            "text": {
+              "en": "Loxa"
+            },
+            "transform": {
+              "x": 70,
+              "y": 80,
+              "width": 360,
+              "height": 130,
+              "rotation": -2,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "tag"
+          },
+          {
+            "id": "h1",
+            "text": {
+              "en": "#BEFORE"
+            },
+            "transform": {
+              "x": 20,
+              "y": 1350,
+              "width": 380,
+              "height": 130,
+              "rotation": -7,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h2",
+            "text": {
+              "en": "#AFTER"
+            },
+            "transform": {
+              "x": 900,
+              "y": 2250,
+              "width": 350,
+              "height": 130,
+              "rotation": 6,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          }
+        ],
+        "imageElements": [
+          {
+            "id": "heart",
+            "src": "/decor/heart.svg",
+            "transform": {
+              "x": 1040,
+              "y": 1060,
+              "width": 240,
+              "height": 240,
+              "rotation": 10,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s1",
+            "src": "/decor/sparkle-yellow.svg",
+            "transform": {
+              "x": 1150,
+              "y": 170,
+              "width": 90,
+              "height": 90,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s2",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 60,
+              "y": 2600,
+              "width": 70,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "star",
+            "src": "/decor/star.svg",
+            "transform": {
+              "x": 60,
+              "y": 2380,
+              "width": 170,
+              "height": 170,
+              "rotation": -12,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          }
+        ]
+      },
+      {
+        "id": "pixie",
+        "layout": "device-bottom",
+        "label": {
+          "en": "Try the big change on you first"
+        },
+        "headline": {
+          "en": "Go [short]\nwith no regrets"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/result-pixie.png",
+        "transforms": {
+          "caption": {
+            "x": 84,
+            "y": 250,
+            "width": 1160,
+            "height": 760,
+            "rotation": 0,
+            "zIndex": 4
+          },
+          "device": {
+            "x": 250,
+            "y": 1090,
+            "width": 980,
+            "height": 1996,
+            "rotation": -4,
+            "zIndex": 3
+          }
+        },
+        "textElements": [
+          {
+            "id": "brand",
+            "text": {
+              "en": "Loxa"
+            },
+            "transform": {
+              "x": 70,
+              "y": 80,
+              "width": 360,
+              "height": 130,
+              "rotation": -2,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "tag"
+          },
+          {
+            "id": "h1",
+            "text": {
+              "en": "#PIXIE"
+            },
+            "transform": {
+              "x": 930,
+              "y": 1180,
+              "width": 330,
+              "height": 130,
+              "rotation": 6,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h2",
+            "text": {
+              "en": "#PLATINUM"
+            },
+            "transform": {
+              "x": 30,
+              "y": 2350,
+              "width": 430,
+              "height": 130,
+              "rotation": -7,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          }
+        ],
+        "imageElements": [
+          {
+            "id": "ghost",
+            "src": "/decor/ghost.svg",
+            "transform": {
+              "x": -20,
+              "y": 1500,
+              "width": 330,
+              "height": 363,
+              "rotation": -10,
+              "zIndex": 8
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s1",
+            "src": "/decor/sparkle-yellow.svg",
+            "transform": {
+              "x": 1150,
+              "y": 170,
+              "width": 90,
+              "height": 90,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s2",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 1170,
+              "y": 1900,
+              "width": 70,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "heart",
+            "src": "/decor/heart.svg",
+            "transform": {
+              "x": 1080,
+              "y": 2560,
+              "width": 200,
+              "height": 200,
+              "rotation": 14,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          }
+        ]
+      },
+      {
+        "id": "privacy",
+        "layout": "device-bottom",
+        "label": {
+          "en": "Face shape is measured on your phone"
+        },
+        "headline": {
+          "en": "We read the face,\nnever the [person]"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/faceread.png",
+        "transforms": {
+          "caption": {
+            "x": 84,
+            "y": 250,
+            "width": 1160,
+            "height": 760,
+            "rotation": 0,
+            "zIndex": 4
+          },
+          "device": {
+            "x": 190,
+            "y": 1110,
+            "width": 980,
+            "height": 1996,
+            "rotation": 0,
+            "zIndex": 3
+          }
+        },
+        "textElements": [
+          {
+            "id": "brand",
+            "text": {
+              "en": "Loxa"
+            },
+            "transform": {
+              "x": 70,
+              "y": 80,
+              "width": 360,
+              "height": 130,
+              "rotation": -2,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "tag"
+          },
+          {
+            "id": "h1",
+            "text": {
+              "en": "#ON DEVICE"
+            },
+            "transform": {
+              "x": 880,
+              "y": 1250,
+              "width": 420,
+              "height": 130,
+              "rotation": 7,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          },
+          {
+            "id": "h2",
+            "text": {
+              "en": "#NO ACCOUNT"
+            },
+            "transform": {
+              "x": 20,
+              "y": 2450,
+              "width": 470,
+              "height": 130,
+              "rotation": -6,
+              "zIndex": 9
+            },
+            "align": "left",
+            "variant": "hashtag"
+          }
+        ],
+        "imageElements": [
+          {
+            "id": "star",
+            "src": "/decor/star.svg",
+            "transform": {
+              "x": 60,
+              "y": 1250,
+              "width": 170,
+              "height": 170,
+              "rotation": -12,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s1",
+            "src": "/decor/sparkle-yellow.svg",
+            "transform": {
+              "x": 1150,
+              "y": 170,
+              "width": 90,
+              "height": 90,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          },
+          {
+            "id": "s2",
+            "src": "/decor/sparkle-white.svg",
+            "transform": {
+              "x": 1160,
+              "y": 2200,
+              "width": 70,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 7
+            },
+            "fit": "contain"
+          }
+        ],
+        "typography": {
+          "headlineScale": 0.82
+        }
+      }
+    ],
+    "android": [
+      {
+        "id": "s_mul7mt37_5",
+        "layout": "hero",
+        "label": {
+          "en": "MEET YOUR APP"
+        },
+        "headline": {
+          "en": "Sell one\nidea per slide."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_6",
+        "layout": "device-bottom",
+        "label": {
+          "en": "FEATURE 01"
+        },
+        "headline": {
+          "en": "Your headline\nlives here."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_7",
+        "layout": "two-devices",
+        "label": {
+          "en": "FEATURE 02"
+        },
+        "headline": {
+          "en": "Show two\nscreens at once."
+        },
+        "screenshot": "",
+        "screenshotSecondary": ""
+      },
+      {
+        "id": "s_mul7mt37_8",
+        "layout": "device-top",
+        "label": {
+          "en": "FEATURE 03"
+        },
+        "headline": {
+          "en": "Flip the contrast\nfor visual rhythm."
+        },
+        "screenshot": "",
+        "inverted": true
+      },
+      {
+        "id": "s_mul7mt37_9",
+        "layout": "no-device",
+        "label": {
+          "en": "MORE"
+        },
+        "headline": {
+          "en": "And so\nmuch more."
+        },
+        "screenshot": ""
+      }
+    ],
+    "ipad": [
+      {
+        "id": "s_mul7mt37_a",
+        "layout": "hero",
+        "label": {
+          "en": "MEET YOUR APP"
+        },
+        "headline": {
+          "en": "Made for\nthe big screen."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_b",
+        "layout": "device-bottom",
+        "label": {
+          "en": "FEATURE 01"
+        },
+        "headline": {
+          "en": "Built for\nfocus."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_c",
+        "layout": "device-top",
+        "label": {
+          "en": "FEATURE 02"
+        },
+        "headline": {
+          "en": "Always within reach."
+        },
+        "screenshot": "",
+        "inverted": true
+      }
+    ],
+    "tvos": [
+      {
+        "id": "s_mul7mt37_d",
+        "layout": "hero",
+        "label": {
+          "en": "MEET YOUR APP"
+        },
+        "headline": {
+          "en": "Made for\nthe living room."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_e",
+        "layout": "split-landscape",
+        "label": {
+          "en": "FEATURE 01"
+        },
+        "headline": {
+          "en": "One idea\nper screen."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_f",
+        "layout": "device-top",
+        "label": {
+          "en": "FEATURE 02"
+        },
+        "headline": {
+          "en": "Flip the contrast."
+        },
+        "screenshot": "",
+        "inverted": true
+      },
+      {
+        "id": "s_mul7mt37_g",
+        "layout": "no-device",
+        "label": {
+          "en": "MORE"
+        },
+        "headline": {
+          "en": "And so\nmuch more."
+        },
+        "screenshot": ""
+      }
+    ],
+    "watchos": [
+      {
+        "id": "s_mul7mt37_h",
+        "layout": "hero",
+        "label": {
+          "en": "MEET YOUR APP"
+        },
+        "headline": {
+          "en": "On your\nwrist."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_i",
+        "layout": "device-bottom",
+        "label": {
+          "en": "FEATURE 01"
+        },
+        "headline": {
+          "en": "One glance.\nDone."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_j",
+        "layout": "device-top",
+        "label": {
+          "en": "FEATURE 02"
+        },
+        "headline": {
+          "en": "Always\nwith you."
+        },
+        "screenshot": "",
+        "inverted": true
+      }
+    ],
+    "carplay": [
+      {
+        "id": "s_mul7mt37_k",
+        "layout": "split-landscape",
+        "label": {
+          "en": "CARPLAY"
+        },
+        "headline": {
+          "en": "Eyes on\nthe road."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_l",
+        "layout": "device-bottom",
+        "label": {
+          "en": "FEATURE 01"
+        },
+        "headline": {
+          "en": "Everything, one tap away."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_m",
+        "layout": "device-top",
+        "label": {
+          "en": "FEATURE 02"
+        },
+        "headline": {
+          "en": "Made for every drive."
+        },
+        "screenshot": "",
+        "inverted": true
+      }
+    ],
+    "mac": [
+      {
+        "id": "s_mul7mt37_n",
+        "layout": "hero",
+        "label": {
+          "en": "MEET YOUR APP"
+        },
+        "headline": {
+          "en": "Made for\nyour Mac."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_o",
+        "layout": "split-landscape",
+        "label": {
+          "en": "FEATURE 01"
+        },
+        "headline": {
+          "en": "Everything in\none window."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_p",
+        "layout": "device-top",
+        "label": {
+          "en": "FEATURE 02"
+        },
+        "headline": {
+          "en": "One shortcut away."
+        },
+        "screenshot": "",
+        "inverted": true
+      },
+      {
+        "id": "s_mul7mt37_q",
+        "layout": "two-devices",
+        "label": {
+          "en": "FEATURE 03"
+        },
+        "headline": {
+          "en": "Work across windows."
+        },
+        "screenshot": "",
+        "screenshotSecondary": ""
+      },
+      {
+        "id": "s_mul7mt37_r",
+        "layout": "no-device",
+        "label": {
+          "en": "MORE"
+        },
+        "headline": {
+          "en": "And so\nmuch more."
+        },
+        "screenshot": ""
+      }
+    ],
+    "android-7": [
+      {
+        "id": "s_mul7mt37_s",
+        "layout": "hero",
+        "label": {
+          "en": "MEET YOUR APP"
+        },
+        "headline": {
+          "en": "Pocket-sized\npower."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_t",
+        "layout": "split-landscape",
+        "label": {
+          "en": "FEATURE 01"
+        },
+        "headline": {
+          "en": "Wide canvas,\nbigger ideas."
+        },
+        "screenshot": ""
+      }
+    ],
+    "android-10": [
+      {
+        "id": "s_mul7mt37_u",
+        "layout": "hero",
+        "label": {
+          "en": "MEET YOUR APP"
+        },
+        "headline": {
+          "en": "Made for\nthe big screen."
+        },
+        "screenshot": ""
+      },
+      {
+        "id": "s_mul7mt37_v",
+        "layout": "split-landscape",
+        "label": {
+          "en": "FEATURE 01"
+        },
+        "headline": {
+          "en": "Wide canvas,\nbigger ideas."
+        },
+        "screenshot": ""
+      }
+    ],
+    "feature-graphic": [
+      {
+        "id": "s_mul7mt37_w",
+        "layout": "feature-graphic",
+        "label": {},
+        "headline": {
+          "en": "Your tagline goes here."
+        },
+        "screenshot": ""
+      }
+    ]
+  }
+}
