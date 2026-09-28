@@ -31,20 +31,20 @@ in step with the code.
 - **Marketing URL:** `https://loxa.blankhexadecimal.com`
 - **Copyright:** `2026 BLANK HEXADECIMAL, S.L.`
 - **Primary category:** Photo & Video · **Secondary:** Lifestyle
-- **Name (all locales):** `Loxa: Hair Try-On`
+- **Name (all locales):** `Loxa: Hair Try-On & Face Shape`
 
 ## English (U.S.)
 
-**Subtitle** (30/30)
+**Subtitle** (27/30)
 
 ```
-Your face, before the scissors
+Haircut ideas that suit you
 ```
 
-**Keywords** (93/100)
+**Keywords** (100/100)
 
 ```
-haircut,hairstyle,color,face shape,salon,bangs,blonde,balayage,bob,pixie,layers,selfie,ombre,curly
+hairstyle,color,bob,layers,finder,balayage,bangs,pixie,blonde,salon,curly,ombre,short,dye,selfie,cut
 ```
 
 **Promotional text** (135/170)
@@ -132,7 +132,7 @@ Tu primera foto es gratis. 24 cortes y 10 colores sobre tu propia cara, con los 
 **Description**
 
 ```
-Loxa pone un corte distinto y un color distinto sobre tu propia cara. Entra tu foto y vuelve la misma cara, con otro pelo — para ver el cambio antes de que nadie coja las tijeras.
+Loxa pone un corte distinto y un color distinto sobre tu propia cara. Entra tu foto y vuelve la misma cara, con otro pelo — para ver el cambio antes de que nadie coja las tijeras. Y antes de elegir, un modelo de IA de visión lee tu cara y te dice qué cortes favorecen su forma, y por qué.
 
 Haz una foto o elige una de tu galería, escoge un corte y un color, y en unos segundos te ves con él. Mantén pulsado el resultado para ver debajo la foto de la que saliste.
 
@@ -177,7 +177,7 @@ Tu primera foto es gratis. 24 cortes y 10 colores sobre tu propia cara, con los 
 **Description**
 
 ```
-Loxa pone un corte distinto y un color distinto sobre tu propia cara. Entra tu foto y vuelve la misma cara, con otro pelo — para ver el cambio antes de que nadie coja las tijeras.
+Loxa pone un corte distinto y un color distinto sobre tu propia cara. Entra tu foto y vuelve la misma cara, con otro pelo — para ver el cambio antes de que nadie coja las tijeras. Y antes de elegir, un modelo de IA de visión lee tu cara y te dice qué cortes favorecen su forma, y por qué.
 
 Haz una foto o elige una de tu galería, escoge un corte y un color, y en unos segundos te ves con él. Mantén pulsado el resultado para ver debajo la foto de la que saliste.
 
@@ -218,7 +218,7 @@ Votre première photo est offerte. 24 coupes et 10 couleurs sur votre visage, ce
 **Description**
 
 ```
-Loxa pose une autre coupe et une autre couleur sur votre propre visage. Votre photo entre ; le même visage revient, recoiffé — pour voir le changement avant que quiconque ne prenne les ciseaux.
+Loxa pose une autre coupe et une autre couleur sur votre propre visage. Votre photo entre ; le même visage revient, recoiffé — pour voir le changement avant que quiconque ne prenne les ciseaux. Et avant de choisir, un modèle d'IA de vision lit votre visage et vous dit quelles coupes vont à sa forme, et pourquoi.
 
 Prenez une photo ou choisissez-en une dans votre galerie, choisissez une coupe et une couleur, et vous vous voyez avec en quelques secondes. Maintenez le résultat appuyé pour revoir la photo de départ en dessous.
 
@@ -259,7 +259,7 @@ Dein erstes Foto ist gratis. 24 Schnitte und 10 Farben auf deinem eigenen Gesich
 **Description**
 
 ```
-Loxa setzt einen anderen Haarschnitt und eine andere Farbe auf dein eigenes Gesicht. Dein Foto geht hinein, dasselbe Gesicht kommt zurück — neu frisiert, damit du die Veränderung siehst, bevor jemand zur Schere greift.
+Loxa setzt einen anderen Haarschnitt und eine andere Farbe auf dein eigenes Gesicht. Dein Foto geht hinein, dasselbe Gesicht kommt zurück — neu frisiert, damit du die Veränderung siehst, bevor jemand zur Schere greift. Und bevor du wählst, liest ein KI-Bildmodell dein Gesicht und sagt dir, welche Schnitte zu seiner Form passen – und warum.
 
 Mach ein Foto oder wähle eines aus deiner Mediathek, such dir Schnitt und Farbe aus, und nach ein paar Sekunden siehst du dich damit. Halte das Ergebnis gedrückt, um das Ausgangsfoto darunter zu sehen.
 
@@ -300,7 +300,7 @@ La prima foto è gratis. 24 tagli e 10 colori sul tuo viso, con quelli adatti al
 **Description**
 
 ```
-Loxa mette un taglio diverso e un colore diverso sul tuo viso. Entra la tua foto e torna lo stesso viso, ripettinato — così vedi il cambiamento prima che qualcuno prenda le forbici.
+Loxa mette un taglio diverso e un colore diverso sul tuo viso. Entra la tua foto e torna lo stesso viso, ripettinato — così vedi il cambiamento prima che qualcuno prenda le forbici. E prima di scegliere, un modello di IA per la visione legge il tuo viso e ti dice quali tagli si adattano alla sua forma, e perché.
 
 Scatta una foto o scegline una dalla galleria, scegli taglio e colore, e in pochi secondi ti vedi con quel look. Tieni premuto il risultato per rivedere sotto la foto di partenza.
 
@@ -320,36 +320,41 @@ Contratto di licenza standard Apple (EULA): https://www.apple.com/legal/internet
 
 ## Screenshots
 
-`screenshots/store/01–05.png`, 1320 × 2868 (iPhone 6.9"), generated from the
-raw simulator captures in `screenshots/` by
-`tools/store-screenshots/generate.py`. Warm paper, Instrument Serif statement,
-one phone per panel — the same system as the app and the marketing site.
+v3, `screenshots/store-v3/panels/01–07-device-bottom.png`, 1320 × 2868,
+uploaded as **APP_IPHONE_67** to all six locales — the same English panels in
+each, because the deck carries English text only. Each is a phone framing a raw
+capture from `screenshots/store-v3/`, taken on a Release build on the iPhone 17
+Pro Max simulator with the status bar pinned to 9:41. The deck is
+`tools/store-editor/app-store-screenshots.json` (the Glossy 3D K-Beauty theme:
+a chrome headline word, hashtag pills, a ghost mascot); edit it there and
+re-export rather than touching the PNGs.
 
-| # | Line | Frame |
+| # | Line | Capture |
 |---|---|---|
-| 01 | Try on any hair *before the scissors.* | `10-preview-with-credits` |
-| 02 | It hands back *your own face.* | `17-result` |
-| 03 | Hold to see *the before.* | `18-result-hold-to-compare` |
-| 04 | One face. *Every look.* | `20-result-platinum` |
-| 05 | 24 cuts. *10 colours.* | the served catalogue art |
+| 01 | Your face, before the scissors | `preview` |
+| 02 | 24 cuts, 10 colours | `result-bob` |
+| 03 | What suits your face? | `suits` |
+| 04 | Try blonde before the dye | `result-3` |
+| 05 | Hold to see the before | `compare` |
+| 06 | Go short with no regrets | `result-pixie` |
+| 07 | We read the face, never the person | `faceread` |
 
-Panel 05 is not a phone. It is a 4 x 6 grid of the preview art the bucket
-serves, one cut per cell with the colour rotating through all ten, built from
-`GET /v1/catalogue` at generation time — so it cannot advertise a cut the app
-does not ship, and a withdrawn style disappears from it on the next run.
+The order is the 4.3(b) argument again: the app, the answer about your own face
+shape, results on the same face, the original beside them, and what the phone
+does with a face. 03 and 07 are the two panels no template has.
 
-**Nothing in the screenshots states the price** (2.3.2 is carried by the
+The results were captured after `f11c0fe`, so the compare pill sits above Share
+as it does from build 17 on; a capture from build 16 or earlier shows it hidden.
+The face is the synthetic portrait recorded in
+`design-system/models/PROVENANCE.md`.
+
+**Nothing in the screenshots states a price** (2.3.2 is carried by the
 description's "What it costs" section and by the App Store's own in-app
-purchase list). The first photo is free and the description says "once"; if
-review ever reads the gallery as promising more than that, the paywall frame —
-`08-paywall-out-of-credits`, which shows both products and the renewal terms —
-is the panel to put back.
+purchase list). Panel 01's "first photo free" pill means exactly the one free
+photo the description says, once.
 
-**To re-shoot before resubmitting.** The frames above predate the 4.3(b)
-changes. Two panels should show what is new, in place of 04 and 05:
-the style strip with "suits you" marks and "Round face · suited first", and the
-looks gallery. Panel 05's catalogue grid is the most category-generic image in
-the set.
+v2 (`screenshots/store-v2/`, from `tools/store-screenshots/`) and v1
+(`screenshots/store/`) stay in the repo as they were.
 
 ## The two products
 

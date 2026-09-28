@@ -41,64 +41,63 @@ Resolution Center reply and in this field, "for reference on future
 submissions". So the field is now the answer sheet, in their order, and the
 reply quotes it rather than the other way round.
 
-The old notes are not deleted so much as absorbed: what was the whole of them —
-no account, no free tier, how to reach a purchase — is now section 3, because
-that is the question App Review actually asks it under.
+The old notes were not deleted so much as absorbed: what was the whole of them —
+no account, no free tier, how to reach a purchase — became section 3 of those
+answers, because that is the question App Review actually asks it under.
 
-Rewritten again for the resubmission after 4.3(b): a "what changed" paragraph
-first, and sections 1, 3 and 7 updated for the new flow.
+Rewritten again for the resubmission after 4.3(b), and last for build 17 on 28
+September 2026. The seven answers are no longer numbered, but none of them is
+gone: the recording and the test path are "How to test", services and purchases
+have their own headings, and audience, regions and regulated material sit under
+"Everything else". What leads now is why this is not the app the 4.3(b)
+reviewer took it for — the face measured on the device, the cuts that suit it,
+the render kept beside its original — and that it is native code rather than a
+wrapper, since that is what this submission has to answer.
 
 Under 4,000 characters, which is the field's limit and the reason this is
 compressed rather than discursive.
 
-> Loxa restyles a photograph of your own face with a different haircut and colour, and suggests the cuts that suit your face. No account, no login. The first photo is free; after that a weekly subscription or a single photo.
+> Loxa restyles a photograph of the user's own face with a different haircut and colour, and tells them which cuts suit the shape of that face. No account, no login. The first photo is free; after that a weekly subscription or a single photo.
+>
+> BUILD 17: hold-to-compare, once hidden under Share, now works; a paid photo always becomes a credit.
+>
+> WHY THIS IS NOT THE APP IT WAS MISTAKEN FOR
+> The category puts a haircut on a stock model, or paints a filter over yours. Neither answers what a person actually asks before a salon: would this suit me. Loxa measures the face in the photograph — on the device, using Apple Vision — and never sends that measurement anywhere. It puts the cuts suiting that shape first, and will name them outright with a sentence each saying why. The render is made from that same face and kept beside the photo it came from, so the two can be compared weeks later.
+>
+> NOT A WEB WRAPPER
+> Native iOS throughout: no WebView, no remote HTML, no downloaded code. The face measurement is our own Swift module built on Apple's Vision framework, running on the device. The catalogue, the credit ledger and the model calls are our own backend on Cloudflare, written for this app.
 >
 > WHAT CHANGED SINCE THE 4.3(b) REVIEW
 > - The first photo is free: a new install sees its own face restyled without paying.
-> - An intro explains the app and says what the phone does with a face.
-> - Before a photo is first sent, a sheet names who gets it and asks you to agree.
-> - The subscription offer no longer sits in front of the app; it appears once, after that result.
-> - Face shape: Apple Vision estimates it on the device and the cuts that suit it come first, marked "suits you". It never leaves the phone.
-> - "What suits me": one or two photos go to a model that names the cuts suiting the face. Needs a credit balance, spends none.
-> - A gallery of every look, kept with its original.
+> - A four-card intro explains the app and what the phone does with a face.
+> - Before a photo is first sent, a sheet names who receives it and asks the user to agree. Declining sends nothing.
+> - The subscription offer no longer sits in front of the app; it appears once, after that first result.
+> - Face shape is estimated on the device; the cuts that suit it come first, marked "suits you".
+> - "What suits me": one or two photos are read by a model that names the cuts suiting the face, with a reason for each. Needs a credit balance, spends none.
+> - A gallery keeps every look beside the photograph it was made from.
 >
-> 1. SCREEN RECORDING
-> Attached, on a physical iPhone on iOS 26, from launch: the intro, the catalogue, a photo, the free render, the one-time offer, the gallery, and the out-of-credits sheet. Purchase controls show title, length, price, auto-renewal terms and links to the Terms and Privacy Policy.
->
-> 2. PURPOSE AND AUDIENCE
-> For anyone deciding whether to change their hair. A cut is irreversible, and a photo of a stranger does not answer "would this suit me". Loxa answers it on the user's own face. General consumers aged 16 and over.
->
-> 3. SETUP AND ACCESS
-> No sign-in, demo account, sample files or sandbox setup; purchases use the sandbox account on the device.
-> a. Launch Loxa, tap Get started, pass the four intro cards. The photo and notification cards can be skipped.
-> b. Take a photo or choose one from the library. Cuts that suit the measured shape move to the front, marked "suits you".
-> c. Pick a cut and a colour, tap Try On, then Agree on the sheet. About ten seconds. A device that already used its free photo goes straight to step e's sheet.
+> HOW TO TEST
+> No sign-in, demo account or sample files. Purchases use the sandbox account on the device.
+> a. Launch, tap Get started, pass the four intro cards. The photo and notification cards can be skipped.
+> b. Take a photo or choose one. Cuts suiting the measured shape move to the front, marked "suits you".
+> c. Pick a cut and a colour, tap Try On, then Agree on the sheet. About ten seconds. A device that already spent its free photo goes straight to step e.
 > d. Leave the result: the offer appears once. Subscribe, or dismiss it with the X.
-> e. Tap Try On again: the free photo spent, the out-of-credits sheet offers both products.
-> f. Profile > Your looks shows every result; open one to compare, share or delete.
-> Credits are granted by our server once the store confirms, a moment after the sheet closes. Restore purchases is on both purchase screens and in Profile.
+> e. Tap Try On again: the out-of-credits sheet offers both products.
+> f. Profile > Your looks: every result, openable to compare, share or delete.
+> A screen recording of this flow on a physical iPhone is attached.
 >
-> 4. EXTERNAL SERVICES
-> - Google Cloud Vertex AI (Gemini image model): the restyled photograph.
-> - OpenRouter: the same Google model when Vertex is rate-limited; also the fallback for "what suits me".
-> - opencode: the vision model behind "what suits me". We keep no photo and train on none.
-> - RevenueCat: purchase and subscription checks.
-> - Cloudflare Workers, D1, KV, R2: backend, credit ledger, image catalogue.
-> No analytics or advertising SDK, no advertising identifier, no tracking.
->
-> 5. REGIONAL DIFFERENCES
-> None. Prices are the App Store's per storefront. English, Spanish, French, German, Italian, from the device language.
->
-> 6. REGULATED INDUSTRY OR THIRD-PARTY MATERIAL
-> Neither. The catalogue photographs are generated; the only other image is the user's own.
->
-> 7. IN-APP PURCHASE
-> Two products, both reachable without an account:
+> IN-APP PURCHASE
 > - Loxa Weekly (loxa_weekly_999), auto-renewable, one week, USD 9.99, first week USD 0.99. 20 photos a week, reset Monday, no roll-over.
-> - One more photo (loxa_single_photo_099), consumable, USD 0.99. One generated photo, no subscription.
-> To reach them: the subscription is on the offer shown once after the free result. After that, Try On with no credits opens the out-of-credits sheet with both; a subscriber who has spent the week sees only the single photo. Profile links to both, and to Manage Subscription.
+> - One more photo (loxa_single_photo_099), consumable, USD 0.99. One photo, no subscription.
+> Both appear at steps d and e; a subscriber out of weekly photos sees only the single photo. Profile links to both and to Manage Subscription. Credits are granted by our server once the store confirms. Restore purchases is on both purchase screens and in Profile.
 >
-> No user-generated content, social features, accounts or advertising. Errors go to our own server with no identifier and no photo, deleted after thirty days: the "Crash Data, not linked to identity" entry on the privacy label.
+> EXTERNAL SERVICES
+> - Google Vertex AI (Gemini image model): the restyled photograph. OpenRouter runs the same model when Vertex is rate-limited.
+> - opencode, OpenRouter: the vision model behind "what suits me". We keep no photo and train on none.
+> - RevenueCat: purchases. Cloudflare Workers, D1, KV, R2: backend, ledger, catalogue.
+>
+> EVERYTHING ELSE
+> No user-generated content, social features, accounts or advertising. No analytics or advertising SDK, no advertising identifier, no tracking. Error reports carry no identifier and no photo and are deleted after thirty days. Not a regulated industry. No third-party material: catalogue photos are generated; the only other image is the user's own. Prices are the App Store's per storefront; five languages, from the device.
 >
 > Contact: apps@blankhexadecimal.com
 
