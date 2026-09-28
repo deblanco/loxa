@@ -19,11 +19,19 @@ Read from the embedded C2PA / PNG metadata of the base photographs in this folde
   band in a filename is an unreliable label, not a fact about the picture; see
   `models/README.md` and the three `13-17` files withdrawn from the manifest.
 
+## What the owner has confirmed
+
+- **Cleared for commercial use, including App Store marketing.** Confirmed by the owner on
+  2026-09-28, for the synthetic Seedream / Higgsfield portraits in this folder and the
+  renders made from them — the catalogue art and the App Store screenshots in
+  `screenshots/store-v3/`. This is the owner's confirmation, not a copy of the terms: the
+  plan and the terms themselves are still recorded below as missing.
+
 ## What is not recorded anywhere in the repo
 
 - **The commercial-use terms** of the Higgsfield plan and of BytePlus ModelArk that were in
-  force on 2026-08-28. "Owned by us" is only true to the extent those terms grant it.
-  *Confirm, and put the plan name and the date of the terms here.*
+  force on 2026-08-28. The owner has confirmed the clearance (above), but the plan name and
+  the text of its terms are not here. *Put the plan name and the date of the terms here.*
 - **Where the onboarding footage came from.** The 21 files in
   `apps/mobile/assets/onboarding/` (twelve wall stills and the carousel clips) carry no
   metadata at all, and `tools/onboarding-footage/` holds only the upload script. *Record
