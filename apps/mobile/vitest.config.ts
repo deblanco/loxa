@@ -38,6 +38,7 @@ export default defineConfig({
         'src/catalogue-cache.ts',
         'src/diagnostics/breadcrumbs.ts',
         'src/diagnostics/report.ts',
+        'src/result-layout.ts',
       ],
       thresholds: { lines: 90, functions: 90, statements: 90 },
     },

@@ -20,6 +20,7 @@ import {
   pendingPortrait,
   type OfferedPhoto,
 } from '@/store/portrait-offer';
+import { ACTIONS_HEIGHT, captionBottom as captionBottomFor } from '@/result-layout';
 import { deleteLook, readLook, type Look } from '@/store/results';
 import { maybeAskForReview } from '@/store/review';
 import { color, radius, space } from '@/theme';
@@ -194,10 +195,9 @@ export default function Result() {
   const styleName = caption?.style ?? '';
   const colorName = caption?.color ?? '';
 
-  // The caption gets out of the card's way rather than the card squeezing in
-  // under it. Everything on this screen is anchored to the bottom, so the only
-  // way to add a row is to push what is above it up.
-  const captionBottom = offer ? ACTIONS_HEIGHT + space.s3 + offerHeight + space.s3 : CAPTION_BOTTOM;
+  // Everything on this screen is anchored to the bottom, so the only way to add
+  // a row is to push what is above it up. See `result-layout.ts`.
+  const captionBottom = captionBottomFor(offer ? offerHeight : null);
 
   return (
     <View style={styles.screen}>
@@ -334,11 +334,6 @@ export default function Result() {
   );
 }
 
-/** The caption's resting place, from the prototype. */
-const CAPTION_BOTTOM = 96;
-
-/** The Share / Again block: `space.s5` of clearance, two pills and the gap. */
-const ACTIONS_HEIGHT = space.s5 + 56 + (space.s2 + 2) + 46;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.night },
